@@ -5,7 +5,8 @@
       "src": "api/*.py",
       "use": "@vercel/python",
       "config": {
-        "maxDuration": 60
+        "maxDuration": 60,
+        "memory": 1024
       }
     },
     {
@@ -41,11 +42,5 @@
       "dest": "/$1"
     }
   ],
-  "regions": ["icn1"],
-  "functions": {
-    "api/*.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  }
+  "regions": ["icn1"]
 } 
