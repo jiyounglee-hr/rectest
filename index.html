@@ -124,47 +124,52 @@
 
     // 이력서 분석 함수
     async function analyzeResume() {
-        const fileInput = document.getElementById('resume-file');
-        const jdText = document.getElementById('jd-text');
-        const resultContent = document.getElementById('result-content');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        
-        if (!fileInput.files[0]) {
-            alert('이력서 파일을 업로드해주세요.');
-            return;
-        }
-        
-        if (!jdText.value.trim()) {
-            alert('JD 텍스트를 입력해주세요.');
-            return;
-        }
-        
-        const formData = new FormData();
-        formData.append('resume', fileInput.files[0]);
-        formData.append('jd_text', jdText.value);
-        
         try {
-            loadingSpinner.style.display = 'block';
-            resultContent.style.display = 'none';
+            const formData = new FormData();
+            const fileInput = document.getElementById('resume-file');
+            
+            if (!fileInput.files[0]) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+            
+            formData.append('file', fileInput.files[0]);
+            
+            // 로딩 표시
+            document.getElementById('result-content').innerHTML = '분석 중입니다...';
             
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 body: formData
             });
             
-            const data = await response.json();
+            // 응답 상태 및 원본 텍스트 로깅
+            console.log('Response status:', response.status);
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
             
-            if (data.error) {
-                throw new Error(data.error);
+            // 응답이 JSON이 아닌 경우 처리
+            if (!response.ok) {
+                throw new Error(`서버 에러 (${response.status}): ${responseText}`);
             }
             
-            resultContent.innerHTML = data.html;
-            resultContent.style.display = 'block';
+            // JSON 파싱 시도
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('JSON 파싱 에러:', e);
+                console.error('받은 응답:', responseText);
+                throw new Error('서버 응답이 올바른 JSON 형식이 아닙니다');
+            }
+            
+            // 결과 표시
+            document.getElementById('result-content').innerHTML = data.result || '분석 결과가 없습니다.';
             
         } catch (error) {
+            console.error('Error details:', error);
+            document.getElementById('result-content').innerHTML = '분석 실패';
             alert('분석 중 오류가 발생했습니다: ' + error.message);
-        } finally {
-            loadingSpinner.style.display = 'none';
         }
     }
 

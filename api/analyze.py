@@ -104,4 +104,49 @@ class handler(BaseHTTPRequestHandler):
                     else:
                         form[field_name] = [content]
         
-        return form 
+        return form
+
+def handle_request(request):
+    try:
+        # CORS 헤더 설정
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Content-Type': 'application/json'
+        }
+
+        # OPTIONS 요청 처리
+        if request.method == 'OPTIONS':
+            return ('', 204, headers)
+
+        if request.method != 'POST':
+            return (json.dumps({'error': 'Method not allowed'}), 405, headers)
+
+        # 파일 처리 및 분석
+        if 'file' not in request.files:
+            return (json.dumps({'error': '파일이 없습니다'}), 400, headers)
+
+        file = request.files['file']
+        
+        # 디버깅을 위한 로그
+        print("Received file:", file.filename)
+        
+        try:
+            # 파일 처리 로직
+            analyzed_text = process_pdf(file)  # 이 함수가 실제 분석을 수행
+            
+            result = {
+                'result': analyzed_text
+            }
+            
+            print("Analysis result:", result)  # 디버깅 로그
+            return (json.dumps(result), 200, headers)
+            
+        except Exception as e:
+            print(f"Processing error: {str(e)}")  # 상세 에러 로그
+            return (json.dumps({'error': f'파일 처리 중 오류: {str(e)}'}), 500, headers)
+
+    except Exception as e:
+        print(f"Server error: {str(e)}")  # 서버 에러 로그
+        return (json.dumps({'error': str(e)}), 500, headers) 
