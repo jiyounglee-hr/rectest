@@ -3,64 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이력서 분석 및 면접질문 TIP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <title>뉴로핏 채용 - 이력서 분석</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .custom-file-upload {
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #e4e4e4;
+        }
+
+        #fileName {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .job-requirements {
+            margin-bottom: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        textarea[readonly] {
+            background-color: #f8f9fa;
+        }
+
+        button {
+            background-color: #FF3333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #E62E2E;
+        }
+
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .result-content {
+            white-space: pre-line;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .loading {
+            background-color: #E3F2FD;
+            border-color: #2196F3;
+        }
+
+        .loading p {
+            color: #2196F3;
+            text-align: center;
+            margin: 0;
+        }
+
+        .error {
+            background-color: #ffebee;
+            border-color: #f44336;
+        }
+
+        .error p {
+            color: #f44336;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center mb-4"><B>[뉴로핏 채용]이력서 분석 및 면접질문 TIP</B></h2>
-        
-        <!-- 파일 업로드 폼 -->
-        <form id="analysis-form" class="mb-4">
-            <div class="form-group mb-3">
-                <label for="pdfFile" class="form-label">이력서 파일 (PDF)</label>
-                <input type="file" class="form-control" id="pdfFile" accept=".pdf" required>
-                <div class="form-text">10MB 이하의 PDF 파일만 업로드 가능합니다.</div>
-            </div>
-
-            <div class="form-group mb-3">
-                <label for="jd-select" class="form-label">채용공고 선택</label>
-                <select class="form-control mb-2" id="jd-select" onchange="updateJD()">
-                    <option value="">직접 입력</option>
-                    <option value="의료기기 인허가(RA) 팀장">의료기기 인허가(RA) 팀장</option>
-                    <option value="일본 법인장">일본 법인장</option>
-                    <option value="의료 AI 솔루션 마케팅(3~6년)">의료 AI 솔루션 마케팅(3~6년)</option>
-                </select>
-            </div>
-
-            <div class="form-group mb-3">
-                <label for="jd-text" class="form-label">채용요건(Job Description) 내용</label>
-                <textarea class="form-control" id="jd-text" rows="10" required></textarea>
-            </div>
-
-            <div class="text-center">
-                <button type="button" class="btn btn-primary me-2" id="analyzeBtn">
-                    <i class="bi bi-file-text"></i> 이력서 분석
-                </button>
-                <button type="button" class="btn btn-success me-2" id="questionsBtn">
-                    <i class="bi bi-chat-dots"></i> 면접 질문 TIP
-                </button>
-            </div>
-        </form>
-
-        <!-- 로딩 스피너 -->
-        <div id="loading-spinner" class="text-center" style="display: none;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">분석중...</span>
-            </div>
-            <p class="mt-2">분석중입니다. 잠시만 기다려주세요...</p>
+    <div class="container">
+        <div class="title">
+            <h1>[뉴로핏 채용] 이력서 분석 및 면접 질문 TIP</h1>
         </div>
 
-        <!-- 결과 표시 영역 -->
-        <div id="result" class="mt-4" style="display: none;">
+        <!-- 1. 이력서 첨부 섹션 -->
+        <div class="section">
+            <div class="section-title">1. 이력서 첨부</div>
+            <div class="file-upload">
+                <label for="pdfFile" class="custom-file-upload">
+                    파일 선택
+                </label>
+                <input type="file" id="pdfFile" accept=".pdf" style="display: none;" onchange="handleFileSelect(this)"/>
+                <span id="fileName">선택된 파일 없음</span>
+            </div>
+        </div>
+
+        <!-- 2. 채용요건 섹션 -->
+        <div class="section">
+            <div class="section-title">2. 채용요건</div>
+            <div class="job-requirements">
+                <select id="jobSelect" onchange="updateJobDescription()">
+                    <option value="">채용공고 선택</option>
+                    <option value="ra_manager">의료기기 인허가(RA) 팀장</option>
+                    <option value="marketing">의료 AI 솔루션 마케팅(3~6년)</option>
+                    <option value="japan_head">일본 법인장</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <textarea id="jobDescription" placeholder="채용공고 내용을 입력하거나 선택한 채용공고 내용이 표시됩니다."></textarea>
+            </div>
+        </div>
+
+        <!-- 3. 이력서 분석 결과 섹션 -->
+        <div class="section">
+            <div class="section-title">3. 이력서 분석 결과</div>
+            <button onclick="analyzeResume()">분석 시작하기</button>
+            <div id="result"></div>
+        </div>
+
+        <!-- 4. 면접 질문 팁 섹션 -->
+        <div class="section">
+            <div class="section-title">4. 면접 질문 TIP</div>
+            <button onclick="generateInterviewQuestions()">질문 추출하기</button>
+            <div id="questions"></div>
         </div>
     </div>
 
     <script>
-    // JD 내용 정의
-    const jdContents = {
-        "의료기기 인허가(RA) 팀장": `담당업무
+        // 파일 선택 처리 함수
+        function handleFileSelect(input) {
+            const fileName = input.files[0] ? input.files[0].name : '선택된 파일 없음';
+            document.getElementById('fileName').textContent = fileName;
+            
+            // 파일이 선택되면 파일명 스타일 변경
+            const fileNameSpan = document.getElementById('fileName');
+            if (input.files[0]) {
+                fileNameSpan.style.color = '#333';
+            } else {
+                fileNameSpan.style.color = '#999';
+            }
+        }
+
+        // 파일 업로드 스타일
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('pdfFile');
+            const fileNameSpan = document.getElementById('fileName');
+            
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(this);
+            });
+        });
+
+        // 채용공고 내용 정의
+        const jobDescriptions = {
+            ra_manager: `[의료기기 인허가(RA) 팀장]
+
+담당업무
 - 국내외 의료기기 인허가 (MFDS, FDA, CE, MHLW 등) 및 사후관리
 - 국가별 기술문서 작성 및 최신화
 - 국가별 의료기기 규제 요구사항 분석
@@ -68,7 +244,7 @@
 - 품질시스템 심사 대응 (ISO 13485, KGMP, MDSAP 등)
 
 필수자격
-- 의료기기 제품 인허가 업무경력 7년~15년
+- 제품 인허가 업무경력 7년이상
 - 의료기기 인증팀 관리 경험
 - SaMD, SiMD, 전기전자 의료기기 인허가 경험
 - 영어 중급 이상 (Reading & Writing 필수)
@@ -77,7 +253,10 @@
 - 3등급 SW 의료기기 허가 경험
 - 의료기기 개발 프로세스에 대한 이해
 - 의료기기 RA(의료기기 규제과학 전문가) 자격증 소지자`,
-        "일본 법인장": `담당업무
+
+            japan_head: `[일본 법인장]
+
+담당업무
 - 일본 법인 총괄 및 운영 관리
 - 일본 시장 사업 전략 수립 및 실행
 - 현지 영업/마케팅 조직 구축 및 관리
@@ -92,7 +271,10 @@
 - AI 의료기기 관련 경험
 - 일본 의료기기 인허가 경험
 - 글로벌 기업 경영 경험`,
-        "의료 AI 솔루션 마케팅(3~6년)": `담당업무
+
+            marketing: `[의료 AI 솔루션 마케팅(3~6년)]
+
+담당업무
 - 의료 AI 솔루션 마케팅 전략 수립 및 실행
 - 제품 포지셔닝 및 가치 제안
 - 디지털 마케팅 캠페인 기획 및 실행
@@ -107,112 +289,143 @@
 - AI/의료 분야 이해도 보유
 - 글로벌 마케팅 경험
 - 의료진 대상 마케팅 경험`
-    };
+        };
 
-    // JD 업데이트 함수
-    function updateJD() {
-        const select = document.getElementById('jd-select');
-        const textarea = document.getElementById('jd-text');
-        const selectedPosition = select.value;
-        
-        if (selectedPosition && jdContents[selectedPosition]) {
-            textarea.value = jdContents[selectedPosition];
-        } else {
-            textarea.value = '';
+        // 채용공고 선택 시 내용 업데이트 함수
+        function updateJobDescription() {
+            const select = document.getElementById('jobSelect');
+            const textarea = document.getElementById('jobDescription');
+            
+            if (select.value === 'custom') {
+                textarea.value = '';
+                textarea.readOnly = false;
+                textarea.placeholder = '채용공고 내용을 직접 입력해주세요.';
+            } else if (select.value) {
+                textarea.value = jobDescriptions[select.value];
+                textarea.readOnly = true;
+            } else {
+                textarea.value = '';
+                textarea.readOnly = true;
+                textarea.placeholder = '채용공고를 선택하면 내용이 자동으로 표시됩니다.';
+            }
         }
-    }
 
-    // 이력서 분석 함수
-    async function analyzeResume() {
-        try {
-            const fileInput = document.getElementById('pdfFile');
-            
-            if (!fileInput.files[0]) {
-                alert('파일을 선택해주세요.');
-                return;
+        // 이력서 분석 함수
+        async function analyzeResume() {
+            try {
+                const fileInput = document.getElementById('pdfFile');
+                const resultDiv = document.getElementById('result');
+                
+                if (!fileInput.files[0]) {
+                    alert('파일을 선택해주세요.');
+                    return;
+                }
+                
+                // 로딩 메시지 표시
+                resultDiv.innerHTML = `
+                    <div class="result-box loading">
+                        <p>이력서 분석 중입니다... 잠시만 기다려주세요.</p>
+                    </div>
+                `;
+                console.log('API 요청 시작');
+                
+                const fileData = await fileInput.files[0].arrayBuffer();
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/octet-stream'
+                    },
+                    body: fileData
+                });
+                
+                console.log('응답 상태:', response.status);
+                const responseText = await response.text();
+                console.log('원본 응답:', responseText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
+                }
+                
+                const data = JSON.parse(responseText);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // 성공적으로 분석이 완료되면 결과 표시
+                resultDiv.innerHTML = `
+                    <div class="result-box">
+                        <div class="result-content">${data.result.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('에러 발생:', error);
+                document.getElementById('result').innerHTML = `
+                    <div class="result-box error">
+                        <p>분석 실패: ${error.message}</p>
+                    </div>
+                `;
             }
-            
-            document.getElementById('result').innerHTML = '분석 중입니다...';
-            console.log('API 요청 시작');
-            
-            const fileData = await fileInput.files[0].arrayBuffer();
-            
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                body: new Uint8Array(fileData)
-            });
-            
-            console.log('응답 상태:', response.status);
-            const responseText = await response.text();
-            console.log('원본 응답:', responseText);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
-            }
-            
-            const data = JSON.parse(responseText);
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            document.getElementById('result').innerHTML = data.result;
-            
-        } catch (error) {
-            console.error('에러 발생:', error);
-            document.getElementById('result').innerHTML = '분석 실패';
-            alert('분석 중 오류가 발생했습니다: ' + error.message);
         }
-    }
 
-    // 면접 질문 생성 함수
-    async function generateInterviewQuestions() {
-        const fileInput = document.getElementById('pdfFile');
-        const jdText = document.getElementById('jd-text');
-        const resultContent = document.getElementById('result');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        
-        if (!fileInput.files[0]) {
-            alert('이력서 파일을 업로드해주세요.');
-            return;
-        }
-        
-        if (!jdText.value.trim()) {
-            alert('JD 텍스트를 입력해주세요.');
-            return;
-        }
-        
-        const formData = new FormData();
-        formData.append('resume', fileInput.files[0]);
-        formData.append('jd_text', jdText.value);
-        
-        try {
-            loadingSpinner.style.display = 'block';
-            resultContent.style.display = 'none';
-            
-            const response = await fetch('/api/generate_questions', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            resultContent.innerHTML = data.html;
-            resultContent.style.display = 'block';
-            
-        } catch (error) {
-            alert('면접 질문 생성 중 오류가 발생했습니다: ' + error.message);
-        } finally {
-            loadingSpinner.style.display = 'none';
-        }
-    }
+        // 면접 질문 생성 함수
+        async function generateInterviewQuestions() {
+            try {
+                const resultDiv = document.getElementById('result');
+                const jobDescriptionInput = document.getElementById('jobDescription');
+                const questionsDiv = document.getElementById('questions');
 
-    // 이벤트 리스너 등록
-    document.getElementById('analyzeBtn').addEventListener('click', analyzeResume);
-    document.getElementById('questionsBtn').addEventListener('click', generateInterviewQuestions);
+                // 입력값 검증
+                if (!resultDiv || !resultDiv.textContent || !jobDescriptionInput || !jobDescriptionInput.value) {
+                    alert('이력서 분석 결과와 채용요건이 모두 필요합니다.');
+                    return;
+                }
+
+                // 로딩 표시
+                questionsDiv.innerHTML = `
+                    <div class="result-box loading">
+                        <p>면접 질문을 생성하고 있습니다...</p>
+                    </div>
+                `;
+
+                const response = await fetch('/api/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        resume_text: resultDiv.textContent,
+                        job_description: jobDescriptionInput.value
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // 결과 표시 (이력서 분석과 동일한 스타일)
+                questionsDiv.innerHTML = `
+                    <div class="result-box">
+                        <div class="result-content">${data.result.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('questions').innerHTML = `
+                    <div class="result-box error">
+                        <p>질문 생성 중 오류가 발생했습니다: ${error.message}</p>
+                    </div>
+                `
+            }
+        }
     </script>
 </body>
 </html>

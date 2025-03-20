@@ -2,34 +2,32 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 from openai import OpenAI
-from PyPDF2 import PdfReader
-from io import BytesIO
 
-def analyze_pdf(pdf_data):
+def generate_questions(resume_text, job_description):
     try:
-        # PDF 읽기
-        pdf = PdfReader(BytesIO(pdf_data))
-        text = ""
-        for page in pdf.pages:
-            text += page.extract_text()
-
-        # OpenAI 클라이언트 초기화
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
-        # ChatCompletion 요청
+        prompt = f"""
+        이력서 내용: {resume_text}
+        
+        직무 설명: {job_description}
+        
+        위 이력서와 직무 설명을 바탕으로 면접 질문 5개를 생성해주세요.
+        각 질문은 지원자의 경력과 기술이 해당 직무와 어떻게 연관되는지 파악할 수 있도록 구성해주세요.
+        """
+        
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "이력서를 분석하여 주요 경력과 기술을 요약해주세요."},
-                {"role": "user", "content": text}
+                {"role": "system", "content": "당신은 전문 면접관입니다."},
+                {"role": "user", "content": prompt}
             ]
         )
         
-        # 응답에서 텍스트 추출
         return response.choices[0].message.content
 
     except Exception as e:
-        print(f"PDF 분석 중 에러: {str(e)}")
+        print(f"질문 생성 중 에러: {str(e)}")
         raise e
 
 class handler(BaseHTTPRequestHandler):
@@ -37,6 +35,7 @@ class handler(BaseHTTPRequestHandler):
         try:
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
+            request_data = json.loads(post_data.decode('utf-8'))
             
             # CORS 헤더
             self.send_response(200)
@@ -44,12 +43,15 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
 
-            # PDF 분석
-            result = analyze_pdf(post_data)
+            # 면접 질문 생성
+            resume_text = request_data.get('resume_text', '')
+            job_description = request_data.get('job_description', '')
+            
+            questions = generate_questions(resume_text, job_description)
             
             # 응답 전송
             self.wfile.write(json.dumps({
-                'result': result
+                'result': questions
             }).encode('utf-8'))
 
         except Exception as e:
