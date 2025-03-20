@@ -1,13 +1,13 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import openai
+from openai import OpenAI
 import os
 
 def generate_questions(resume_text, job_description):
     try:
-        openai.api_key = os.environ.get('OPENAI_API_KEY')
+        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
         
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "당신은 경험 많은 면접관입니다."},
