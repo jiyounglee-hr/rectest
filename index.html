@@ -14,8 +14,8 @@
         <!-- 파일 업로드 폼 -->
         <form id="analysis-form" class="mb-4">
             <div class="form-group mb-3">
-                <label for="resume-file" class="form-label">이력서 파일 (PDF)</label>
-                <input type="file" class="form-control" id="resume-file" accept=".pdf" required>
+                <label for="pdfFile" class="form-label">이력서 파일 (PDF)</label>
+                <input type="file" class="form-control" id="pdfFile" accept=".pdf" required>
                 <div class="form-text">10MB 이하의 PDF 파일만 업로드 가능합니다.</div>
             </div>
 
@@ -53,7 +53,7 @@
         </div>
 
         <!-- 결과 표시 영역 -->
-        <div id="result-content" class="mt-4" style="display: none;">
+        <div id="result" class="mt-4" style="display: none;">
         </div>
     </div>
 
@@ -125,23 +125,26 @@
     // 이력서 분석 함수
     async function analyzeResume() {
         try {
-            const formData = new FormData();
-            const fileInput = document.getElementById('resume-file');
+            const fileInput = document.getElementById('pdfFile');
             
             if (!fileInput.files[0]) {
                 alert('파일을 선택해주세요.');
                 return;
             }
             
-            formData.append('file', fileInput.files[0]);
-            
             // 로딩 표시
-            document.getElementById('result-content').innerHTML = '분석 중입니다...';
+            document.getElementById('result').innerHTML = '분석 중입니다...';
             console.log('API 요청 시작');
+            
+            // 파일 데이터를 직접 전송
+            const fileData = await fileInput.files[0].arrayBuffer();
             
             const response = await fetch('/api/analyze', {
                 method: 'POST',
-                body: await fileInput.files[0].arrayBuffer()  // 파일 데이터를 직접 전송
+                headers: {
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: fileData
             });
             
             console.log('응답 상태:', response.status);
@@ -153,20 +156,24 @@
             }
             
             const data = JSON.parse(responseText);
-            document.getElementById('result-content').innerHTML = data.result;
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            document.getElementById('result').innerHTML = data.result;
             
         } catch (error) {
             console.error('에러 발생:', error);
-            document.getElementById('result-content').innerHTML = '분석 실패';
+            document.getElementById('result').innerHTML = '분석 실패';
             alert('분석 중 오류가 발생했습니다: ' + error.message);
         }
     }
 
     // 면접 질문 생성 함수
     async function generateInterviewQuestions() {
-        const fileInput = document.getElementById('resume-file');
+        const fileInput = document.getElementById('pdfFile');
         const jdText = document.getElementById('jd-text');
-        const resultContent = document.getElementById('result-content');
+        const resultContent = document.getElementById('result');
         const loadingSpinner = document.getElementById('loading-spinner');
         
         if (!fileInput.files[0]) {

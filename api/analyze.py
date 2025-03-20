@@ -5,18 +5,16 @@ import openai
 from PyPDF2 import PdfReader
 from io import BytesIO
 
-def process_pdf(file_data):
+def analyze_pdf(pdf_data):
     try:
-        # PDF 파일 읽기
-        pdf = PdfReader(BytesIO(file_data))
+        # PDF 읽기
+        pdf = PdfReader(BytesIO(pdf_data))
         text = ""
         for page in pdf.pages:
             text += page.extract_text()
-        
-        # OpenAI API 설정
+
+        # OpenAI API 호출
         openai.api_key = os.getenv('OPENAI_API_KEY')
-        
-        # GPT 분석 요청
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -24,71 +22,52 @@ def process_pdf(file_data):
                 {"role": "user", "content": text}
             ]
         )
-        
         return response.choices[0].message['content']
     except Exception as e:
-        print(f"PDF 처리 중 에러: {str(e)}")
+        print(f"PDF 분석 중 에러: {str(e)}")
         raise e
 
-def handle_request(event):
-    try:
-        # CORS 헤더
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json'
-        }
-        
-        # OPTIONS 요청 처리
-        if event.get('httpMethod') == 'OPTIONS':
-            return {
-                'statusCode': 204,
-                'headers': headers,
-                'body': ''
-            }
-            
-        if event.get('httpMethod') != 'POST':
-            return {
-                'statusCode': 405,
-                'headers': headers,
-                'body': json.dumps({'error': 'Method not allowed'})
-            }
-            
-        # multipart/form-data 처리
-        body = event.get('body', '')
-        if not body:
-            return {
-                'statusCode': 400,
-                'headers': headers,
-                'body': json.dumps({'error': '요청 본문이 비어있습니다.'})
-            }
-            
-        try:
-            # PDF 처리 및 분석
-            analyzed_text = process_pdf(body)
-            
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({'result': analyzed_text})
-            }
-            
-        except Exception as e:
-            print(f"처리 중 에러: {str(e)}")
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({'error': f'처리 중 에러: {str(e)}'})
-            }
-            
-    except Exception as e:
-        print(f"서버 에러: {str(e)}")
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps({'error': f'서버 에러: {str(e)}'})
-        }
+class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
-def main(req):
-    return handle_request(req) 
+    def do_POST(self):
+        try:
+            # CORS 헤더 설정
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+
+            # 요청 본문 읽기
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+
+            # PDF 분석
+            result = analyze_pdf(post_data)
+            
+            # 응답 전송
+            response = json.dumps({
+                'result': result
+            })
+            self.wfile.write(response.encode('utf-8'))
+
+        except Exception as e:
+            print(f"서버 에러: {str(e)}")
+            error_response = json.dumps({
+                'error': str(e)
+            })
+            self.wfile.write(error_response.encode('utf-8'))
+
+    def do_GET(self):
+        self.send_response(405)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        response = json.dumps({
+            'error': 'Method not allowed'
+        })
+        self.wfile.write(response.encode('utf-8')) 
