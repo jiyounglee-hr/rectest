@@ -18,16 +18,23 @@
       "config": {
         "maxDuration": 60
       }
+    },
+    {
+      "src": "api/analyze.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/analyze",
-      "dest": "/api/analyze/index.py"
-    },
-    {
       "src": "/api/generate_questions",
       "dest": "api/generate_questions.py"
+    },
+    {
+      "src": "/api/analyze",
+      "dest": "api/analyze.py"
     },
     {
       "src": "/(.*)",
