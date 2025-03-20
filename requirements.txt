@@ -1,0 +1,8 @@
+flask
+flask-cors
+python-dotenv
+openai
+PyPDF2
+pytesseract
+pdf2image
+python-docx 
