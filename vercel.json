@@ -11,6 +11,13 @@
     {
       "src": "*.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "api/generate_questions.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60
+      }
     }
   ],
   "routes": [
@@ -20,7 +27,7 @@
     },
     {
       "src": "/api/generate_questions",
-      "dest": "/api/generate_questions/index.py"
+      "dest": "api/generate_questions.py"
     },
     {
       "src": "/(.*)",

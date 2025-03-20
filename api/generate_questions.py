@@ -7,49 +7,14 @@ def generate_questions(resume_text, job_description):
     try:
         client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
         
-        # 프롬프트 최적화 및 토큰 수 제한
-        resume_summary = resume_text[:1000]  # 이력서 내용 제한
-        job_summary = job_description[:500]  # 채용요건 내용 제한
-        
-        prompt = f"""다음 내용을 바탕으로 간단한 면접 질문을 생성해주세요:
-
-이력서: {resume_summary}
-
-채용요건: {job_summary}
-
-다음 형식으로 11개의 질문을 생성해주세요:
-
-[경력 기반 질문]
-1. 
-2. 
-
-[직무 적합성 질문]
-3. 
-4. 
-
-[기술/전문성 질문]
-5. 
-6. 
-
-[조직 적합성 질문]
-7. 
-8. 
-9. 
-10. 
-
-[성장 가능성 질문]
-11. 
-"""
-        
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "면접관으로서 간단하고 명확한 질문을 생성하세요."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "당신은 경험 많은 면접관입니다."},
+                {"role": "user", "content": f"다음 이력서와 채용요건을 바탕으로 면접 질문을 생성해주세요:\n\n이력서: {resume_text}\n\n채용요건: {job_description}"}
             ],
             temperature=0.7,
-            max_tokens=1000,  # 토큰 수 제한
-            timeout=15  # 타임아웃 설정
+            max_tokens=2000
         )
         
         return response.choices[0].message.content
