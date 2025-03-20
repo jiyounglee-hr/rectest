@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "/api/*.py",
+      "src": "api/*.py",
       "use": "@vercel/python",
       "config": {
         "maxDuration": 60
@@ -40,5 +40,12 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ]
+  ],
+  "regions": ["icn1"],
+  "functions": {
+    "api/*.py": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 } 
