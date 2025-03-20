@@ -157,6 +157,15 @@
             color: #f44336;
             margin: 0;
         }
+
+        #questions .result-content {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            white-space: pre-line;
+        }
     </style>
 </head>
 <body>
@@ -321,7 +330,7 @@
                     return;
                 }
                 
-                // 로딩 메시지 표시
+                // 로딩 메시지 표시 - 동일한 스타일 적용
                 resultDiv.innerHTML = '<div class="loading">이력서 분석 중입니다... 잠시만 기다려주세요.</div>';
                 console.log('API 요청 시작');
                 
@@ -358,8 +367,8 @@
             } catch (error) {
                 console.error('에러 발생:', error);
                 document.getElementById('result').innerHTML = `
-                    <div class="result-box error">
-                        <p>분석 실패: ${error.message}</p>
+                    <div class="error result-content">
+                        이력서 분석 중 오류가 발생했습니다: ${error.message}
                     </div>
                 `;
             }
@@ -372,13 +381,12 @@
                 const jobDescriptionInput = document.getElementById('jobDescription');
                 const questionsDiv = document.getElementById('questions');
 
-                // 입력값 검증
                 if (!resultDiv || !resultDiv.textContent || !jobDescriptionInput || !jobDescriptionInput.value) {
                     alert('이력서 분석 결과와 채용요건이 모두 필요합니다.');
                     return;
                 }
 
-                // 로딩 메시지 표시
+                // 로딩 메시지 표시 - 동일한 스타일 적용
                 questionsDiv.innerHTML = '<div class="loading">면접 질문을 생성하고 있습니다...</div>';
 
                 console.log('API 요청 시작');
@@ -426,7 +434,7 @@
             } catch (error) {
                 console.error('에러 발생:', error);
                 document.getElementById('questions').innerHTML = `
-                    <div class="error">
+                    <div class="error result-content">
                         질문 생성 중 오류가 발생했습니다: ${error.message}
                     </div>
                 `;
