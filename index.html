@@ -381,12 +381,13 @@
                 const jobDescriptionInput = document.getElementById('jobDescription');
                 const questionsDiv = document.getElementById('questions');
 
+                // 입력값 검증
                 if (!resultDiv || !resultDiv.textContent || !jobDescriptionInput || !jobDescriptionInput.value) {
                     alert('이력서 분석 결과와 채용요건이 모두 필요합니다.');
                     return;
                 }
 
-                // 로딩 메시지 표시 - 동일한 스타일 적용
+                // 로딩 표시
                 questionsDiv.innerHTML = '<div class="loading">면접 질문을 생성하고 있습니다...</div>';
 
                 console.log('API 요청 시작');
@@ -434,7 +435,7 @@
             } catch (error) {
                 console.error('에러 발생:', error);
                 document.getElementById('questions').innerHTML = `
-                    <div class="error result-content">
+                    <div class="error">
                         질문 생성 중 오류가 발생했습니다: ${error.message}
                     </div>
                 `;

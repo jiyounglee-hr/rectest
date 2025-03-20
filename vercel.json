@@ -2,12 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/analyze/index.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/generate_questions/index.py",
-      "use": "@vercel/python"
+      "src": "/api/*.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60
+      }
     },
     {
       "src": "*.html",
