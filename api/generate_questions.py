@@ -7,11 +7,39 @@ def generate_questions(resume_text, job_description):
     try:
         client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
         
+        prompt = f"""다음 이력서와 채용요건을 바탕으로 면접 질문을 생성해주세요:
+
+이력서: {resume_text}
+
+채용요건: {job_description}
+
+[직무 기반 질문]
+1. 가장 중요한 프로젝트 경험 질문
+2. 어려운 문제를 해결한 구체적 사례 질문
+3. 채용공고의 필수 자격요건 관련 질문
+4. 채용공고의 우대사항 관련 질문
+5. 직무 관련 전문 지식을 검증하는 질문
+6. 실제 업무 상황에서의 대처 방안을 묻는 질문
+
+[조직 적합성 질문 - 뉴로핏 핵심가치 기반]
+7. [도전] "두려워 말고 시도합니다"와 관련된 경험 질문
+8. [책임감] "대충은 없습니다"와 관련된 사례 질문
+9. [협력] "동료와 협업합니다"와 관련된 경험 질문
+10. [전문성] "능동적으로 일합니다"와 관련된 사례 질문
+
+각 질문은 반드시:
+1. 이력서의 구체적인 내용을 참조할 것
+2. 채용공고의 요구사항과 연계할 것
+3. 구체적이고 상황 중심적일 것
+4. 단순 예/아니오로 답할 수 없는 형태로 작성할 것
+
+질문 번호를 포함하여 각 카테고리별로 구분하여 작성해주세요."""
+
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "당신은 경험 많은 면접관입니다."},
-                {"role": "user", "content": f"다음 이력서와 채용요건을 바탕으로 면접 질문을 생성해주세요:\n\n이력서: {resume_text}\n\n채용요건: {job_description}"}
+                {"role": "system", "content": "당신은 경험 많은 면접관입니다. 구체적이고 상황 중심적인 면접 질문을 생성합니다."},
+                {"role": "user", "content": prompt}
             ],
             temperature=0.7,
             max_tokens=2000
