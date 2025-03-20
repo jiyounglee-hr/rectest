@@ -1,25 +1,31 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/**/*.py", "use": "@vercel/python" },
-    { "src": "*.html", "use": "@vercel/static" }
+    {
+      "src": "api/analyze/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/generate_questions/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
+      "src": "/api/analyze",
+      "dest": "/api/analyze/index.py"
+    },
+    {
+      "src": "/api/generate_questions",
+      "dest": "/api/generate_questions/index.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/$1",
-      "headers": {
-        "Access-Control-Allow-Origin": "*"
-      }
+      "dest": "/$1"
     }
   ]
 } 
