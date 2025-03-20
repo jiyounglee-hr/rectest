@@ -138,14 +138,14 @@
         }
 
         .loading {
-            background-color: #E3F2FD;
-            border-color: #2196F3;
-        }
-
-        .loading p {
-            color: #2196F3;
             text-align: center;
-            margin: 0;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            color: #007bff;
+            font-weight: bold;
         }
 
         .error {
@@ -322,11 +322,7 @@
                 }
                 
                 // 로딩 메시지 표시
-                resultDiv.innerHTML = `
-                    <div class="result-box loading">
-                        <p>이력서 분석 중입니다... 잠시만 기다려주세요.</p>
-                    </div>
-                `;
+                resultDiv.innerHTML = '<div class="loading">이력서 분석 중입니다... 잠시만 기다려주세요.</div>';
                 console.log('API 요청 시작');
                 
                 const fileData = await fileInput.files[0].arrayBuffer();
@@ -382,12 +378,12 @@
                     return;
                 }
 
-                // 로딩 표시
-                questionsDiv.innerHTML = `
-                    <div class="result-box loading">
-                        <p>면접 질문을 생성하고 있습니다...</p>
-                    </div>
-                `;
+                // 로딩 메시지 표시
+                questionsDiv.innerHTML = '<div class="loading">면접 질문을 생성하고 있습니다...</div>';
+
+                console.log('API 요청 시작');
+                console.log('이력서 분석 결과:', resultDiv.textContent);
+                console.log('채용 요건:', jobDescriptionInput.value);
 
                 const response = await fetch('/api/generate_questions', {
                     method: 'POST',
@@ -395,35 +391,45 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        resume_text: resultDiv.textContent,
-                        job_description: jobDescriptionInput.value
+                        resume_text: resultDiv.textContent.trim(),
+                        job_description: jobDescriptionInput.value.trim()
                     })
                 });
+
+                console.log('응답 상태:', response.status);
+                const responseText = await response.text();
+                console.log('원본 응답:', responseText);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data = await response.json();
-                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON 파싱 에러:', e);
+                    throw new Error('서버 응답을 처리할 수 없습니다.');
+                }
+
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
-                // 결과 표시 (이력서 분석과 동일한 스타일)
+                // 결과 표시
                 questionsDiv.innerHTML = `
-                    <div class="result-box">
-                        <div class="result-content">${data.result.replace(/\n/g, '<br>')}</div>
+                    <div class="result-content">
+                        ${data.result.replace(/\n/g, '<br>')}
                     </div>
                 `;
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('에러 발생:', error);
                 document.getElementById('questions').innerHTML = `
-                    <div class="result-box error">
-                        <p>질문 생성 중 오류가 발생했습니다: ${error.message}</p>
+                    <div class="error">
+                        질문 생성 중 오류가 발생했습니다: ${error.message}
                     </div>
-                `
+                `;
             }
         }
     </script>

@@ -63,35 +63,37 @@ def generate_questions(resume_text, job_description):
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            request_data = json.loads(post_data.decode('utf-8'))
-            
             # CORS 헤더
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-type', 'application/json')
             self.end_headers()
 
-            # 면접 질문 생성
+            # 요청 본문 읽기
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            request_data = json.loads(post_data.decode('utf-8'))
+
+            # 입력값 검증
             resume_text = request_data.get('resume_text', '')
             job_description = request_data.get('job_description', '')
-            
-            questions = generate_questions(resume_text, job_description)
+
+            if not resume_text or not job_description:
+                response = json.dumps({'error': '이력서 분석 결과와 채용요건이 모두 필요합니다.'})
+                self.wfile.write(response.encode('utf-8'))
+                return
+
+            # 질문 생성
+            result = generate_questions(resume_text, job_description)
             
             # 응답 전송
-            self.wfile.write(json.dumps({
-                'result': questions
-            }).encode('utf-8'))
+            response = json.dumps({'result': result})
+            self.wfile.write(response.encode('utf-8'))
 
         except Exception as e:
-            self.send_response(500)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                'error': str(e)
-            }).encode('utf-8'))
+            print(f"서버 에러: {str(e)}")
+            error_response = json.dumps({'error': str(e)})
+            self.wfile.write(error_response.encode('utf-8'))
 
     def do_OPTIONS(self):
         self.send_response(204)
