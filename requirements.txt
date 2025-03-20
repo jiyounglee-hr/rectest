@@ -1,8 +1,4 @@
-flask
-flask-cors
-python-dotenv
 openai
+python-dotenv
 PyPDF2
-pytesseract
-pdf2image
-python-docx 
+python-docx
