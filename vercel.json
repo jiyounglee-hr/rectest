@@ -6,14 +6,14 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/generate_questions",
-      "dest": "/api/generate_questions/index.py"
+      "source": "/api/generate_questions",
+      "destination": "/api/generate_questions/index.py"
     },
     {
-      "src": "/api/analyze",
-      "dest": "/api/analyze/index.py"
+      "source": "/api/analyze",
+      "destination": "/api/analyze/index.py"
     }
   ],
   "headers": [
