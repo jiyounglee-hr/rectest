@@ -5,7 +5,10 @@ import os
 
 def generate_questions(resume_text, job_description):
     try:
-        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+        client = OpenAI(
+            api_key=os.environ.get('OPENAI_API_KEY'),
+            timeout=25.0  # 25초 타임아웃 설정
+        )
         
         prompt = f"""다음 이력서와 채용요건을 바탕으로 구체적인 면접 질문을 생성해주세요:
 
@@ -51,7 +54,8 @@ def generate_questions(resume_text, job_description):
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=2000
+            max_tokens=2000,
+            timeout=25  # 25초 타임아웃 설정
         )
         
         return response.choices[0].message.content
