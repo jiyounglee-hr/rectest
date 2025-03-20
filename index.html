@@ -132,19 +132,14 @@
                 return;
             }
             
-            // 로딩 표시
             document.getElementById('result').innerHTML = '분석 중입니다...';
             console.log('API 요청 시작');
             
-            // 파일 데이터를 직접 전송
             const fileData = await fileInput.files[0].arrayBuffer();
             
             const response = await fetch('/api/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/octet-stream'
-                },
-                body: fileData
+                body: new Uint8Array(fileData)
             });
             
             console.log('응답 상태:', response.status);
