@@ -1,74 +1,32 @@
 from http.server import BaseHTTPRequestHandler
 import json
+import openai
 import os
-from openai import OpenAI
 
 def generate_questions(resume_text, job_description):
     try:
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        openai.api_key = os.environ.get('OPENAI_API_KEY')
         
-        prompt = f"""
-        다음 이력서와 채용공고를 바탕으로 면접 질문을 생성해주세요.
-        
-        이력서 내용: {resume_text}
-        
-        채용공고: {job_description}
-        
-        다음 카테고리별로 구체적인 면접 질문을 생성해주세요:
-
-        [경력 기반 질문] (2개)
-        1. 가장 중요한 프로젝트 경험 질문
-        2. 어려운 문제를 해결한 구체적 사례 질문
-
-        [직무 적합성 질문] (2개)
-        3. 채용공고의 필수 자격요건 관련 질문
-        4. 채용공고의 우대사항 관련 질문
-
-        [기술/전문성 질문] (2개)
-        5. 직무 관련 전문 지식을 검증하는 질문
-        6. 실제 업무 상황에서의 대처 방안을 묻는 질문
-
-        [조직 적합성 질문] (4개 - 뉴로핏 핵심가치 기반)
-        7. [도전] "두려워 말고 시도합니다"와 관련된 경험 질문
-        8. [책임감] "대충은 없습니다"와 관련된 사례 질문
-        9. [협력] "동료와 협업합니다"와 관련된 경험 질문
-        10. [전문성] "능동적으로 일합니다"와 관련된 사례 질문
-
-        [성장 가능성 질문] (1개)
-        11. 자기 개발 계획과 비전 질문
-
-        각 질문은:
-        - 이력서의 구체적인 내용을 참조할 것
-        - 채용공고의 요구사항과 연계할 것
-        - 구체적이고 상황 중심적일 것
-        - 단순 예/아니오로 답할 수 없는 형태로 작성할 것
-        """
-        
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "당신은 경험 많은 면접관입니다. 지원자의 이력서와 채용공고를 분석하여 구체적이고 효과적인 면접 질문을 생성합니다."},
-                {"role": "user", "content": prompt}
-            ]
+                {"role": "system", "content": "당신은 경험 많은 면접관입니다."},
+                {"role": "user", "content": f"다음 이력서와 채용요건을 바탕으로 면접 질문을 생성해주세요:\n\n이력서: {resume_text}\n\n채용요건: {job_description}"}
+            ],
+            temperature=0.7,
+            max_tokens=2000
         )
         
-        # 응답에서 ** 제거
-        result = response.choices[0].message.content.replace('**', '')
-        return result
-
+        return response.choices[0].message.content.replace('**', '')
     except Exception as e:
-        print(f"질문 생성 중 에러: {str(e)}")
-        raise e
+        print(f"OpenAI API 에러: {str(e)}")
+        raise Exception(str(e))
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
+        response_data = {}
+        
         try:
-            # CORS 헤더
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-
             # 요청 데이터 읽기
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
@@ -80,14 +38,27 @@ class handler(BaseHTTPRequestHandler):
                 request_data.get('job_description', '')
             )
             
-            # 응답 전송
-            response_data = {'result': result}
-            self.wfile.write(json.dumps(response_data, ensure_ascii=False).encode('utf-8'))
-
+            response_data = {"result": result}
+            
         except Exception as e:
-            print(f"Error: {str(e)}")
-            error_response = {'error': str(e)}
-            self.wfile.write(json.dumps(error_response, ensure_ascii=False).encode('utf-8'))
+            print(f"서버 에러: {str(e)}")
+            response_data = {"error": str(e)}
+        
+        finally:
+            # 응답 헤더 설정
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.end_headers()
+            
+            # 응답 데이터 전송
+            try:
+                response_json = json.dumps(response_data, ensure_ascii=False)
+                self.wfile.write(response_json.encode('utf-8'))
+            except Exception as e:
+                print(f"응답 전송 에러: {str(e)}")
+                error_response = json.dumps({"error": "응답 전송 중 오류가 발생했습니다"})
+                self.wfile.write(error_response.encode('utf-8'))
 
     def do_OPTIONS(self):
         self.send_response(204)
