@@ -137,37 +137,26 @@
             
             // 로딩 표시
             document.getElementById('result-content').innerHTML = '분석 중입니다...';
+            console.log('API 요청 시작');
             
             const response = await fetch('/api/analyze', {
                 method: 'POST',
-                body: formData
+                body: await fileInput.files[0].arrayBuffer()  // 파일 데이터를 직접 전송
             });
             
-            // 응답 상태 및 원본 텍스트 로깅
-            console.log('Response status:', response.status);
+            console.log('응답 상태:', response.status);
             const responseText = await response.text();
-            console.log('Raw response:', responseText);
+            console.log('원본 응답:', responseText);
             
-            // 응답이 JSON이 아닌 경우 처리
             if (!response.ok) {
-                throw new Error(`서버 에러 (${response.status}): ${responseText}`);
+                throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
             }
             
-            // JSON 파싱 시도
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (e) {
-                console.error('JSON 파싱 에러:', e);
-                console.error('받은 응답:', responseText);
-                throw new Error('서버 응답이 올바른 JSON 형식이 아닙니다');
-            }
-            
-            // 결과 표시
-            document.getElementById('result-content').innerHTML = data.result || '분석 결과가 없습니다.';
+            const data = JSON.parse(responseText);
+            document.getElementById('result-content').innerHTML = data.result;
             
         } catch (error) {
-            console.error('Error details:', error);
+            console.error('에러 발생:', error);
             document.getElementById('result-content').innerHTML = '분석 실패';
             alert('분석 중 오류가 발생했습니다: ' + error.message);
         }
