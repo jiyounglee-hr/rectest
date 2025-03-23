@@ -46,7 +46,7 @@ def analyze_pdf(pdf_content):
 """
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "당신은 전문 채용 담당자입니다. 이력서를 객관적으로 분석하고, 주요 직무 경험은 들여쓰기와 번호를 사용하여 구조화된 형식으로 작성해주세요."},
                 {"role": "user", "content": prompt.format(text=text)}

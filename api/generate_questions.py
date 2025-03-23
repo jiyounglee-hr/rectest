@@ -36,7 +36,7 @@ def generate_questions(resume_text, job_description):
 질문 번호를 포함하여 각 카테고리별로 구분하여 작성해주세요."""
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "당신은 경험 많은 면접관입니다. 구체적이고 상황 중심적인 면접 질문을 생성합니다."},
                 {"role": "user", "content": prompt}
