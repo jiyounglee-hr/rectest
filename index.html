@@ -346,38 +346,31 @@
             try {
                 const fileInput = document.getElementById('pdfFile');
                 const resultDiv = document.getElementById('result');
+                const jobDescription = document.getElementById('jobDescription').value;
                 
                 if (!fileInput.files[0]) {
                     alert('파일을 선택해주세요.');
                     return;
                 }
                 
-                // 로딩 메시지 표시 - 동일한 스타일 적용
+                // 로딩 메시지 표시
                 resultDiv.innerHTML = '<div class="loading">이력서 분석 중입니다... 잠시만 기다려주세요.</div>';
-                console.log('API 요청 시작');
                 
-                const fileData = await fileInput.files[0].arrayBuffer();
+                // FormData 객체 생성
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('job_description', jobDescription);
                 
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/octet-stream'
-                    },
-                    body: fileData
+                    body: formData  // FormData 사용
                 });
                 
-                console.log('응답 상태:', response.status);
-                const responseText = await response.text();
-                console.log('원본 응답:', responseText);
-                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const data = JSON.parse(responseText);
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                const data = await response.json();
                 
                 // 성공적으로 분석이 완료되면 결과 표시
                 resultDiv.innerHTML = `
@@ -390,7 +383,8 @@
                 console.error('에러 발생:', error);
                 document.getElementById('result').innerHTML = `
                     <div class="error result-content">
-                        이력서 분석 중 오류가 발생했습니다: ${error.message}
+                        <p>이력서 분석 중 오류가 발생했습니다: ${error.message}</p>
+                        <p>서버가 응답하지 않습니다. 잠시 후 다시 시도해주세요.</p>
                     </div>
                 `;
             }
