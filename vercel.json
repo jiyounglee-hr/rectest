@@ -1,19 +1,46 @@
 {
   "version": 2,
   "builds": [
-    { 
-      "src": "/api/*.py",
-      "use": "@vercel/python"
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60,
+        "memory": 1024
+      }
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/generate_questions.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60
+      }
+    },
+    {
+      "src": "api/analyze.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/analyze",
-      "dest": "/api/analyze.py"
+      "src": "/api/generate_questions",
+      "dest": "api/generate_questions.py"
     },
     {
-      "src": "/api/generate_questions",
-      "dest": "/api/generate_questions.py"
+      "src": "/api/analyze",
+      "dest": "api/analyze.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
-  ]
+  ],
+  "regions": ["icn1"]
 } 
