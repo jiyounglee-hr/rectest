@@ -43,6 +43,12 @@ def generate_questions(resume_text, job_description):
         
         return formatted_result
         
+        # 기본 카테고리 구조 추가
+        if "[조직 적합성 질문]" not in result:
+            formatted_result = "[조직 적합성 질문]\n" + result
+        
+        return formatted_result
+    
     except Exception as e:
         print(f"에러: {str(e)}")
         raise Exception(str(e))
