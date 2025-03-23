@@ -16,13 +16,14 @@ def generate_questions(resume_text, job_description):
 [직무 기반 질문]
 1-6: 직무 경험, 프로젝트, 문제해결, 자격요건 관련 질문
 
-[조직 적합성 질문]
+[조직 적합성 질문 - 뉴로핏 핵심가치 기반]
 7-10: 뉴로핏 핵심가치(도전,책임감,협력,전문성) 관련 질문
 
 이력서: {resume_text}
 채용요건: {job_description}
 
 각 질문은 구체적이고 상황 중심적으로 작성해주세요."""
+반드시 '[직무 기반 질문]'과 '[조직 적합성 질문 - 뉴로핏 핵심가치 기반]' 두 개의 카테고리로 구분하여 작성해주세요."""
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",  # 더 빠른 처리를 위해 GPT-3.5 사용
@@ -42,12 +43,13 @@ def generate_questions(resume_text, job_description):
             formatted_result = "[직무 기반 질문]\n" + result
         
         return formatted_result
+
+        if "[조직 적합성 질문" not in result:
+            parts = result.split("7.")
+            if len(parts) == 2:
+                result = parts[0] + "\n[조직 적합성 질문 - 뉴로핏 핵심가치 기반]\n7." + parts[1]
         
-        # 기본 카테고리 구조 추가
-        if "[조직 적합성 질문]" not in result:
-            formatted_result = "[조직 적합성 질문]\n" + result
-        
-        return formatted_result
+        return result     
     
     except Exception as e:
         print(f"에러: {str(e)}")
