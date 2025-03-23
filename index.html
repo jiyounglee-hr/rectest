@@ -166,6 +166,12 @@
             background-color: #f8f9fa;
             white-space: pre-line;
         }
+
+        .tip-description {
+            margin-bottom: 15px;
+            color: #666;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -211,6 +217,12 @@
         <!-- 4. 면접 질문 팁 섹션 -->
         <div class="section">
             <div class="section-title">4. 면접 질문 TIP</div>
+            <div class="tip-description">
+                <small>
+                    1~6번은 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문<br>
+                    7~10번은 핵심가치 기반의 '[도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다'와 관련된 사례 질문
+                </small>
+            </div>
             <button onclick="generateInterviewQuestions()">질문 추출하기</button>
             <div id="questions"></div>
         </div>
