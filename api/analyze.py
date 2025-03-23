@@ -34,6 +34,8 @@ def analyze_pdf(pdf_content):
    - 부합되는 요건
    - 미확인/부족 요건
 
+- 분석 결과에서 ** 기호를 사용하지 말 것
+
 이력서 내용: {text}"""
 
         # OpenAI API 호출 - GPT-3.5-turbo 사용 (더 빠름)
