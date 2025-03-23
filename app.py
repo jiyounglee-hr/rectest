@@ -1,164 +1,141 @@
-from flask import Flask, request, render_template, send_file, jsonify
-from resume_summarizer import ResumeSummarizer
+import streamlit as st
+import PyPDF2
+import io
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
-import socket
-import PyPDF2
-from werkzeug.utils import secure_filename
-from docx import Document
-from docx.shared import Pt, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_ORIENT
-import io
-from flask_cors import CORS
-import tempfile
 
+# 환경 변수 로드
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://[your-github-username].github.io"}})
-summarizer = ResumeSummarizer()
+# 페이지 설정
+st.set_page_config(
+    page_title="뉴로핏 이력서 분석기",
+    page_icon="📄",
+    layout="wide"
+)
 
-def get_ip():
-    # 현재 컴퓨터의 IP 주소 가져오기
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    return ip_address
+# 로고 추가
+st.image("https://neurophethr.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fe3948c44-a232-43dd-9c54-c4142a1b670b%2Fneruophet_logo.png?table=block&id=893029a6-2091-4dd3-872b-4b7cd8f94384&spaceId=9453ab34-9a3e-45a8-a6b2-ec7f1cefbd7f&width=410&userId=&cache=v2", 
+         width=150)
 
-def extract_text_from_pdf(pdf_file):
-    pdf_reader = PyPDF2.PdfReader(pdf_file)
-    text = ''
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-    return text
+st.title("이력서 분석 & 면접 질문 생성")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/analyze', methods=['POST'])
-def analyze():
+def analyze_pdf(pdf_content):
     try:
-        if 'resume' not in request.files:
-            return jsonify({'error': '이력서 파일이 필요합니다'}), 400
+        # PDF 파일 읽기
+        pdf_file = io.BytesIO(pdf_content)
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
         
-        resume_file = request.files['resume']
-        jd_text = request.form.get('jd', '')
-        
-        # 임시 파일로 저장
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            resume_file.save(temp_file.name)
-            resume_text = summarizer.read_resume(temp_file.name)
-        
-        # 임시 파일 삭제
-        os.unlink(temp_file.name)
-        
-        if resume_text is None:
-            return jsonify({'error': '이력서 읽기 실패'}), 400
-            
-        # 분석 수행
-        result = summarizer.generate_summary(resume_text, jd_text)
-        
-        return jsonify({'result': result})
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # PDF 텍스트 추출
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text()
 
-@app.route('/download-word', methods=['POST'])
-def download_word():
-    try:
-        content = request.json.get('content')
+        # OpenAI API 호출
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
-        # Word 문서 생성
-        doc = Document()
-        
-        # 가로 방향으로 설정
-        section = doc.sections[0]
-        section.orientation = WD_ORIENT.LANDSCAPE
-        section.page_width = Inches(11.69)  # A4 가로
-        section.page_height = Inches(8.27)  # A4 세로
-        
-        # 여백 설정 (좁게)
-        section.left_margin = Inches(0.5)
-        section.right_margin = Inches(0.5)
-        section.top_margin = Inches(0.5)
-        section.bottom_margin = Inches(0.5)
-        
-        # 내용 추가 (공백 제거)
-        sections = content.strip().split('\n\n')
-        
-        for section in sections:
-            if section.strip():
-                # 이모지가 있는 섹션 제목 처리
-                if '📃' in section or '🚀' in section or '🎯' in section:
-                    # 섹션 제목과 내용 분리
-                    title_end = section.find(':')
-                    if title_end != -1:
-                        section_title = section[:title_end+1]
-                        section_content = section[title_end+1:]
-                        
-                        # 섹션 제목 추가
-                        heading = doc.add_paragraph()
-                        heading.add_run(section_title).bold = True
-                        
-                        # 섹션 내용 추가 (앞뒤 공백 제거)
-                        if section_content.strip():
-                            doc.add_paragraph(section_content.strip())
-                    else:
-                        doc.add_paragraph(section.strip())
-                else:
-                    doc.add_paragraph(section.strip())
-        
-        # 스타일 적용
-        for paragraph in doc.paragraphs:
-            for run in paragraph.runs:
-                run.font.size = Pt(9)
-                run.font.name = '맑은 고딕'
-        
-        # 메모리에 Word 파일 저장
-        docx_file = io.BytesIO()
-        doc.save(docx_file)
-        docx_file.seek(0)
-        
-        return send_file(
-            docx_file,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            as_attachment=True,
-            download_name='이력서_분석_및_질문TIP.docx'
+        prompt = f"""다음 이력서를 분석하여 아래 항목별로 평가해주세요:
+
+1. 핵심 경력 요약 
+   - 총 경력 기간
+   - 주요 직무 경험:
+      1) [회사명]: [직위] (기간)
+      2) [회사명]: [직위] (기간)
+      3) [회사명]: [직위] (기간)
+   - 주요 업무 내용
+
+2. 채용요건 연관성 분석
+   - 부합되는 요건
+   - 미확인/부족 요건
+
+분석 요약: 전반적인 평가를 간단히 작성
+
+이력서 내용: {text}"""
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "당신은 전문 채용 담당자입니다."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1000
         )
         
+        return response.choices[0].message.content
     except Exception as e:
-        return f"Word 파일 생성 중 오류가 발생했습니다: {str(e)}", 500
+        return f"에러 발생: {str(e)}"
 
-@app.route('/generate_questions', methods=['POST'])
-def generate_questions():
+def generate_questions(resume_text, job_description):
     try:
-        # 파일과 JD 텍스트 확인
-        if 'file' not in request.files:
-            return jsonify({'error': '이력서 파일(PDF)을 업로드해주세요.'}), 400
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
-        file = request.files['file']
-        jd_text = request.form.get('jd_text', '').strip()
-        
-        # 이력서 텍스트 추출
-        resume_text = extract_text_from_pdf(file)
-        
-        # 면접 질문 생성
-        questions = summarizer.generate_interview_questions(resume_text, jd_text)
-        
-        return jsonify({'html': questions})
+        prompt = f"""다음 내용을 바탕으로 면접 질문을 생성해주세요:
 
+이력서: {resume_text}
+
+채용요건: {job_description}
+
+[직무 기반 질문]
+1. 가장 중요한 프로젝트 경험 질문
+2. 어려운 문제를 해결한 구체적 사례 질문
+3. 채용공고의 필수 자격요건 관련 질문
+4. 채용공고의 우대사항 관련 질문
+5. 직무 관련 전문 지식을 검증하는 질문
+6. 실제 업무 상황에서의 대처 방안을 묻는 질문
+
+[조직 적합성 질문 - 뉴로핏 핵심가치 기반]
+7. [도전] "두려워 말고 시도합니다"와 관련된 경험 질문
+8. [책임감] "대충은 없습니다"와 관련된 사례 질문
+9. [협력] "동료와 협업합니다"와 관련된 경험 질문
+10. [전문성] "능동적으로 일합니다"와 관련된 사례 질문"""
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "면접 질문을 생성하는 면접관입니다."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        return response.choices[0].message.content
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return f"에러 발생: {str(e)}"
 
-if __name__ == '__main__':
-    ip_address = get_ip()
-    print(f"\n=== 서버 접속 정보 ===")
-    print(f"내부 네트워크 접속 주소: http://{ip_address}:5000")
-    print(f"로컬 접속 주소: http://localhost:5000")
-    print("위의 주소로 접속하실 수 있습니다.")
-    print("다른 사람들은 '내부 네트워크 접속 주소'로 접속하면 됩니다.")
-    print("===================\n")
-    
-    # 모든 네트워크 인터페이스에서 접속 허용
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+# 파일 업로더
+uploaded_file = st.file_uploader("이력서 PDF 파일을 업로드해주세요", type="pdf")
+
+# 채용공고 입력
+job_description = st.text_area("채용공고 내용을 입력해주세요")
+
+if uploaded_file is not None:
+    # 분석 시작 버튼
+    if st.button("분석 시작"):
+        with st.spinner("이력서를 분석하고 있습니다..."):
+            # PDF 파일 읽기
+            pdf_content = uploaded_file.read()
+            
+            # 이력서 분석
+            analysis_result = analyze_pdf(pdf_content)
+            
+            # 결과 표시
+            st.subheader("이력서 분석 결과")
+            st.write(analysis_result)
+            
+            # 면접 질문 생성
+            if job_description:
+                st.subheader("면접 질문 TIP")
+                with st.spinner("면접 질문을 생성하고 있습니다..."):
+                    questions = generate_questions(analysis_result, job_description)
+                    st.write(questions)
+
+# 설명 추가
+with st.expander("도움말"):
+    st.write("""
+    1. PDF 형식의 이력서 파일을 업로드해주세요.
+    2. 채용공고 내용을 입력해주세요.
+    3. '분석 시작' 버튼을 클릭하면 이력서 분석과 면접 질문이 생성됩니다.
+    """) 
