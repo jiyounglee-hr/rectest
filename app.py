@@ -1,9 +1,9 @@
 import streamlit as st
 import PyPDF2
 from io import BytesIO
-from openai import OpenAI
-from dotenv import load_dotenv
 import os
+import openai
+from dotenv import load_dotenv
 from salary_negotiation import show_salary_negotiation
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
@@ -14,21 +14,12 @@ if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
-if 'client' not in st.session_state:
-    try:
-        st.session_state['client'] = OpenAI()
-    except Exception as e:
-        st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
-        st.stop()
 
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
 
 # 환경 변수 설정
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-
-# OpenAI 클라이언트 사용
-client = st.session_state['client']
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # 페이지 라우팅
 if st.session_state['current_page'] == 'salary':
@@ -234,7 +225,7 @@ else:
                     for page in pdf_reader.pages:
                         text += page.extract_text()
 
-                    response = client.chat.completions.create(
+                    response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
@@ -289,12 +280,12 @@ else:
             help="분석 결과를 바탕으로 면접 질문을 생성합니다"
         )
 
-    # 질문 생성 로직 부분 수정
+    # 질문 생성 로직 수정
     if question_button:
         if st.session_state.analysis_result and st.session_state.analysis_result != "":
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
-                    response = client.chat.completions.create(
+                    response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 경험 많은 면접관입니다. 
