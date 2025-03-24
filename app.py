@@ -14,6 +14,12 @@ if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
+if 'client' not in st.session_state:
+    try:
+        st.session_state['client'] = OpenAI()
+    except Exception as e:
+        st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
+        st.stop()
 
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
@@ -21,12 +27,8 @@ st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wid
 # 환경 변수 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
-# OpenAI 클라이언트 초기화
-try:
-    client = OpenAI()
-except Exception as e:
-    st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
-    st.stop()
+# OpenAI 클라이언트 사용
+client = st.session_state['client']
 
 # 페이지 라우팅
 if st.session_state['current_page'] == 'salary':
