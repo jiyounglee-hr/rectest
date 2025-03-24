@@ -31,6 +31,10 @@ ENV/
 *.swp
 *.swo
 
+# Streamlit
+.streamlit/
+secrets.toml
+
 # Environment variables
 .env
 
