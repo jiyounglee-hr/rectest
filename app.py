@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from salary_negotiation import show_salary_negotiation
+from streamlit_dotenv import load_dotenv
 
 # 환경 변수 로드
 load_dotenv()
