@@ -5,8 +5,23 @@ from dotenv import load_dotenv
 import pandas as pd
 import math
 
+# 환경 변수 로드
 load_dotenv()
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+# OpenAI API 키 확인
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    st.error("OpenAI API 키가 설정되지 않았습니다. Streamlit Cloud의 Secrets에서 OPENAI_API_KEY를 설정해주세요.")
+    st.stop()
+
+# OpenAI 클라이언트 초기화
+try:
+    client = OpenAI(api_key=api_key)
+    # API 키 유효성 검사
+    client.models.list()
+except Exception as e:
+    st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
+    st.stop()
 
 def show_salary_negotiation():
     # 사이드바 스타일 수정
