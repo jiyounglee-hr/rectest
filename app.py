@@ -17,7 +17,7 @@ if not api_key:
 
 # OpenAI 클라이언트 초기화
 try:
-    client = OpenAI(api_key=api_key)
+    client = OpenAI()
     # API 키 유효성 검사
     client.models.list()
 except Exception as e:
