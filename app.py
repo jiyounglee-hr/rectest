@@ -18,20 +18,12 @@ if 'current_page' not in st.session_state:
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
 
-# 환경 변수 로드
-load_dotenv()
-
-# OpenAI API 키 확인
-api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-    st.error("OpenAI API 키가 설정되지 않았습니다. Streamlit Cloud의 Secrets에서 OPENAI_API_KEY를 설정해주세요.")
-    st.stop()
+# 환경 변수 설정
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 # OpenAI 클라이언트 초기화
 try:
-    client = OpenAI(api_key=api_key, base_url="https://api.openai.com/v1")
-    # API 키 유효성 검사
-    client.models.list()
+    client = OpenAI()
 except Exception as e:
     st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
     st.stop()
