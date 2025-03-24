@@ -6,9 +6,7 @@ import pandas as pd
 import math
 
 
-def show_salary_negotiation():
-    st.title("💰 처우협상 시뮬레이션")
-    
+def show_salary_negotiation():    
     # 환경 변수 설정
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     

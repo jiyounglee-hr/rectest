@@ -18,8 +18,8 @@ if 'current_page' not in st.session_state:
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
 
-# 환경 변수 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# OpenAI 클라이언트 초기화
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # 페이지 라우팅
 if st.session_state['current_page'] == 'salary':
@@ -225,7 +225,7 @@ else:
                     for page in pdf_reader.pages:
                         text += page.extract_text()
 
-                    response = openai.ChatCompletion.create(
+                    response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
@@ -280,12 +280,12 @@ else:
             help="분석 결과를 바탕으로 면접 질문을 생성합니다"
         )
 
-    # 질문 생성 로직 수정
+    # 질문 생성 로직
     if question_button:
         if st.session_state.analysis_result and st.session_state.analysis_result != "":
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
-                    response = openai.ChatCompletion.create(
+                    response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 경험 많은 면접관입니다. 
