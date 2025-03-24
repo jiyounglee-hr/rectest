@@ -225,7 +225,7 @@ else:
                     for page in pdf_reader.pages:
                         text += page.extract_text()
 
-                    response = openai.ChatCompletion.create(
+                    response = openai.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
@@ -285,7 +285,7 @@ else:
         if st.session_state.analysis_result and st.session_state.analysis_result != "":
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
-                    response = openai.ChatCompletion.create(
+                    response = openai.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 경험 많은 면접관입니다. 
