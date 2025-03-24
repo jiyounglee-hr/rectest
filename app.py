@@ -5,6 +5,18 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from salary_negotiation import show_salary_negotiation
+# 세션 상태 초기화
+if 'analysis_result' not in st.session_state:
+    st.session_state['analysis_result'] = None
+if 'interview_questions' not in st.session_state:
+    st.session_state['interview_questions'] = None
+if 'job_description' not in st.session_state:
+    st.session_state['job_description'] = None
+if 'current_page' not in st.session_state:
+    st.session_state['current_page'] = 'resume'
+
+# 페이지 설정
+st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
 
 # 환경 변수 로드
 load_dotenv()
@@ -23,19 +35,6 @@ try:
 except Exception as e:
     st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
     st.stop()
-
-# 세션 상태 초기화
-if 'analysis_result' not in st.session_state:
-    st.session_state['analysis_result'] = None
-if 'interview_questions' not in st.session_state:
-    st.session_state['interview_questions'] = None
-if 'job_description' not in st.session_state:
-    st.session_state['job_description'] = None
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
-
-# 페이지 설정
-st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
 
 # 페이지 라우팅
 if st.session_state['current_page'] == 'salary':
