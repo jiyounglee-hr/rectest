@@ -10,12 +10,19 @@ from salary_negotiation import show_salary_negotiation
 load_dotenv()
 
 # OpenAI API 키 확인
-if not os.getenv('OPENAI_API_KEY'):
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
     st.error("OpenAI API 키가 설정되지 않았습니다. Streamlit Cloud의 Secrets에서 OPENAI_API_KEY를 설정해주세요.")
     st.stop()
 
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+try:
+    client = OpenAI(api_key=api_key)
+    # API 키 유효성 검사
+    client.models.list()
+except Exception as e:
+    st.error(f"OpenAI API 키가 유효하지 않습니다. 오류: {str(e)}")
+    st.stop()
 
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
