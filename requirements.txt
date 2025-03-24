@@ -1,4 +1,10 @@
-streamlit
+streamlit==1.32.0
+pandas==1.5.3
+openpyxl==3.1.2
+python-dotenv==1.0.0
 openai>=1.0.0
-PyPDF2>=3.0.0
-python-dotenv
+PyPDF2==3.0.1
+python-docx==1.0.1
+pytesseract==0.3.10
+Pillow==9.5.0
+numpy==1.23.5
