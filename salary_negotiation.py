@@ -6,70 +6,13 @@ import pandas as pd
 import math
 
 
-
 def show_salary_negotiation():
     st.title("💰 처우협상 시뮬레이션")
     
     # 환경 변수 설정
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     
-    # 사용자 입력 필드
-    st.markdown("""
-        <h4 style='color: #333333; margin-bottom: 20px;'>
-            처우협상 준비하기
-        </h4>
-    """, unsafe_allow_html=True)
     
-    # 입력 필드
-    current_salary = st.number_input("현재 연봉 (만원)", min_value=0, value=3000)
-    desired_salary = st.number_input("희망 연봉 (만원)", min_value=0, value=4000)
-    years_experience = st.number_input("총 경력 (년)", min_value=0, value=3)
-    position = st.text_input("지원 포지션", value="의료기기 인허가(RA) 팀장")
-    
-    # 협상 전략 생성 버튼
-    if st.button("협상 전략 생성"):
-        with st.spinner("협상 전략을 생성중입니다..."):
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": """당신은 경력 있는 협상 전문가입니다.
-다음 형식에 맞춰 처우협상 전략을 제시해주세요:
-
-1. 시장 가치 분석
-- 해당 포지션의 일반적인 연봉 범위
-- 경력에 따른 적정 연봉 수준
-
-2. 협상 전략
-- 핵심 협상 포인트
-- 예상 질문과 답변
-- 대체 보상 요소 (연봉 외 처우)
-
-3. 협상 시나리오
-- 최선의 시나리오
-- 차선의 시나리오
-- 최저 수용 가능 조건"""},
-                        {"role": "user", "content": f"""
-현재 연봉: {current_salary}만원
-희망 연봉: {desired_salary}만원
-총 경력: {years_experience}년
-지원 포지션: {position}
-
-위 정보를 바탕으로 처우협상 전략을 제시해주세요."""}
-                    ]
-                )
-                st.text_area("협상 전략", response.choices[0].message.content, height=500)
-            except Exception as e:
-                st.error(f"전략 생성 중 오류가 발생했습니다: {str(e)}")
-    
-    # 도움말
-    with st.expander("도움말"):
-        st.write("""
-        1. 현재 연봉과 희망 연봉을 입력해주세요.
-        2. 총 경력과 지원 포지션을 입력해주세요.
-        3. '협상 전략 생성' 버튼을 클릭하면 맞춤형 협상 전략이 생성됩니다.
-        """)
-
     # 사이드바 스타일 수정
     st.markdown("""
         <style>
