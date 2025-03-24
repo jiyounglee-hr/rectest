@@ -5,10 +5,15 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from salary_negotiation import show_salary_negotiation
-from streamlit_dotenv import load_dotenv
 
 # 환경 변수 로드
 load_dotenv()
+
+# OpenAI API 키 확인
+if not os.getenv('OPENAI_API_KEY'):
+    st.error("OpenAI API 키가 설정되지 않았습니다. Streamlit Cloud의 Secrets에서 OPENAI_API_KEY를 설정해주세요.")
+    st.stop()
+
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # 세션 상태 초기화

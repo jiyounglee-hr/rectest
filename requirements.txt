@@ -9,4 +9,3 @@ pytesseract==0.3.10
 Pillow==9.5.0
 numpy==1.24.3
 xlrd==2.0.1
-streamlit-dotenv==0.1.0
