@@ -336,13 +336,47 @@ with st.sidebar:
     
     if uploaded_file:
         st.markdown(f"<div style='padding: 5px 0px; color: #666666;'>{uploaded_file.name}</div>", unsafe_allow_html=True)
+        
+        # PDF 내용 추출 및 표시
+        pdf_data = uploaded_file.read()
+        pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+        
+        # 이력서 내용 표시 스타일
+        st.markdown("""
+            <style>
+                .resume-text {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 5px;
+                    border: 1px solid #ddd;
+                    max-height: 500px;
+                    overflow-y: auto;
+                    font-family: monospace;
+                    white-space: pre-wrap;
+                    margin: 10px 0;
+                }
+                div[data-testid="stExpander"] div[role="button"] p {
+                    font-size: 1.1em;
+                    color: #0066cc;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        
+        # 이력서 내용을 자동으로 표시
+        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
+        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+        st.session_state.resume_text = text  # 세션에 저장
+        
     else:
         st.markdown("<div class='upload-text'>Drag and drop file here<br>Limit 200MB per file • PDF</div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
     # 맨 마지막에 도움말 추가
-    st.markdown("<br>", unsafe_allow_html=True)  # 약간의 여백 추가
+    st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("도움말"):
         st.write("""
         1. PDF 형식의 이력서 파일을 업로드해주세요.
@@ -501,40 +535,8 @@ if analyze_button:
     if uploaded_file is not None and job_description:
         with st.spinner("이력서를 분석중입니다..."):
             try:
-                # PDF 파일 임시 저장 및 표시
-                pdf_data = uploaded_file.read()
-                with open("temp.pdf", "wb") as f:
-                    f.write(pdf_data)
-                
-                # PDF 내용 추출
-                pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
-                text = ""
-                for page in pdf_reader.pages:
-                    text += page.extract_text()
-                
-                # 이력서 내용 팝업 버튼 추가
-                st.markdown("""
-                    <style>
-                        div[data-testid="stExpander"] div[role="button"] p {
-                            font-size: 1.1em;
-                            color: #0066cc;
-                        }
-                        .resume-text {
-                            background-color: white;
-                            padding: 20px;
-                            border-radius: 5px;
-                            border: 1px solid #ddd;
-                            max-height: 500px;
-                            overflow-y: auto;
-                            font-family: monospace;
-                            white-space: pre-wrap;
-                            margin: 10px 0;
-                        }
-                    </style>
-                """, unsafe_allow_html=True)
-                
-                with st.expander("📄 이력서 내용 보기", expanded=False):
-                    st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+                # 이미 추출된 텍스트 사용
+                text = st.session_state.resume_text
                 
                 # 기존 분석 로직
                 response = openai.ChatCompletion.create(
