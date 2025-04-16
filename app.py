@@ -443,12 +443,12 @@ job_descriptions = {
 
 # 1. 채용요건 섹션
 st.markdown("""
-    <h4 style='color: #333333; margin-bottom: 20px;'>
-        1. 채용요건
-    </h4>
+    <h5 style='color: #333333; margin-bottom: 20px;'>
+        🤖 이력서분석
+    </h5>
 """, unsafe_allow_html=True)
 job_option = st.selectbox(
-    "채용공고 선택",
+    "1. 채용공고 선택",
     ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
 )
 
@@ -471,12 +471,6 @@ else:
     else:
         job_description = ""
 
-# 2. 이력서 분석 섹션 수정
-st.markdown("""
-    <h4 style='color: #333333; margin-bottom: 20px;'>
-        2. 이력서 분석
-    </h4>
-""", unsafe_allow_html=True)
 
 # 경력기간 입력 섹션 추가
 st.markdown("""
@@ -497,11 +491,10 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-st.markdown("##### 경력기간 산정")
 experience_text = st.text_area(
-    "경력기간 입력 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
-    height=100,
-    help="예시:\n2023-04-24 ~ 2024-05-10\n2019-06-03 ~ 2023-04-21\n2019-01-21 ~ 2019-05-31\n2015-07-01 ~ 2019-01-18"
+    "경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
+    height=130,
+    help="예시:\n2023-04-24 ~ 2024-05-10"
 )
 
 if experience_text:
