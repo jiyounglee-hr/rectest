@@ -453,7 +453,15 @@ st.markdown("""
             display: block;
         }
         .stTextArea textarea {
-            font-family: monospace;
+            font-family: "Source Sans Pro", sans-serif;
+            font-size: 14px;
+        }
+        .stTextArea > div > div > textarea {
+            font-size: 14px;
+        }
+        .stText {
+            font-size: 14px;
+            font-family: "Source Sans Pro", sans-serif;
         }
         .web-link {
             color: #0066cc;
@@ -512,8 +520,7 @@ with left_col:
     
     experience_text = st.text_area(
         "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-        height=140,
-        help="예시:\n2023-04-24 ~ 2024-05-10"
+        height=140
     )
 
     if experience_text:
