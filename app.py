@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 import pandas as pd
 import re
+import base64
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -449,7 +450,7 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-
+st.markdown("##### 경력기간 계산 결과")
 experience_text = st.text_area(
     "경력기간 입력 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
     height=100,
@@ -458,8 +459,7 @@ experience_text = st.text_area(
 
 if experience_text:
     try:
-        result = calculate_experience(experience_text)
-        st.markdown("##### 경력기간 계산 결과")
+        result = calculate_experience(experience_text)        
         st.text(result)
         st.markdown("---")
     except Exception as e:
@@ -483,7 +483,32 @@ if analyze_button:
                 text = ""
                 for page in pdf_reader.pages:
                     text += page.extract_text()
-
+                
+                # 이력서 내용 팝업 버튼 추가
+                st.markdown("""
+                    <style>
+                        div[data-testid="stExpander"] div[role="button"] p {
+                            font-size: 1.1em;
+                            color: #0066cc;
+                        }
+                        .resume-text {
+                            background-color: white;
+                            padding: 20px;
+                            border-radius: 5px;
+                            border: 1px solid #ddd;
+                            max-height: 500px;
+                            overflow-y: auto;
+                            font-family: monospace;
+                            white-space: pre-wrap;
+                            margin: 10px 0;
+                        }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                with st.expander("📄 이력서 내용 보기", expanded=False):
+                    st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+                
+                # 기존 분석 로직
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
