@@ -344,8 +344,9 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # PDF 표시를 위한 base64 인코딩
+        # PDF 다운로드 링크 생성
         b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+        pdf_download = f'<a href="data:application/pdf;base64,{b64_pdf}" download="{uploaded_file.name}" class="download-button">📥 PDF 다운로드</a>'
         
         # 이력서 내용 표시 스타일
         st.markdown("""
@@ -367,28 +368,18 @@ with st.sidebar:
                     font-size: 1.1em;
                     color: #0066cc;
                 }
-                .pdf-viewer {
-                    width: 100%;
-                    height: 500px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    margin: 10px 0;
-                }
-                .view-tabs {
-                    display: flex;
-                    margin-bottom: 10px;
-                }
-                .view-tab {
+                .download-button {
+                    display: inline-block;
                     padding: 8px 16px;
-                    cursor: pointer;
-                    border: 1px solid #ddd;
-                    background: white;
-                    color: #666;
+                    background-color: #0066cc;
+                    color: white !important;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    margin: 10px 0;
+                    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
                 }
-                .view-tab.active {
-                    background: #0066cc;
-                    color: white;
-                    border-color: #0066cc;
+                .download-button:hover {
+                    background-color: #0052a3;
                 }
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
@@ -403,9 +394,8 @@ with st.sidebar:
             st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
             st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
         else:
-            st.markdown("<h5>📎 PDF 원본</h5>", unsafe_allow_html=True)
-            pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" class="pdf-viewer" type="application/pdf"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
+            st.markdown("<h5>📎 PDF 파일</h5>", unsafe_allow_html=True)
+            st.markdown(pdf_download, unsafe_allow_html=True)
         
         st.session_state.resume_text = text  # 세션에 저장
         
