@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import PyPDF2
 from io import BytesIO
 import os
@@ -9,29 +8,6 @@ from datetime import datetime
 import pandas as pd
 import re
 import base64
-import tempfile
-
-# 임시 디렉토리 생성
-if 'temp_dir' not in st.session_state:
-    st.session_state.temp_dir = tempfile.mkdtemp()
-
-# PDF 파일 저장 및 HTML 생성 함수
-def create_pdf_html(pdf_data, filename):
-    # PDF를 base64로 인코딩
-    b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-    
-    # PDF 뷰어 HTML 생성
-    html_content = f'''
-        <html>
-            <body style="margin:0;padding:0;overflow:hidden">
-                <embed src="data:application/pdf;base64,{b64_pdf}" 
-                       type="application/pdf"
-                       style="width:100%;height:100vh;"
-                       toolbar="0">
-            </body>
-        </html>
-    '''
-    return html_content
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -546,13 +522,6 @@ with col1:
         key="analyze_button",
         help="이력서와 채용공고를 분석합니다"
     )
-
-# PDF 표시 함수 추가
-def show_pdf(file_path):
-    with open(file_path, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
 
 # 분석 로직
 if analyze_button:
