@@ -249,7 +249,7 @@ def calculate_experience(experience_text):
     # 결과 문자열 생성
     result = ""
     if experience_periods:
-        result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n\n"
+        result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n"
         result += "\n".join(experience_periods)
     
     return result
