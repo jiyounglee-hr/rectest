@@ -515,22 +515,11 @@ if analyze_button:
                             white-space: pre-wrap;
                             margin: 10px 0;
                         }
-                        .view-options {
-                            display: flex;
-                            gap: 10px;
-                            margin-bottom: 10px;
-                        }
                     </style>
                 """, unsafe_allow_html=True)
                 
-                # 보기 옵션 선택
-                col1, col2 = st.columns(2)
-                with col1:
-                    with st.expander("📄 텍스트로 보기", expanded=False):
-                        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
-                with col2:
-                    with st.expander("📎 PDF로 보기", expanded=False):
-                        show_pdf("temp.pdf")
+                with st.expander("📄 이력서 내용 보기", expanded=False):
+                    st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
                 
                 # 기존 분석 로직
                 response = openai.ChatCompletion.create(
@@ -554,10 +543,6 @@ if analyze_button:
                     ]
                 )
                 st.session_state.analysis_result = response.choices[0].message.content
-                
-                # 임시 PDF 파일 삭제
-                if os.path.exists("temp.pdf"):
-                    os.remove("temp.pdf")
             except Exception as e:
                 st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
     else:
