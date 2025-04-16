@@ -265,8 +265,6 @@ if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
-if 'calculated_experience' not in st.session_state:
-    st.session_state['calculated_experience'] = None
 
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
@@ -503,7 +501,7 @@ with left_col:
     )
 
     if job_option == "직접 입력":
-        job_description = st.text_area("채용공고 내용을 입력해주세요", height=200)
+        job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
     else:
         job_map = {
             "의료기기 인허가(RA) 팀장": "ra_manager",
@@ -515,30 +513,32 @@ with left_col:
             job_description = st.text_area(
                 "채용공고 내용 (필요시 수정 가능합니다)",
                 value=default_description,
-                height=200
+                height=300
             )
         else:
             job_description = ""
-    
-    st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
-    
-    experience_text = st.text_area(
-        "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-        height=100
-    )
 
-    if experience_text:
-        try:
-            result = calculate_experience(experience_text)        
-            st.text(result)
-            # 경력기간 계산 결과를 세션에 저장
-            st.session_state['calculated_experience'] = result
-        except Exception as e:
-            st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
-
-# 오른쪽 컬럼은 여백으로 유지
+# 오른쪽 컬럼: 이력서 내용
 with right_col:
-    pass
+    if uploaded_file:
+        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
+        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+
+# 경력기간 산정 부분
+st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
+
+experience_text = st.text_area(
+    "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
+    height=140,
+    help="예시:\n2023-04-24 ~ 2024-05-10"
+)
+
+if experience_text:
+    try:
+        result = calculate_experience(experience_text)        
+        st.text(result)
+    except Exception as e:
+        st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
 st.markdown("---")
 
@@ -559,14 +559,6 @@ if analyze_button:
                 # 이미 추출된 텍스트 사용
                 text = st.session_state.resume_text
                 
-                # 경력기간 계산 결과가 있는 경우 사용
-                experience_years = "[총 경력 연월]"
-                if st.session_state['calculated_experience']:
-                    # 결과에서 총 경력기간 추출
-                    match = re.search(r"총 경력기간: (\d+)년 (\d+)개월 \((\d+\.?\d*)년\)", st.session_state['calculated_experience'])
-                    if match:
-                        experience_years = f"{match.group(3)}년"
-                
                 # 기존 분석 로직
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
@@ -575,7 +567,7 @@ if analyze_button:
 다음 형식에 맞춰 이력서를 분석해주세요:
 
 (1) 핵심 경력 요약
-- 총 경력 기간: {experience_years}
+- 총 경력 기간: [총 경력 연월]
 - 주요 직무 경험:
 1) [최근 회사명]: [직위/직책]
 2) [이전 회사명]: [직위/직책]
