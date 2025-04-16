@@ -515,16 +515,14 @@ with left_col:
         help="예시:\n2023-04-24 ~ 2024-05-10"
     )
 
+# 오른쪽 컬럼: 경력기간 계산 결과
+with right_col:
     if experience_text:
         try:
             result = calculate_experience(experience_text)        
             st.text(result)
         except Exception as e:
             st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
-
-# 오른쪽 컬럼은 여백으로 유지
-with right_col:
-    pass
 
 st.markdown("---")
 
