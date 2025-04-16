@@ -251,6 +251,9 @@ def calculate_experience(experience_text):
     if experience_periods:
         result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n"
         result += "\n".join(experience_periods)
+        
+
+    
     return result
 
 # 세션 상태 초기화
@@ -560,7 +563,7 @@ if analyze_button:
 다음 형식에 맞춰 이력서를 분석해주세요:
 
 (1) 핵심 경력 요약
-- 총 경력 기간: {total_decimal_years}년
+- 총 경력 기간: [총 경력 연월]
 - 주요 직무 경험:
 1) [최근 회사명]: [직위/직책]
 2) [이전 회사명]: [직위/직책]
@@ -577,10 +580,7 @@ if analyze_button:
             except Exception as e:
                 st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
     else:
-        if uploaded_file is None:
-            st.warning("이력서 파일을 업로드해주세요.")
-        if not job_description:
-            st.warning("채용공고를 선택하거나 입력해주세요.")
+        st.warning("이력서 파일과 채용공고를 모두 입력해주세요.")
 
 # 분석 결과를 구분선으로 분리하여 표시
 if st.session_state.analysis_result:
