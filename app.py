@@ -509,23 +509,22 @@ with left_col:
     
     st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
     
-    # 경력기간 입력과 결과를 나란히 표시하기 위한 컬럼 생성
-    exp_input_col, exp_result_col = st.columns([1, 1])
-    
-    with exp_input_col:
-        experience_text = st.text_area(
-            "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-            height=140,
-            help="예시:\n2023-04-24 ~ 2024-05-10"
-        )
-    
-    with exp_result_col:
-        if experience_text:
-            try:
-                result = calculate_experience(experience_text)        
-                st.text(result)
-            except Exception as e:
-                st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
+    experience_text = st.text_area(
+        "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
+        height=140,
+        help="예시:\n2023-04-24 ~ 2024-05-10"
+    )
+
+    if experience_text:
+        try:
+            result = calculate_experience(experience_text)        
+            st.text(result)
+        except Exception as e:
+            st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
+
+# 오른쪽 컬럼은 여백으로 유지
+with right_col:
+    pass
 
 st.markdown("---")
 
