@@ -577,7 +577,10 @@ if analyze_button:
             except Exception as e:
                 st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
     else:
-        st.warning("이력서 파일과 채용공고를 모두 입력해주세요.")
+        if uploaded_file is None:
+            st.warning("이력서 파일을 업로드해주세요.")
+        if not job_description:
+            st.warning("채용공고를 선택하거나 입력해주세요.")
 
 # 분석 결과를 구분선으로 분리하여 표시
 if st.session_state.analysis_result:
