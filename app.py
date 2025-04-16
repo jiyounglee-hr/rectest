@@ -355,8 +355,8 @@ with st.sidebar:
                     max-height: 500px;
                     overflow-y: auto;
                     font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-                    font-size: 0.8em;
-                    line-height: 1.6;
+                    font-size: 0.9em;
+                    line-height: 1.3;
                     white-space: pre-wrap;
                     margin: 10px 0;
                 }
