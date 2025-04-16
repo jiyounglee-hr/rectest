@@ -4,6 +4,253 @@ from io import BytesIO
 import os
 import openai
 from dotenv import load_dotenv
+from datetime import datetime
+import pandas as pd
+import re
+
+# 날짜 정규화 함수
+def normalize_date(date_str):
+    if pd.isna(date_str) or date_str == '':
+        return None
+    
+    # 이미 datetime 객체인 경우
+    if isinstance(date_str, (datetime, pd.Timestamp)):
+        return date_str
+    
+    # 문자열인 경우
+    if isinstance(date_str, str):
+        # 공백 제거
+        date_str = date_str.strip()
+        
+        # 빈 문자열 처리
+        if not date_str:
+            return None
+            
+        # 날짜 형식 변환 시도
+        try:
+            # YYYY-MM-DD 형식
+            if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+                return datetime.strptime(date_str, '%Y-%m-%d')
+            # YYYY.MM.DD 형식
+            elif re.match(r'^\d{4}\.\d{2}\.\d{2}$', date_str):
+                return datetime.strptime(date_str, '%Y.%m.%d')
+            # YYYY/MM/DD 형식
+            elif re.match(r'^\d{4}/\d{2}/\d{2}$', date_str):
+                return datetime.strptime(date_str, '%Y/%m/%d')
+            # YYYYMMDD 형식
+            elif re.match(r'^\d{8}$', date_str):
+                return datetime.strptime(date_str, '%Y%m%d')
+        except ValueError:
+            return None
+    
+    return None
+
+def calculate_experience(experience_text):
+    """경력기간을 계산하는 함수"""
+    # 영문 월을 숫자로 변환하는 딕셔너리
+    month_dict = {
+        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+        'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+    }
+    
+    total_months = 0
+    experience_periods = []
+    
+    # 각 줄을 분리하여 처리
+    lines = experience_text.split('\n')
+    current_company = None
+    
+    for line in lines:
+        # 공백과 탭 문자를 모두 일반 공백으로 변환하고 연속된 공백을 하나로 처리
+        line = re.sub(r'[\s\t]+', ' ', line.strip())
+        if not line:
+            continue
+            
+        # 회사명 추출 (숫자나 특수문자가 없는 줄)
+        if not any(c.isdigit() for c in line) and not any(c in '~-–./' for c in line):
+            current_company = line
+            continue
+            
+        # 영문 월 형식 패턴 (예: Nov 2021 – Oct 2024)
+        en_pattern = r'([A-Za-z]{3})\s*(\d{4})\s*[–-]\s*([A-Za-z]{3})\s*(\d{4})'
+        en_match = re.search(en_pattern, line)
+        
+        # 한국어 날짜 형식 패턴 (예: 2021 년 11월 – 2024 년 10월)
+        kr_pattern = r'(\d{4})\s*년?\s*(\d{1,2})\s*월\s*[-–~]\s*(\d{4})\s*년?\s*(\d{1,2})\s*월'
+        kr_match = re.search(kr_pattern, line)
+        
+        if en_match:
+            start_month, start_year, end_month, end_year = en_match.groups()
+            start_date = f"{start_year}-{month_dict[start_month]}-01"
+            end_date = f"{end_year}-{month_dict[end_month]}-01"
+            
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            
+            months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+            total_months += months
+            
+            years = months // 12
+            remaining_months = months % 12
+            decimal_years = round(months / 12, 1)
+            
+            period_str = f"{start_year}-{month_dict[start_month]}~{end_year}-{month_dict[end_month]} ({years}년 {remaining_months}개월, {decimal_years}년)"
+            if current_company:
+                period_str = f"{current_company}: {period_str}"
+            experience_periods.append(period_str)
+            continue
+            
+        elif kr_match:
+            start_year, start_month, end_year, end_month = kr_match.groups()
+            start_date = f"{start_year}-{start_month.zfill(2)}-01"
+            end_date = f"{end_year}-{end_month.zfill(2)}-01"
+            
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            
+            months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+            total_months += months
+            
+            years = months // 12
+            remaining_months = months % 12
+            decimal_years = round(months / 12, 1)
+            
+            period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
+            if current_company:
+                period_str = f"{current_company}: {period_str}"
+            experience_periods.append(period_str)
+            continue
+            
+        # 날짜 패턴 처리
+        # 1. 2023. 04 ~ 2024. 07 형식
+        pattern1 = r'(\d{4})\.\s*(\d{1,2})\s*[~-–]\s*(\d{4})\.\s*(\d{1,2})'
+        # 2. 2015.01.~2016.06 형식
+        pattern2 = r'(\d{4})\.(\d{1,2})\.\s*[~-–]\s*(\d{4})\.(\d{1,2})'
+        # 3. 2024.05 ~ 형식
+        pattern3 = r'(\d{4})\.(\d{1,2})\s*[~-–]'
+        # 4. 2024-05 ~ 형식
+        pattern4 = r'(\d{4})-(\d{1,2})\s*[~-–]'
+        # 5. 2024/05 ~ 형식
+        pattern5 = r'(\d{4})/(\d{1,2})\s*[~-–]'
+        # 6. 2024.05.01 ~ 형식 (일 부분 무시)
+        pattern6 = r'(\d{4})\.(\d{1,2})\.\d{1,2}\s*[~-–]'
+        # 7. 2024-05-01 ~ 형식 (일 부분 무시)
+        pattern7 = r'(\d{4})-(\d{1,2})-\d{1,2}\s*[~-–]'
+        # 8. 2024/05/01 ~ 형식 (일 부분 무시)
+        pattern8 = r'(\d{4})/(\d{1,2})/\d{1,2}\s*[~-–]'
+        # 9. 2023/05 - 2024.04 형식
+        pattern9 = r'(\d{4})[/\.](\d{1,2})\s*[-]\s*(\d{4})[/\.](\d{1,2})'
+        # 10. 2023-04-24 ~ 2024-05-10 형식
+        pattern10 = r'(\d{4})-(\d{1,2})-(\d{1,2})\s*[~-–]\s*(\d{4})-(\d{1,2})-(\d{1,2})'
+        # 11. 2021-03-2026-08 형식
+        pattern11 = r'(\d{4})-(\d{1,2})-(\d{4})-(\d{1,2})'
+        # 12. 2021-03~2022-08 형식
+        pattern12 = r'(\d{4})-(\d{1,2})\s*[~-–]\s*(\d{4})-(\d{1,2})'
+        
+        # 패턴 매칭 시도
+        match = None
+        current_pattern = None
+        
+        # 먼저 패턴 10으로 시도 (2023-04-24 ~ 2024-05-10 형식)
+        match = re.search(pattern10, line)
+        if match:
+            current_pattern = pattern10
+        # 다음으로 패턴 12로 시도 (2021-03~2022-08 형식)
+        elif re.search(pattern12, line):
+            match = re.search(pattern12, line)
+            current_pattern = pattern12
+        else:
+            # 다른 패턴 시도
+            for pattern in [pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern11]:
+                match = re.search(pattern, line)
+                if match:
+                    current_pattern = pattern
+                    break
+                
+        if match and current_pattern:
+            if current_pattern in [pattern1, pattern2, pattern9]:
+                start_year, start_month, end_year, end_month = match.groups()
+                start_date = f"{start_year}-{start_month.zfill(2)}-01"
+                end_date = f"{end_year}-{end_month.zfill(2)}-01"
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                end = datetime.strptime(end_date, "%Y-%m-%d")
+            elif current_pattern == pattern10:
+                start_year, start_month, start_day, end_year, end_month, end_day = match.groups()
+                start_date = f"{start_year}-{start_month.zfill(2)}-{start_day.zfill(2)}"
+                end_date = f"{end_year}-{end_month.zfill(2)}-{end_day.zfill(2)}"
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                end = datetime.strptime(end_date, "%Y-%m-%d")
+            elif current_pattern in [pattern11, pattern12]:
+                start_year, start_month, end_year, end_month = match.groups()
+                start_date = f"{start_year}-{start_month.zfill(2)}-01"
+                end_date = f"{end_year}-{end_month.zfill(2)}-01"
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                end = datetime.strptime(end_date, "%Y-%m-%d")
+            else:
+                start_year, start_month = match.groups()
+                start_date = f"{start_year}-{start_month.zfill(2)}-01"
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                
+                # 종료일 처리
+                if '현재' in line or '재직중' in line:
+                    end = datetime.now()
+                else:
+                    # 종료일 패턴 처리 (일 부분 무시)
+                    end_pattern = r'[~-–]\s*(\d{4})[\.-/](\d{1,2})(?:[\.-/]\d{1,2})?'
+                    end_match = re.search(end_pattern, line)
+                    if end_match:
+                        end_year, end_month = end_match.groups()
+                        end_date = f"{end_year}-{end_month.zfill(2)}-01"
+                        end = datetime.strptime(end_date, "%Y-%m-%d")
+                    else:
+                        # 종료일이 없는 경우
+                        period_str = f"{start_year}-{start_month.zfill(2)}~종료일 입력 필요"
+                        if current_company:
+                            period_str = f"{current_company}: {period_str}"
+                        experience_periods.append(period_str)
+                        continue
+            
+            # 경력기간 계산
+            if current_pattern in [pattern10, pattern11, pattern12]:
+                # 패턴 10, 11, 12의 경우 정확한 일자 계산
+                months = (end.year - start.year) * 12 + (end.month - start.month)
+                if end.day < start.day:
+                    months -= 1
+                if months < 0:
+                    months = 0
+            else:
+                # 다른 패턴의 경우 기존 로직 유지
+                months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+            
+            total_months += months
+            
+            years = months // 12
+            remaining_months = months % 12
+            decimal_years = round(months / 12, 1)
+            
+            # 결과 문자열 생성
+            if current_pattern == pattern10:
+                period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
+            elif current_pattern in [pattern11, pattern12]:
+                period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
+            else:
+                period_str = f"{start_year}-{start_month.zfill(2)}~{end.year}-{str(end.month).zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
+            
+            if current_company:
+                period_str = f"{current_company}: {period_str}"
+            experience_periods.append(period_str)
+    
+    # 총 경력기간 계산
+    total_years = total_months // 12
+    total_remaining_months = total_months % 12
+    total_decimal_years = round(total_months / 12, 1)
+    
+    # 결과 문자열 생성
+    result = "\n".join(experience_periods)
+    if result:
+        result += f"\n\n총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)"
+    
+    return result
 
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
@@ -193,6 +440,30 @@ st.markdown("""
         2. 이력서 분석
     </h4>
 """, unsafe_allow_html=True)
+
+# 경력기간 입력 섹션 추가
+st.markdown("""
+    <style>
+        .stTextArea textarea {
+            font-family: monospace;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+experience_text = st.text_area(
+    "경력기간 입력 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
+    height=200,
+    help="예시:\n2023-04-24 ~ 2024-05-10\n2019-06-03 ~ 2023-04-21\n2019-01-21 ~ 2019-05-31\n2015-07-01 ~ 2019-01-18"
+)
+
+if experience_text:
+    try:
+        result = calculate_experience(experience_text)
+        st.markdown("### 경력기간 계산 결과")
+        st.text(result)
+        st.markdown("---")
+    except Exception as e:
+        st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
 # 버튼을 왼쪽에 배치하고 스타일 적용
 col1, col2 = st.columns([1, 4])
