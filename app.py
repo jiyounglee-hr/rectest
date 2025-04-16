@@ -265,6 +265,8 @@ if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
+if 'resume_text' not in st.session_state:
+    st.session_state['resume_text'] = None
 
 # 페이지 설정
 st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
