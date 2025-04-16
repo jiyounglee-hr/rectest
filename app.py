@@ -492,7 +492,7 @@ st.markdown("""
 # 화면을 두 개의 컬럼으로 분할
 left_col, right_col = st.columns(2)
 
-# 왼쪽 컬럼: 채용공고 선택 및 내용
+# 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
 with left_col:
     st.markdown('<div class="label-text">1)채용공고 선택</div>', unsafe_allow_html=True)
     job_option = st.selectbox(
@@ -517,28 +517,27 @@ with left_col:
             )
         else:
             job_description = ""
+    
+    st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
+    
+    experience_text = st.text_area(
+        "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
+        height=140,
+        help="예시:\n2023-04-24 ~ 2024-05-10"
+    )
+
+    if experience_text:
+        try:
+            result = calculate_experience(experience_text)        
+            st.text(result)
+        except Exception as e:
+            st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
 # 오른쪽 컬럼: 이력서 내용
 with right_col:
     if uploaded_file:
         st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
         st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
-
-# 경력기간 산정 부분
-st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
-
-experience_text = st.text_area(
-    "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-    height=140,
-    help="예시:\n2023-04-24 ~ 2024-05-10"
-)
-
-if experience_text:
-    try:
-        result = calculate_experience(experience_text)        
-        st.text(result)
-    except Exception as e:
-        st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
 st.markdown("---")
 
