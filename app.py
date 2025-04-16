@@ -344,6 +344,9 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
+        # PDF 표시를 위한 base64 인코딩
+        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+        
         # 이력서 내용 표시 스타일
         st.markdown("""
             <style>
@@ -364,13 +367,46 @@ with st.sidebar:
                     font-size: 1.1em;
                     color: #0066cc;
                 }
+                .pdf-viewer {
+                    width: 100%;
+                    height: 500px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                }
+                .view-tabs {
+                    display: flex;
+                    margin-bottom: 10px;
+                }
+                .view-tab {
+                    padding: 8px 16px;
+                    cursor: pointer;
+                    border: 1px solid #ddd;
+                    background: white;
+                    color: #666;
+                }
+                .view-tab.active {
+                    background: #0066cc;
+                    color: white;
+                    border-color: #0066cc;
+                }
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
         """, unsafe_allow_html=True)
         
-        # 이력서 내용을 자동으로 표시
-        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
-        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+        # 탭으로 보기 방식 선택
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            view_option = st.radio("보기 방식", ["텍스트", "PDF"], label_visibility="collapsed")
+        
+        if view_option == "텍스트":
+            st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
+            st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown("<h5>📎 PDF 원본</h5>", unsafe_allow_html=True)
+            pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" class="pdf-viewer" type="application/pdf"></iframe>'
+            st.markdown(pdf_display, unsafe_allow_html=True)
+        
         st.session_state.resume_text = text  # 세션에 저장
         
     else:
