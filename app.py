@@ -443,6 +443,37 @@ job_descriptions = {
 
 # 1. 채용요건 섹션
 st.markdown("""
+    <style>
+        .label-text {
+            font-size: 14px;
+            font-weight: normal;
+            color: rgb(49, 51, 63);
+            font-family: "Source Sans Pro", sans-serif;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .stTextArea textarea {
+            font-family: monospace;
+        }
+        .web-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+        .web-link:hover {
+            text-decoration: underline;
+        }
+        .label-with-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 1px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
     <h5 style='color: #333333; margin-bottom: 20px;'>
         🤖 이력서분석
     </h5>
@@ -453,8 +484,9 @@ left_col, right_col = st.columns(2)
 
 # 왼쪽 컬럼: 채용공고 선택 및 내용
 with left_col:
+    st.markdown('<div class="label-text">1. 채용공고 선택</div>', unsafe_allow_html=True)
     job_option = st.selectbox(
-        "1. 채용공고 선택",
+        "",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
         ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
     )
 
@@ -478,31 +510,8 @@ with left_col:
 
 # 오른쪽 컬럼: 경력기간 산정
 with right_col:
-    st.markdown("""
-        <style>
-            .stTextArea textarea {
-                font-family: monospace;
-            }
-            .web-link {
-                color: #0066cc;
-                text-decoration: none;
-                font-size: 0.9em;
-                margin-left: 5px;
-            }
-            .web-link:hover {
-                text-decoration: underline;
-            }
-            .label-with-link {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                margin-bottom: 5px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.markdown(
-        '<div class="label-with-link">경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.) <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">웹링크 ></a></div>',
+        '<div class="label-text">경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.) <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">웹링크 ></a></div>',
         unsafe_allow_html=True
     )
 
