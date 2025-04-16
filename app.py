@@ -364,13 +364,7 @@ with st.sidebar:
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
         """, unsafe_allow_html=True)
-        
-        # 이력서 내용 표시
-        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
-        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
-        
-        st.session_state.resume_text = text  # 세션에 저장
-        
+                
     else:
         st.markdown("<div class='upload-text'>Drag and drop file here<br>Limit 200MB per file • PDF</div>", unsafe_allow_html=True)
 
@@ -522,8 +516,7 @@ with left_col:
     
     experience_text = st.text_area(
         "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-        height=140,
-        help="예시:\n2023-04-24 ~ 2024-05-10"
+        height=120
     )
 
     if experience_text:
@@ -536,7 +529,7 @@ with left_col:
 # 오른쪽 컬럼: 이력서 내용
 with right_col:
     if uploaded_file:
-        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
+        st.markdown('<div class="label-text">📄 이력서 내용 </div>', unsafe_allow_html=True)
         st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
 
 st.markdown("---")
