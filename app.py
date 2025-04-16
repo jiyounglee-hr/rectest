@@ -452,14 +452,14 @@ st.markdown("""
 
 experience_text = st.text_area(
     "경력기간 입력 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
-    height=200,
+    height=100,
     help="예시:\n2023-04-24 ~ 2024-05-10\n2019-06-03 ~ 2023-04-21\n2019-01-21 ~ 2019-05-31\n2015-07-01 ~ 2019-01-18"
 )
 
 if experience_text:
     try:
         result = calculate_experience(experience_text)
-        st.markdown("### 경력기간 계산 결과")
+        st.markdown("##### 경력기간 계산 결과")
         st.text(result)
         st.markdown("---")
     except Exception as e:
