@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import PyPDF2
 from io import BytesIO
 import os
@@ -14,12 +15,23 @@ import tempfile
 if 'temp_dir' not in st.session_state:
     st.session_state.temp_dir = tempfile.mkdtemp()
 
-# PDF 파일 저장 및 URL 생성 함수
-def save_pdf_get_url(pdf_data, filename):
-    temp_pdf_path = os.path.join(st.session_state.temp_dir, filename)
-    with open(temp_pdf_path, 'wb') as f:
-        f.write(pdf_data)
-    return temp_pdf_path
+# PDF 파일 저장 및 HTML 생성 함수
+def create_pdf_html(pdf_data, filename):
+    # PDF를 base64로 인코딩
+    b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+    
+    # PDF 뷰어 HTML 생성
+    html_content = f'''
+        <html>
+            <body style="margin:0;padding:0;overflow:hidden">
+                <embed src="data:application/pdf;base64,{b64_pdf}" 
+                       type="application/pdf"
+                       style="width:100%;height:100vh;"
+                       toolbar="0">
+            </body>
+        </html>
+    '''
+    return html_content
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -356,8 +368,8 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # PDF 파일 저장
-        pdf_path = save_pdf_get_url(pdf_data, uploaded_file.name)
+        # PDF HTML 생성
+        pdf_html = create_pdf_html(pdf_data, uploaded_file.name)
         
         # 이력서 내용 표시 스타일
         st.markdown("""
@@ -379,12 +391,6 @@ with st.sidebar:
                     font-size: 1.1em;
                     color: #0066cc;
                 }
-                .pdf-viewer {
-                    width: 100%;
-                    height: 800px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                }
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
         """, unsafe_allow_html=True)
@@ -399,7 +405,7 @@ with st.sidebar:
             st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
         else:
             st.markdown("<h5>📎 PDF 파일</h5>", unsafe_allow_html=True)
-            st.markdown(f'<iframe src="file://{pdf_path}" class="pdf-viewer"></iframe>', unsafe_allow_html=True)
+            components.html(pdf_html, height=800)
         
         st.session_state.resume_text = text  # 세션에 저장
         
