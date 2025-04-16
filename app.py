@@ -466,7 +466,7 @@ else:
         job_description = st.text_area(
             "채용공고 내용 (필요시 수정 가능합니다)",
             value=default_description,
-            height=500
+            height=300
         )
     else:
         job_description = ""
@@ -478,24 +478,28 @@ st.markdown("""
         .stTextArea textarea {
             font-family: monospace;
         }
-        .resume-text {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            max-height: 500px;
-            overflow-y: auto;
-            font-family: monospace;
-            white-space: pre-wrap;
-            margin: 10px 0;
+        .web-link {
+            display: inline-block;
+            margin-left: 10px;
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        .web-link:hover {
+            text-decoration: underline;
         }
     </style>
 """, unsafe_allow_html=True)
-experience_text = st.text_area(
-    "경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
-    height=130,
-    help="예시:\n2023-04-24 ~ 2024-05-10"
-)
+
+col1, col2 = st.columns([3, 1])
+with col1:
+    experience_text = st.text_area(
+        "경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
+        height=130,
+        help="예시:\n2023-04-24 ~ 2024-05-10"
+    )
+with col2:
+    st.markdown('<div style="padding-top: 48px;"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">웹링크 ></a></div>', unsafe_allow_html=True)
 
 if experience_text:
     try:
