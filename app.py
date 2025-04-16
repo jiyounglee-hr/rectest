@@ -335,8 +335,6 @@ with st.sidebar:
     )
     
     if uploaded_file:
-        st.markdown(f"<div style='padding: 5px 0px; color: #666666;'>{uploaded_file.name}</div>", unsafe_allow_html=True)
-        
         # PDF 내용 추출 및 표시
         pdf_data = uploaded_file.read()
         pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
