@@ -449,7 +449,6 @@ st.markdown("""
             font-weight: normal;
             color: rgb(49, 51, 63);
             font-family: "Source Sans Pro", sans-serif;
-            margin-bottom: 0.5rem;
             display: block;
         }
         .stTextArea textarea {
@@ -484,7 +483,7 @@ left_col, right_col = st.columns(2)
 
 # 왼쪽 컬럼: 채용공고 선택 및 내용
 with left_col:
-    st.markdown('<div class="label-text">1. 채용공고 선택</div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text">1)채용공고 선택</div>', unsafe_allow_html=True)
     job_option = st.selectbox(
         "",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
         ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
@@ -507,17 +506,12 @@ with left_col:
             )
         else:
             job_description = ""
-
-# 오른쪽 컬럼: 경력기간 산정
-with right_col:
-    st.markdown(
-        '<div class="label-text">경력기간 산정 (이력서의 날짜 부분을 복사하여 붙여넣으세요.) <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">웹링크 ></a></div>',
-        unsafe_allow_html=True
-    )
-
+    
+    st.markdown('<div class="label-text">2)경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
+    
     experience_text = st.text_area(
         "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-        height=300,  # 높이를 채용공고 내용과 동일하게 맞춤
+        height=140,
         help="예시:\n2023-04-24 ~ 2024-05-10"
     )
 
@@ -527,6 +521,10 @@ with right_col:
             st.text(result)
         except Exception as e:
             st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
+
+# 오른쪽 컬럼은 여백으로 유지
+with right_col:
+    pass
 
 st.markdown("---")
 
