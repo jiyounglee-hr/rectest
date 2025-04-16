@@ -321,6 +321,10 @@ with st.sidebar:
                 color: #666;
                 font-size: 14px;
             }
+            /* 파일명 숨기기 */
+            .st-emotion-cache-1v0mbdj > span {
+                display: none;
+            }
         </style>
     """, unsafe_allow_html=True)
     
@@ -461,7 +465,7 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-
+st.markdown("##### 경력기간 산정")
 experience_text = st.text_area(
     "경력기간 입력 (이력서의 날짜 부분을 복사하여 붙여넣으세요.)",
     height=100,
@@ -470,8 +474,7 @@ experience_text = st.text_area(
 
 if experience_text:
     try:
-        result = calculate_experience(experience_text)
-        st.markdown("##### 경력기간 계산 결과")
+        result = calculate_experience(experience_text)        
         st.text(result)
         st.markdown("---")
     except Exception as e:
