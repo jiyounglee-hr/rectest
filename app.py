@@ -354,7 +354,9 @@ with st.sidebar:
                     border: 1px solid #ddd;
                     max-height: 500px;
                     overflow-y: auto;
-                    font-family: monospace;
+                    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+                    font-size: 0.8em;
+                    line-height: 1.6;
                     white-space: pre-wrap;
                     margin: 10px 0;
                 }
@@ -362,6 +364,7 @@ with st.sidebar:
                     font-size: 1.1em;
                     color: #0066cc;
                 }
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
         """, unsafe_allow_html=True)
         
