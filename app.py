@@ -368,9 +368,6 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # PDF HTML 생성
-        pdf_html = create_pdf_html(pdf_data, uploaded_file.name)
-        
         # 이력서 내용 표시 스타일
         st.markdown("""
             <style>
@@ -387,25 +384,13 @@ with st.sidebar:
                     white-space: pre-wrap;
                     margin: 10px 0;
                 }
-                div[data-testid="stExpander"] div[role="button"] p {
-                    font-size: 1.1em;
-                    color: #0066cc;
-                }
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
         """, unsafe_allow_html=True)
         
-        # 탭으로 보기 방식 선택
-        col1, col2 = st.columns([1, 4])
-        with col1:
-            view_option = st.radio("보기 방식", ["텍스트", "PDF"], label_visibility="collapsed")
-        
-        if view_option == "텍스트":
-            st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
-            st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown("<h5>📎 PDF 파일</h5>", unsafe_allow_html=True)
-            components.html(pdf_html, height=800)
+        # 이력서 내용 표시
+        st.markdown("<h5>📄 이력서 내용</h5>", unsafe_allow_html=True)
+        st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
         
         st.session_state.resume_text = text  # 세션에 저장
         
