@@ -251,7 +251,6 @@ def calculate_experience(experience_text):
     if experience_periods:
         result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n"
         result += "\n".join(experience_periods)
-    
     return result
 
 # 세션 상태 초기화
@@ -557,11 +556,11 @@ if analyze_button:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
+                        {"role": "system", "content": f"""당신은 전문 채용 담당자입니다. 
 다음 형식에 맞춰 이력서를 분석해주세요:
 
 (1) 핵심 경력 요약
-- 총 경력 기간: [총 경력 연월]
+- 총 경력 기간: {total_decimal_years}년
 - 주요 직무 경험:
 1) [최근 회사명]: [직위/직책]
 2) [이전 회사명]: [직위/직책]
