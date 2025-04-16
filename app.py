@@ -8,6 +8,18 @@ from datetime import datetime
 import pandas as pd
 import re
 import base64
+import tempfile
+
+# 임시 디렉토리 생성
+if 'temp_dir' not in st.session_state:
+    st.session_state.temp_dir = tempfile.mkdtemp()
+
+# PDF 파일 저장 및 URL 생성 함수
+def save_pdf_get_url(pdf_data, filename):
+    temp_pdf_path = os.path.join(st.session_state.temp_dir, filename)
+    with open(temp_pdf_path, 'wb') as f:
+        f.write(pdf_data)
+    return temp_pdf_path
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -344,9 +356,8 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # PDF 다운로드 링크 생성
-        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-        pdf_download = f'<a href="data:application/pdf;base64,{b64_pdf}" download="{uploaded_file.name}" class="download-button">📥 PDF 다운로드</a>'
+        # PDF 파일 저장
+        pdf_path = save_pdf_get_url(pdf_data, uploaded_file.name)
         
         # 이력서 내용 표시 스타일
         st.markdown("""
@@ -368,18 +379,11 @@ with st.sidebar:
                     font-size: 1.1em;
                     color: #0066cc;
                 }
-                .download-button {
-                    display: inline-block;
-                    padding: 8px 16px;
-                    background-color: #0066cc;
-                    color: white !important;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    margin: 10px 0;
-                    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-                }
-                .download-button:hover {
-                    background-color: #0052a3;
+                .pdf-viewer {
+                    width: 100%;
+                    height: 800px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
                 }
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
             </style>
@@ -395,7 +399,7 @@ with st.sidebar:
             st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
         else:
             st.markdown("<h5>📎 PDF 파일</h5>", unsafe_allow_html=True)
-            st.markdown(pdf_download, unsafe_allow_html=True)
+            st.markdown(f'<iframe src="file://{pdf_path}" class="pdf-viewer"></iframe>', unsafe_allow_html=True)
         
         st.session_state.resume_text = text  # 세션에 저장
         
