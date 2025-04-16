@@ -509,6 +509,30 @@ if analyze_button:
                 for page in pdf_reader.pages:
                     text += page.extract_text()
                 
+                # 이력서 내용 팝업 버튼 추가
+                st.markdown("""
+                    <style>
+                        div[data-testid="stExpander"] div[role="button"] p {
+                            font-size: 1.1em;
+                            color: #0066cc;
+                        }
+                        .resume-text {
+                            background-color: white;
+                            padding: 20px;
+                            border-radius: 5px;
+                            border: 1px solid #ddd;
+                            max-height: 500px;
+                            overflow-y: auto;
+                            font-family: monospace;
+                            white-space: pre-wrap;
+                            margin: 10px 0;
+                        }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                with st.expander("📄 이력서 내용 보기", expanded=False):
+                    st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+                
                 # 기존 분석 로직
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
@@ -531,11 +555,6 @@ if analyze_button:
                     ]
                 )
                 st.session_state.analysis_result = response.choices[0].message.content
-                
-                # 임시 PDF 파일 삭제
-                if os.path.exists("temp.pdf"):
-                    os.remove("temp.pdf")
-                
             except Exception as e:
                 st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
     else:
@@ -546,16 +565,6 @@ if st.session_state.analysis_result:
     st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
     st.text_area("분석 결과", st.session_state.analysis_result, height=350)
     st.markdown("</div>", unsafe_allow_html=True)
-    
-    # 이력서 내용 보기 버튼을 여기로 이동
-    if 'resume_text' not in st.session_state:
-        st.session_state.resume_text = ""
-    
-    with st.expander("📄 이력서 내용 보기", expanded=False):
-        if st.session_state.resume_text:
-            st.markdown(f'<div class="resume-text">{st.session_state.resume_text}</div>', unsafe_allow_html=True)
-        else:
-            st.info("이력서를 먼저 업로드해주세요.")
 
 # 3. 면접 질문 섹션
 st.markdown("""
