@@ -582,7 +582,7 @@ if analyze_button:
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
                 if 'total_decimal_years' in locals() and total_decimal_years is not None:
-                    analysis_result = analysis_result.replace("[총 경력 연월]", f"{total_decimal_years}년")
+                    analysis_result = analysis_result.replace("[총 경력 연월]", f"총 {total_years}년 {total_remaining_months}개월 (1순위 경력기간 산정에 의한 값, 2순위 결과값)")
                 
                 st.session_state.analysis_result = analysis_result
             except Exception as e:
