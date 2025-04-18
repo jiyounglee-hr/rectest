@@ -512,7 +512,7 @@ with left_col:
             job_description = st.text_area(
                 "- 채용공고 내용 (필요시 수정 가능합니다)",
                 value=default_description,
-                height=300
+                height=220
             )
         else:
             job_description = ""
@@ -521,7 +521,7 @@ with left_col:
     
     experience_text = st.text_area(
         "- 경력기간 입력",  
-        height=90
+        height=120
     )
 
     if experience_text:
@@ -544,28 +544,14 @@ with right_col:
 
 st.markdown("---")
 
-# 버튼 스타일 수정
-st.markdown("""
-    <style>
-        div.stButton > button:first-child {
-            background-color: #ff4b4b;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            font-weight: bold;
-        }
-        div.stButton > button:first-child:hover {
-            background-color: #ff3333;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-analyze_button = st.button(
-    "분석 시작하기",
-    key="analyze_button",
-    help="이력서와 채용공고를 분석합니다"
-)
+# 버튼을 왼쪽에 배치하고 스타일 적용
+col1, col2 = st.columns([1, 4])
+with col1:
+    analyze_button = st.button(
+        "분석 시작하기",
+        key="analyze_button",
+        help="이력서와 채용공고를 분석합니다"
+    )
 
 # 분석 로직
 if analyze_button:
@@ -716,7 +702,7 @@ if analyze_button:
 # 분석 결과를 구분선으로 분리하여 표시
 if st.session_state.analysis_result:
     st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
-    st.text_area("분석 결과", st.session_state.analysis_result, height=350)
+    st.text_area("분석 결과", st.session_state.analysis_result, height=400)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 3. 면접 질문 섹션
