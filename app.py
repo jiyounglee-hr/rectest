@@ -532,6 +532,12 @@ with left_col:
         try:
             result = calculate_experience(experience_text)
             st.text(result)
+            
+            # 경력기간 정보를 세션 상태에 저장
+            if 'total_years' in locals() and 'total_remaining_months' in locals():
+                st.session_state.experience_years = total_years
+                st.session_state.experience_months = total_remaining_months
+                st.session_state.experience_decimal_years = total_decimal_years
         except Exception as e:
             st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
