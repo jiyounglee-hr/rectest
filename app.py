@@ -254,22 +254,21 @@ def calculate_experience(experience_text):
     
     return result, total_years, total_remaining_months, total_decimal_years
 
-# URL 파라미터로 현재 페이지 설정
-try:
-    query_params = st.experimental_get_query_params()
-    current_page = query_params.get("page", ["resume"])[0]
-    if current_page not in ['resume', 'interview1', 'interview2']:
-        current_page = 'resume'
-except:
-    current_page = 'resume'
-
-# 페이지 설정
+# 페이지 설정 (반드시 첫 번째 명령어여야 함)
 st.set_page_config(
     page_title="HR Resume Analyzer",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# URL 파라미터로 현재 페이지 설정
+try:
+    current_page = st.query_params.get("page", ["resume"])[0]
+    if current_page not in ['resume', 'interview1', 'interview2']:
+        current_page = 'resume'
+except:
+    current_page = 'resume'
 
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
@@ -336,15 +335,15 @@ with st.sidebar:
 
     # 페이지 전환 버튼 추가
     if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
-        st.experimental_set_query_params(page="resume")
+        st.query_params["page"] = "resume"
         st.rerun()
     
     if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
-        st.experimental_set_query_params(page="interview1")
+        st.query_params["page"] = "interview1"
         st.rerun()
     
     if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
-        st.experimental_set_query_params(page="interview2")
+        st.query_params["page"] = "interview2"
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
