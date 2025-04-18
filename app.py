@@ -621,7 +621,7 @@ if analyze_button:
                         r"- 총 경력기간: .*년.*개월"
                     ]
                     
-                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {fit_percentage}% 부합)"
+                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {required_years}년 중 {fit_percentage}% 부합)"
                     
                     for pattern in experience_patterns:
                         analysis_result = re.sub(pattern, replacement, analysis_result)
