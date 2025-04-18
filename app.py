@@ -576,7 +576,7 @@ if analyze_button:
 - 주요 업무: [핵심 업무 내용 요약]
 
 (2) 채용요건 연관성 분석
-- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들, 경력 *년 요건은 제외외]
+- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들, 경력 *년 요건은 제외]
 - 미확인/부족 요건: [채용공고의 요건 중 이력서에서 확인되지 않거나 부족한 항목들]"""},
                         {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                     ]
@@ -598,12 +598,15 @@ if analyze_button:
                             r'경력\s*(\d+)년',
                             r'경력\s*(\d+)~\d+년',
                             r'(\d+)년\s*이상',
-                            r'경력\s*(\d+)\s*년차'
+                            r'경력\s*(\d+)\s*년차',
+                            r'경력\s*(\d+)\+년',
+                            r'(\d+)년.*필수'
                         ]
                         for pattern in year_patterns:
                             match = re.search(pattern, job_description)
                             if match:
                                 required_years = int(match.group(1))
+                                st.write(f"- 필수 경력: {required_years}년")
                                 break
                     
                     # 경력 부합도 계산
@@ -613,15 +616,19 @@ if analyze_button:
                     else:
                         fit_percentage = 100  # 신입인 경우
                     
+                    st.write(f"- 부합도: {fit_percentage}%")
+                    
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
                         r"- 총 경력 기간: \[총 경력 연월\]",
-                        r"- 총 경력 기간: .*년.*개월",
+                        r"- 총 경력 기간: .*년.*개월.*",
                         r"- 총 경력기간: \[총 경력 연월\]",
-                        r"- 총 경력기간: .*년.*개월"
+                        r"- 총 경력기간: .*년.*개월.*"
                     ]
                     
                     replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {required_years}년 중 {fit_percentage}% 부합)"
+                    st.write("분석 결과에 반영될 경력 정보:")
+                    st.write(replacement)
                     
                     for pattern in experience_patterns:
                         analysis_result = re.sub(pattern, replacement, analysis_result)
