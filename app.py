@@ -302,9 +302,9 @@ st.markdown("""
             padding-bottom: 10px;
             border-bottom: 2px solid #e0e0e0;
         }
-        /* 버튼 스타일 수정 */
-        .stButton button {
-            width: 120px !important;  /* 버튼 너비 고정 */
+        /* 사이드바 버튼 스타일 */
+        [data-testid="stSidebar"] .stButton button {
+            width: 120px !important;
             padding: 8px 12px !important;
             margin: 5px 5px !important;
             border: 1px solid #ddd;
@@ -314,15 +314,15 @@ st.markdown("""
             transition: background-color 0.3s;
             font-size: 0.9em !important;
         }
-        .stButton button:hover {
+        [data-testid="stSidebar"] .stButton button:hover {
             background-color: #f0f0f0;
         }
-        .stButton button[data-baseweb="button"][kind="primary"] {
+        [data-testid="stSidebar"] .stButton button[data-baseweb="button"][kind="primary"] {
             background-color: #e6e6e6;
             border-color: #999;
         }
-        /* 버튼 컨테이너 스타일 */
-        .button-container {
+        /* 사이드바 버튼 컨테이너 스타일 */
+        [data-testid="stSidebar"] .button-container {
             display: flex;
             justify-content: flex-start;
             gap: 5px;
