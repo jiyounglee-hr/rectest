@@ -571,8 +571,8 @@ if analyze_button:
 (1) 핵심 경력 요약
 - 총 경력 기간: 총 X년 Y개월
 - 주요 직무 경험:
-1) [최근 회사명]: [직위/직책]
-2) [이전 회사명]: [직위/직책]
+    1) [최근 회사명]: [직위/직책]
+    2) [이전 회사명]: [직위/직책]
 3) [이전 회사명]: [직위/직책]
 - 주요 업무 내용: [핵심 업무 내용 요약]
 
@@ -619,7 +619,12 @@ if analyze_button:
                         r"- 총 경력기간:.*"
                     ]
                     
-                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {required_years}년 중 {fit_percentage}% 부합)"
+                    # required_years가 없거나 0인 경우와 그 외의 경우 분리
+                    if required_years == 0:
+                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
+                    else:
+                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {required_years}년 중 {fit_percentage}% 부합)"
+                    
                     st.write("분석 결과에 반영될 경력 정보:")
                     st.write(replacement)
                     
