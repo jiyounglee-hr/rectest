@@ -598,21 +598,18 @@ if analyze_button:
                         # 2. x~y년 패턴
                         pattern_range = r'경력\s*(\d+)~(\d+)년'
                         # 3. x년 미만/이하 패턴
-                        pattern_under = r'경력\s*(\d+)년\s*(미만|이하)'
+                        pattern_under = r'경력\s*(\d+)년\s*(미만|이하|이내)'
                         
                         if match := re.search(pattern_over, job_description):
                             required_years = int(match.group(1))
                             experience_type = "over"
-                            st.write(f"- 필수 경력: {required_years}년 이상")
                         elif match := re.search(pattern_range, job_description):
                             required_years_min = int(match.group(1))
                             required_years_max = int(match.group(2))
                             experience_type = "range"
-                            st.write(f"- 필수 경력: {required_years_min}~{required_years_max}년")
                         elif match := re.search(pattern_under, job_description):
                             required_years = int(match.group(1))
                             experience_type = "under"
-                            st.write(f"- 필수 경력: {required_years}년 {match.group(2)}")
                     
                     # 경력 부합도 계산
                     experience_years = st.session_state.experience_years + (st.session_state.experience_months / 12)
@@ -622,22 +619,40 @@ if analyze_button:
                         if experience_years >= required_years:
                             fit_status = "부합"
                         else:
-                            remaining_years = required_years - int(experience_years)
-                            remaining_months = 12 - (int((experience_years % 1) * 12) if experience_years % 1 > 0 else 0)
-                            if remaining_months == 12:
-                                remaining_years += 1
+                            # 정수 부분과 소수 부분을 분리하여 계산
+                            exp_years = int(experience_years)
+                            exp_months = int((experience_years % 1) * 12)
+                            
+                            # 부족한 년수 계산
+                            remaining_years = required_years - exp_years
+                            
+                            # 부족한 개월수 계산
+                            if exp_months > 0:
+                                remaining_months = 12 - exp_months
+                                remaining_years -= 1  # 개월이 있으면 년수를 1 빼고 개월을 더함
+                            else:
                                 remaining_months = 0
+                            
                             fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
                     elif experience_type == "range":
                         if required_years_min <= experience_years <= required_years_max:
                             fit_status = "부합"
                         else:
                             if experience_years < required_years_min:
-                                remaining_years = required_years_min - int(experience_years)
-                                remaining_months = 12 - (int((experience_years % 1) * 12) if experience_years % 1 > 0 else 0)
-                                if remaining_months == 12:
-                                    remaining_years += 1
+                                # 정수 부분과 소수 부분을 분리하여 계산
+                                exp_years = int(experience_years)
+                                exp_months = int((experience_years % 1) * 12)
+                                
+                                # 부족한 년수 계산
+                                remaining_years = required_years_min - exp_years
+                                
+                                # 부족한 개월수 계산
+                                if exp_months > 0:
+                                    remaining_months = 12 - exp_months
+                                    remaining_years -= 1  # 개월이 있으면 년수를 1 빼고 개월을 더함
+                                else:
                                     remaining_months = 0
+                                
                                 fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
                             else:
                                 over_years = int(experience_years - required_years_max)
@@ -662,9 +677,6 @@ if analyze_button:
                         replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
                     else:
                         replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 ({fit_status})"
-                    
-                    st.write("분석 결과에 반영될 경력 정보:")
-                    st.write(replacement)
                     
                     for pattern in experience_patterns:
                         analysis_result = re.sub(pattern, replacement, analysis_result)
