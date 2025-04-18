@@ -336,33 +336,35 @@ with st.sidebar:
     def switch_to_resume():
         st.session_state['current_page'] = 'resume'
         st.query_params["page"] = "resume"
-        st.rerun()
 
     def switch_to_interview1():
         st.session_state['current_page'] = 'interview1'
         st.query_params["page"] = "interview1"
-        st.rerun()
 
     def switch_to_interview2():
         st.session_state['current_page'] = 'interview2'
         st.query_params["page"] = "interview2"
-        st.rerun()
 
     # 페이지 전환 버튼 추가
-    st.button("🤖 이력서분석", 
-              key="btn_resume", 
-              on_click=switch_to_resume,
-              use_container_width=True)
+    col1, col2, col3 = st.columns(3)
     
-    st.button("☝️ 1차 면접 질문", 
-              key="btn_interview1", 
-              on_click=switch_to_interview1,
-              use_container_width=True)
+    with col1:
+        st.button("🤖 이력서분석", 
+                key="btn_resume", 
+                on_click=switch_to_resume,
+                type="primary" if st.session_state['current_page'] == "resume" else "secondary")
     
-    st.button("✌️ 2차 면접 질문", 
-              key="btn_interview2", 
-              on_click=switch_to_interview2,
-              use_container_width=True)
+    with col2:
+        st.button("☝️ 1차 면접 질문", 
+                key="btn_interview1", 
+                on_click=switch_to_interview1,
+                type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
+    
+    with col3:
+        st.button("✌️ 2차 면접 질문", 
+                key="btn_interview2", 
+                on_click=switch_to_interview2,
+                type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
     st.markdown("<br>", unsafe_allow_html=True)
     
