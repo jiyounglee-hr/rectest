@@ -568,15 +568,15 @@ if analyze_button:
 다음 형식에 맞춰 이력서를 분석해주세요:
 
 (1) 핵심 경력 요약
-- 총 경력 기간: [총 경력 연월]
-- 주요 직무 경험:
+- 총 경력 기간: [총 경력 연월] 
+- 주요 이력 :
     1) [최근 회사명]: [직위/직책]
     2) [이전 회사명]: [직위/직책]
     3) [이전 회사명]: [직위/직책]
-- 주요 업무 내용: [핵심 업무 내용 요약]
+- 주요 업무: [핵심 업무 내용 요약]
 
 (2) 채용요건 연관성 분석
-- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들, 경력 *년 요건은 총경력기간과 비교]
+- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들, 경력 *년 요건은 제외외]
 - 미확인/부족 요건: [채용공고의 요건 중 이력서에서 확인되지 않거나 부족한 항목들]"""},
                         {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                     ]
@@ -585,6 +585,34 @@ if analyze_button:
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
                 if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
+                    st.write("📝 경력기간 산정 결과:")
+                    st.write(f"- 연도: {st.session_state.experience_years}년")
+                    st.write(f"- 개월: {st.session_state.experience_months}개월")
+                    st.write(f"- 소수점 연도: {st.session_state.experience_decimal_years}년")
+                    
+                    # 채용공고에서 필수 경력 연차 추출
+                    required_years = 0
+                    if "경력" in job_description:
+                        # 정규식으로 경력 연차 추출 (예: "경력 3년", "경력 3~5년", "3년이상" 등의 패턴)
+                        year_patterns = [
+                            r'경력\s*(\d+)년',
+                            r'경력\s*(\d+)~\d+년',
+                            r'(\d+)년\s*이상',
+                            r'경력\s*(\d+)\s*년차'
+                        ]
+                        for pattern in year_patterns:
+                            match = re.search(pattern, job_description)
+                            if match:
+                                required_years = int(match.group(1))
+                                break
+                    
+                    # 경력 부합도 계산
+                    experience_years = st.session_state.experience_years + (st.session_state.experience_months / 12)
+                    if required_years > 0:
+                        fit_percentage = min(100, round((experience_years / required_years) * 100))
+                    else:
+                        fit_percentage = 100  # 신입인 경우
+                    
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
                         r"- 총 경력 기간: \[총 경력 연월\]",
@@ -593,7 +621,7 @@ if analyze_button:
                         r"- 총 경력기간: .*년.*개월"
                     ]
                     
-                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
+                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {fit_percentage}% 부합)"
                     
                     for pattern in experience_patterns:
                         analysis_result = re.sub(pattern, replacement, analysis_result)
