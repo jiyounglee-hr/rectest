@@ -550,7 +550,8 @@ with col1:
     analyze_button = st.button(
         "분석 시작하기",
         key="analyze_button",
-        help="이력서와 채용공고를 분석합니다"
+        help="이력서와 채용공고를 분석합니다",
+        type="error"  # 빨간색 버튼
     )
 
 # 분석 로직
