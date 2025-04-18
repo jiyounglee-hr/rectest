@@ -266,6 +266,17 @@ def set_page_config():
 # 페이지 설정 호출
 set_page_config()
 
+# URL 파라미터로 현재 페이지 설정
+try:
+    current_page = st.query_params.get("page", ["resume"])[0]
+    if current_page in ['resume', 'interview1', 'interview2']:
+        st.session_state['current_page'] = current_page
+        # URL 파라미터 유지
+        st.query_params["page"] = current_page
+except:
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = 'resume'
+
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
     st.session_state['analysis_result'] = None
@@ -273,13 +284,6 @@ if 'interview_questions' not in st.session_state:
     st.session_state['interview_questions'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
-
-# URL 파라미터로 현재 페이지 설정
-current_page = st.query_params.get("page", ["resume"])[0]
-if current_page in ['resume', 'interview1', 'interview2']:
-    st.session_state['current_page'] = current_page
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -498,9 +502,6 @@ job_descriptions = {
 }
 
 # 현재 페이지에 따른 내용 표시
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
-
 if st.session_state['current_page'] == 'resume':
     # 기존의 이력서 분석 페이지 내용
     st.markdown("""
@@ -727,6 +728,9 @@ if st.session_state['current_page'] == 'resume':
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif st.session_state['current_page'] == 'interview1':
+    # URL 파라미터 유지
+    st.query_params["page"] = "interview1"
+    
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ☝️ 1차 면접 질문
@@ -791,6 +795,9 @@ elif st.session_state['current_page'] == 'interview1':
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif st.session_state['current_page'] == 'interview2':
+    # URL 파라미터 유지
+    st.query_params["page"] = "interview2"
+    
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ✌️ 2차 면접 질문
