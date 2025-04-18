@@ -570,13 +570,13 @@ if analyze_button:
 (1) 핵심 경력 요약
 - 총 경력 기간: [총 경력 연월]
 - 주요 직무 경험:
-1) [최근 회사명]: [직위/직책]
-2) [이전 회사명]: [직위/직책]
-3) [이전 회사명]: [직위/직책]
+    1) [최근 회사명]: [직위/직책]
+    2) [이전 회사명]: [직위/직책]
+    3) [이전 회사명]: [직위/직책]
 - 주요 업무 내용: [핵심 업무 내용 요약]
 
 (2) 채용요건 연관성 분석
-- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들]
+- 부합되는 요건: [채용공고의 요건 중 이력서에서 확인된 항목들, 경력 *년 요건은 총경력기간과 비교]
 - 미확인/부족 요건: [채용공고의 요건 중 이력서에서 확인되지 않거나 부족한 항목들]"""},
                         {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                     ]
@@ -585,11 +585,6 @@ if analyze_button:
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
                 if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
-                    st.write("📝 경력기간 산정 결과:")
-                    st.write(f"- 연도: {st.session_state.experience_years}년")
-                    st.write(f"- 개월: {st.session_state.experience_months}개월")
-                    st.write(f"- 소수점 연도: {st.session_state.experience_decimal_years}년")
-                    
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
                         r"- 총 경력 기간: \[총 경력 연월\]",
