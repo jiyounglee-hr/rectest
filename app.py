@@ -254,37 +254,30 @@ def calculate_experience(experience_text):
     
     return result, total_years, total_remaining_months, total_decimal_years
 
-# 페이지 설정
-def set_page_config():
-    st.set_page_config(
-        page_title="HR Resume Analyzer",
-        page_icon="📄",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+# URL 파라미터로 현재 페이지 설정
+try:
+    query_params = st.experimental_get_query_params()
+    current_page = query_params.get("page", ["resume"])[0]
+    if current_page not in ['resume', 'interview1', 'interview2']:
+        current_page = 'resume'
+except:
+    current_page = 'resume'
 
-# 페이지 설정 호출
-set_page_config()
+# 페이지 설정
+st.set_page_config(
+    page_title="HR Resume Analyzer",
+    page_icon="📄",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # 세션 상태 초기화
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
 if 'analysis_result' not in st.session_state:
     st.session_state['analysis_result'] = None
 if 'interview_questions' not in st.session_state:
     st.session_state['interview_questions'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
-
-# URL 파라미터로 현재 페이지 설정
-try:
-    current_page = st.query_params.get("page", ["resume"])[0]
-    if current_page in ['resume', 'interview1', 'interview2']:
-        st.session_state['current_page'] = current_page
-        # URL 파라미터 유지
-        st.query_params["page"] = current_page
-except Exception as e:
-    st.session_state['current_page'] = 'resume'
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -343,18 +336,15 @@ with st.sidebar:
 
     # 페이지 전환 버튼 추가
     if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
-        st.query_params["page"] = "resume"
-        st.session_state['current_page'] = 'resume'
+        st.experimental_set_query_params(page="resume")
         st.rerun()
     
     if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
-        st.query_params["page"] = "interview1"
-        st.session_state['current_page'] = 'interview1'
+        st.experimental_set_query_params(page="interview1")
         st.rerun()
     
     if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
-        st.query_params["page"] = "interview2"
-        st.session_state['current_page'] = 'interview2'
+        st.experimental_set_query_params(page="interview2")
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -503,8 +493,6 @@ job_descriptions = {
 }
 
 # 현재 페이지에 따른 내용 표시
-current_page = st.session_state.get('current_page', 'resume')
-
 if current_page == 'resume':
     # 기존의 이력서 분석 페이지 내용
     st.markdown("""
@@ -731,9 +719,6 @@ if current_page == 'resume':
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif current_page == 'interview1':
-    # URL 파라미터 유지
-    st.query_params["page"] = "interview1"
-    
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ☝️ 1차 면접 질문
@@ -798,9 +783,6 @@ elif current_page == 'interview1':
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif current_page == 'interview2':
-    # URL 파라미터 유지
-    st.query_params["page"] = "interview2"
-    
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ✌️ 2차 면접 질문
