@@ -277,7 +277,7 @@ def set_page_config():
     )
     
     # URL 파라미터 확인
-    page = st.query_params.get("page", "resume")
+    page = st.query_params.get("page", ["resume"])[0]
     if page == 'resume':
         st.session_state['current_page'] = 'resume'
     elif page == 'interview1':
@@ -354,7 +354,12 @@ with st.sidebar:
         ["🤖 이력서분석", "☝️ 1차 면접 질문", "✌️ 2차 면접 질문"],
         key="menu_radio",
         horizontal=False,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        index=["🤖 이력서분석", "☝️ 1차 면접 질문", "✌️ 2차 면접 질문"].index(
+            "🤖 이력서분석" if st.session_state['current_page'] == 'resume'
+            else "☝️ 1차 면접 질문" if st.session_state['current_page'] == 'interview1'
+            else "✌️ 2차 면접 질문"
+        )
     )
     
     if selected_page == "🤖 이력서분석":
