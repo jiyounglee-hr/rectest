@@ -262,6 +262,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# 페이지 전환 함수
+def switch_page(page_name: str):
+    st.query_params["page"] = page_name
+    st.rerun()
+
 # URL 파라미터로 현재 페이지 설정
 try:
     current_page = st.query_params.get("page", ["resume"])[0]
@@ -334,17 +339,16 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # 페이지 전환 버튼 추가
-    if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
-        st.query_params["page"] = "resume"
-        st.rerun()
+    col1, col2, col3 = st.columns(3)
     
-    if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
-        st.query_params["page"] = "interview1"
-        st.rerun()
+    if st.button("🤖 이력서분석", key="btn_resume", type="primary" if current_page == "resume" else "secondary", use_container_width=True):
+        switch_page("resume")
     
-    if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
-        st.query_params["page"] = "interview2"
-        st.rerun()
+    if st.button("☝️ 1차 면접 질문", key="btn_interview1", type="primary" if current_page == "interview1" else "secondary", use_container_width=True):
+        switch_page("interview1")
+    
+    if st.button("✌️ 2차 면접 질문", key="btn_interview2", type="primary" if current_page == "interview2" else "secondary", use_container_width=True):
+        switch_page("interview2")
 
     st.markdown("<br>", unsafe_allow_html=True)
     
