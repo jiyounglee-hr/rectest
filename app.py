@@ -277,19 +277,16 @@ def set_page_config():
     )
     
     # URL 파라미터 확인
-    query_params = st.query_params
-    if 'page' in query_params:
-        page = query_params['page'][0]
-        if page == 'resume':
-            st.session_state['current_page'] = 'resume'
-        elif page == 'interview1':
-            st.session_state['current_page'] = 'interview1'
-        elif page == 'interview2':
-            st.session_state['current_page'] = 'interview2'
-    else:
-        # 기본 페이지 설정
+    page = st.query_params.get("page", "resume")
+    if page == 'resume':
         st.session_state['current_page'] = 'resume'
-        st.query_params['page'] = 'resume'
+    elif page == 'interview1':
+        st.session_state['current_page'] = 'interview1'
+    elif page == 'interview2':
+        st.session_state['current_page'] = 'interview2'
+    else:
+        st.session_state['current_page'] = 'resume'
+        st.query_params.update(page='resume')
 
 # 페이지 설정 호출
 set_page_config()
@@ -362,13 +359,13 @@ with st.sidebar:
     
     if selected_page == "🤖 이력서분석":
         st.session_state['current_page'] = 'resume'
-        st.query_params['page'] = 'resume'
+        st.query_params.update(page='resume')
     elif selected_page == "☝️ 1차 면접 질문":
         st.session_state['current_page'] = 'interview1'
-        st.query_params['page'] = 'interview1'
+        st.query_params.update(page='interview1')
     elif selected_page == "✌️ 2차 면접 질문":
         st.session_state['current_page'] = 'interview2'
-        st.query_params['page'] = 'interview2'
+        st.query_params.update(page='interview2')
 
     st.markdown("<br>", unsafe_allow_html=True)
     
