@@ -345,6 +345,11 @@ with st.sidebar:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
+        # 이력서 내용을 세션 상태에 저장
+        if 'resume_text' not in st.session_state:
+            st.session_state.resume_text = ""
+        st.session_state.resume_text = text
+        
         # 이력서 내용 표시 스타일
         st.markdown("""
             <style>
