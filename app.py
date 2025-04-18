@@ -588,30 +588,51 @@ if analyze_button:
                 if 'experience_years' in st.session_state and 'experience_months' in st.session_state:                    
                     # 채용공고에서 필수 경력 연차 추출
                     required_years = 0
+                    required_years_min = 0
+                    required_years_max = 0
+                    experience_type = None
+                    
                     if "경력" in job_description:
-                        year_patterns = [
-                            r'경력\s*(\d+)년',
-                            r'경력\s*(\d+)~\d+년',
-                            r'(\d+)년\s*이상',
-                            r'경력\s*(\d+)\s*년차',
-                            r'경력\s*(\d+)\+년',
-                            r'(\d+)년.*필수'
-                        ]
-                        for pattern in year_patterns:
-                            match = re.search(pattern, job_description)
-                            if match:
-                                required_years = int(match.group(1))
-                                st.write(f"- 필수 경력: {required_years}년")
-                                break
+                        # 1. x년 이상 패턴
+                        pattern_over = r'경력\s*(\d+)년\s*이상'
+                        # 2. x~y년 패턴
+                        pattern_range = r'경력\s*(\d+)~(\d+)년'
+                        # 3. x년 미만/이하 패턴
+                        pattern_under = r'경력\s*(\d+)년\s*(미만|이하)'
+                        
+                        if match := re.search(pattern_over, job_description):
+                            required_years = int(match.group(1))
+                            experience_type = "over"
+                            st.write(f"- 필수 경력: {required_years}년 이상")
+                        elif match := re.search(pattern_range, job_description):
+                            required_years_min = int(match.group(1))
+                            required_years_max = int(match.group(2))
+                            experience_type = "range"
+                            st.write(f"- 필수 경력: {required_years_min}~{required_years_max}년")
+                        elif match := re.search(pattern_under, job_description):
+                            required_years = int(match.group(1))
+                            experience_type = "under"
+                            st.write(f"- 필수 경력: {required_years}년 {match.group(2)}")
                     
                     # 경력 부합도 계산
                     experience_years = st.session_state.experience_years + (st.session_state.experience_months / 12)
-                    if required_years > 0:
-                        fit_percentage = min(100, round((experience_years / required_years) * 100))
-                    else:
-                        fit_percentage = 100  # 신입인 경우
+                    fit_status = ""
                     
-                    st.write(f"- 부합도: {fit_percentage}%")
+                    if experience_type == "over":
+                        if experience_years >= required_years:
+                            fit_status = "부합"
+                        else:
+                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
+                    elif experience_type == "range":
+                        if required_years_min <= experience_years <= required_years_max:
+                            fit_status = "부합"
+                        else:
+                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
+                    elif experience_type == "under":
+                        if experience_years <= required_years:
+                            fit_status = "부합"
+                        else:
+                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
                     
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
@@ -619,11 +640,11 @@ if analyze_button:
                         r"- 총 경력기간:.*"
                     ]
                     
-                    # required_years가 없거나 0인 경우와 그 외의 경우 분리
-                    if required_years == 0:
+                    # 경력 요건이 없는 경우와 있는 경우 분리
+                    if not experience_type:
                         replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
                     else:
-                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (경력 {required_years}년 중 {fit_percentage}% 부합)"
+                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 ({fit_status})"
                     
                     st.write("분석 결과에 반영될 경력 정보:")
                     st.write(replacement)
