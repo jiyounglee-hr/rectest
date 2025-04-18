@@ -274,8 +274,8 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 st.markdown("""
     <style>
         [data-testid="stSidebar"] {
-            min-width: 420px !important;
-            max-width: 420px !important;
+            min-width: 400px !important;
+            max-width: 400px !important;
             background-color: #f8f9fa;
         }
         [data-testid="stSidebar"] > div:first-child {
