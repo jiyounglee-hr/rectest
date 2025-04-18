@@ -450,6 +450,7 @@ st.markdown("""
             font-weight: normal;
             color: rgb(49, 51, 63);
             font-family: "Source Sans Pro", sans-serif;
+            margin-bottom: 10px;
             display: block;
         }
         .stTextArea textarea {
