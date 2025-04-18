@@ -285,6 +285,10 @@ def set_page_config():
         page = st.query_params.get("page", ["resume"])[0]
         if page in ['resume', 'interview1', 'interview2']:
             st.session_state['current_page'] = page
+            # 페이지가 변경되었을 때 강제로 새로고침
+            if st.session_state.get('last_page') != page:
+                st.session_state['last_page'] = page
+                st.rerun()
     except:
         st.session_state['current_page'] = 'resume'
 
