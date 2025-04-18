@@ -321,7 +321,7 @@ with st.sidebar:
         }
         /* 라디오 버튼 스타일 수정 */
         div[data-testid="stRadio"] label {
-            font-size: 14px !important;
+            font-size: 12px !important;
             line-height: 1.4 !important;
         }
         </style>
