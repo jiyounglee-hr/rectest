@@ -334,36 +334,16 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # 페이지 전환 버튼 추가
-    resume_btn = st.button(
-        "🤖 이력서분석",
-        key="btn_resume",
-        type="primary" if current_page == "resume" else "secondary",
-        use_container_width=True
-    )
-    
-    interview1_btn = st.button(
-        "☝️ 1차 면접 질문",
-        key="btn_interview1",
-        type="primary" if current_page == "interview1" else "secondary",
-        use_container_width=True
-    )
-    
-    interview2_btn = st.button(
-        "✌️ 2차 면접 질문",
-        key="btn_interview2",
-        type="primary" if current_page == "interview2" else "secondary",
-        use_container_width=True
-    )
-
-    # 버튼 클릭 처리
-    if resume_btn:
-        st.query_params["page"] = "resume"
+    if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
+        st.query_params.update(page="resume")
         st.rerun()
-    elif interview1_btn:
-        st.query_params["page"] = "interview1"
+    
+    if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
+        st.query_params.update(page="interview1")
         st.rerun()
-    elif interview2_btn:
-        st.query_params["page"] = "interview2"
+    
+    if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
+        st.query_params.update(page="interview2")
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
