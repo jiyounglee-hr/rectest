@@ -340,52 +340,24 @@ with st.sidebar:
             background-color: #e6e6e6;
             border-color: #999;
         }
-        /* 라디오 버튼 스타일 수정 */
-        div[data-testid="stRadio"] label {
-            font-size: 12px !important;
-            line-height: 1.4 !important;
-        }
         </style>
     """, unsafe_allow_html=True)
 
-    # 메뉴 버튼 추가
-    page_options = {
-        "🤖 이력서분석": "resume",
-        "☝️ 1차 면접 질문": "interview1",
-        "✌️ 2차 면접 질문": "interview2"
-    }
+    # 페이지 전환 버튼 추가
+    if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
+        st.session_state['current_page'] = 'resume'
+        st.query_params.update(page='resume')
+        st.rerun()
     
-    # 현재 페이지에 해당하는 라디오 버튼 인덱스 계산
-    current_index = list(page_options.values()).index(st.session_state['current_page'])
+    if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
+        st.session_state['current_page'] = 'interview1'
+        st.query_params.update(page='interview1')
+        st.rerun()
     
-    # 라디오 버튼 표시 (disabled=True로 설정하여 선택 불가능하게 함)
-    selected_page = st.radio(
-        "",
-        list(page_options.keys()),
-        key="menu_radio",
-        horizontal=False,
-        label_visibility="collapsed",
-        index=current_index,
-        disabled=True
-    )
-    
-    # 페이지 전환 링크 생성
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("이력서분석", key="btn_resume"):
-            st.session_state['current_page'] = 'resume'
-            st.query_params.update(page='resume')
-            st.rerun()
-    with col2:
-        if st.button("1차 면접", key="btn_interview1"):
-            st.session_state['current_page'] = 'interview1'
-            st.query_params.update(page='interview1')
-            st.rerun()
-    with col3:
-        if st.button("2차 면접", key="btn_interview2"):
-            st.session_state['current_page'] = 'interview2'
-            st.query_params.update(page='interview2')
-            st.rerun()
+    if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
+        st.session_state['current_page'] = 'interview2'
+        st.query_params.update(page='interview2')
+        st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     
