@@ -622,17 +622,34 @@ if analyze_button:
                         if experience_years >= required_years:
                             fit_status = "부합"
                         else:
-                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
+                            remaining_years = required_years - int(experience_years)
+                            remaining_months = 12 - (int((experience_years % 1) * 12) if experience_years % 1 > 0 else 0)
+                            if remaining_months == 12:
+                                remaining_years += 1
+                                remaining_months = 0
+                            fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
                     elif experience_type == "range":
                         if required_years_min <= experience_years <= required_years_max:
                             fit_status = "부합"
                         else:
-                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
+                            if experience_years < required_years_min:
+                                remaining_years = required_years_min - int(experience_years)
+                                remaining_months = 12 - (int((experience_years % 1) * 12) if experience_years % 1 > 0 else 0)
+                                if remaining_months == 12:
+                                    remaining_years += 1
+                                    remaining_months = 0
+                                fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
+                            else:
+                                over_years = int(experience_years - required_years_max)
+                                over_months = int((experience_years % 1) * 12)
+                                fit_status = f"{over_years}년{f' {over_months}개월' if over_months > 0 else ''} 초과"
                     elif experience_type == "under":
                         if experience_years <= required_years:
                             fit_status = "부합"
                         else:
-                            fit_status = f"{st.session_state.experience_years}년{st.session_state.experience_months}개월 미부합"
+                            over_years = int(experience_years - required_years)
+                            over_months = int((experience_years % 1) * 12)
+                            fit_status = f"{over_years}년{f' {over_months}개월' if over_months > 0 else ''} 초과"
                     
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
