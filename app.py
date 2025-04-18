@@ -516,7 +516,7 @@ with left_col:
         else:
             job_description = ""
     
-    st.markdown('<div class="label-text">📝 경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
+    st.markdown('<div>📝 경력기간 산정 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
     
     experience_text = st.text_area(
         "",  # 레이블은 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
@@ -584,12 +584,7 @@ if analyze_button:
                 analysis_result = response.choices[0].message.content
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
-                if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
-                    st.write("📝 경력기간 산정 결과:")
-                    st.write(f"- 연도: {st.session_state.experience_years}년")
-                    st.write(f"- 개월: {st.session_state.experience_months}개월")
-                    st.write(f"- 소수점 연도: {st.session_state.experience_decimal_years}년")
-                    
+                if 'experience_years' in st.session_state and 'experience_months' in st.session_state:                    
                     # 채용공고에서 필수 경력 연차 추출
                     required_years = 0
                     if "경력" in job_description:
