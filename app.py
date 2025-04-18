@@ -355,18 +355,37 @@ with st.sidebar:
         "✌️ 2차 면접 질문": "interview2"
     }
     
+    # 현재 페이지에 해당하는 라디오 버튼 인덱스 계산
+    current_index = list(page_options.values()).index(st.session_state['current_page'])
+    
+    # 라디오 버튼 표시 (disabled=True로 설정하여 선택 불가능하게 함)
     selected_page = st.radio(
         "",
         list(page_options.keys()),
         key="menu_radio",
         horizontal=False,
         label_visibility="collapsed",
-        index=list(page_options.values()).index(st.session_state['current_page'])
+        index=current_index,
+        disabled=True
     )
     
-    # 선택된 페이지에 따라 상태 업데이트
-    st.session_state['current_page'] = page_options[selected_page]
-    st.query_params.update(page=st.session_state['current_page'])
+    # 페이지 전환 링크 생성
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("이력서분석", key="btn_resume"):
+            st.session_state['current_page'] = 'resume'
+            st.query_params.update(page='resume')
+            st.rerun()
+    with col2:
+        if st.button("1차 면접", key="btn_interview1"):
+            st.session_state['current_page'] = 'interview1'
+            st.query_params.update(page='interview1')
+            st.rerun()
+    with col3:
+        if st.button("2차 면접", key="btn_interview2"):
+            st.session_state['current_page'] = 'interview2'
+            st.query_params.update(page='interview2')
+            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     
