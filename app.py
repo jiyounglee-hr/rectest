@@ -277,7 +277,7 @@ def set_page_config():
     )
     
     # URL 파라미터 확인
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     if 'page' in query_params:
         page = query_params['page'][0]
         if page == 'resume':
@@ -289,7 +289,7 @@ def set_page_config():
     else:
         # 기본 페이지 설정
         st.session_state['current_page'] = 'resume'
-        st.experimental_set_query_params(page='resume')
+        st.query_params['page'] = 'resume'
 
 # 페이지 설정 호출
 set_page_config()
@@ -362,13 +362,13 @@ with st.sidebar:
     
     if selected_page == "🤖 이력서분석":
         st.session_state['current_page'] = 'resume'
-        st.experimental_set_query_params(page='resume')
+        st.query_params['page'] = 'resume'
     elif selected_page == "☝️ 1차 면접 질문":
         st.session_state['current_page'] = 'interview1'
-        st.experimental_set_query_params(page='interview1')
+        st.query_params['page'] = 'interview1'
     elif selected_page == "✌️ 2차 면접 질문":
         st.session_state['current_page'] = 'interview2'
-        st.experimental_set_query_params(page='interview2')
+        st.query_params['page'] = 'interview2'
 
     st.markdown("<br>", unsafe_allow_html=True)
     
