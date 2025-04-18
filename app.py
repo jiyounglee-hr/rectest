@@ -447,7 +447,7 @@ st.markdown("""
     <style>
         .label-text {
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 500;
             color: rgb(49, 51, 63);
             font-family: "Source Sans Pro", sans-serif;
             margin-bottom: 10px;
