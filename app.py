@@ -302,6 +302,32 @@ st.markdown("""
             padding-bottom: 10px;
             border-bottom: 2px solid #e0e0e0;
         }
+        /* 버튼 스타일 수정 */
+        .stButton button {
+            width: 120px !important;  /* 버튼 너비 고정 */
+            padding: 8px 12px !important;
+            margin: 5px 5px !important;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.9em !important;
+        }
+        .stButton button:hover {
+            background-color: #f0f0f0;
+        }
+        .stButton button[data-baseweb="button"][kind="primary"] {
+            background-color: #e6e6e6;
+            border-color: #999;
+        }
+        /* 버튼 컨테이너 스타일 */
+        .button-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -312,29 +338,9 @@ with st.sidebar:
     
     st.markdown("<div class='sidebar-title'>HR-채용</div>", unsafe_allow_html=True)
 
-    # 메뉴 버튼 스타일 추가
-    st.markdown("""
-        <style>
-        .stButton button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .stButton button:hover {
-            background-color: #f0f0f0;
-        }
-        .stButton button[data-baseweb="button"][kind="primary"] {
-            background-color: #e6e6e6;
-            border-color: #999;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
+    # 버튼 컨테이너 추가
+    st.markdown('<div class="button-container">', unsafe_allow_html=True)
+    
     # 페이지 전환 함수들
     def switch_to_resume():
         st.query_params["page"] = "resume"
@@ -349,25 +355,22 @@ with st.sidebar:
         st.session_state['current_page'] = 'interview2'
 
     # 페이지 전환 버튼 추가
-    col1, col2, col3 = st.columns(3)
+    st.button("🤖 이력서분석", 
+            key="btn_resume", 
+            on_click=switch_to_resume,
+            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
+
+    st.button("☝️ 1차 면접 질문", 
+            key="btn_interview1", 
+            on_click=switch_to_interview1,
+            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
+
+    st.button("✌️ 2차 면접 질문", 
+            key="btn_interview2", 
+            on_click=switch_to_interview2,
+            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
     
-    with col1:
-        st.button("🤖 이력서분석", 
-                key="btn_resume", 
-                on_click=switch_to_resume,
-                type="primary" if st.session_state['current_page'] == "resume" else "secondary")
-    
-    with col2:
-        st.button("☝️ 1차 면접 질문", 
-                key="btn_interview1", 
-                on_click=switch_to_interview1,
-                type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
-    
-    with col3:
-        st.button("✌️ 2차 면접 질문", 
-                key="btn_interview2", 
-                on_click=switch_to_interview2,
-                type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
