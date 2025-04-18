@@ -276,17 +276,17 @@ def set_page_config():
         initial_sidebar_state="expanded"
     )
     
+    # 세션 상태 초기화
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = 'resume'
+    
     # URL 파라미터 확인
-    page = st.query_params.get("page", ["resume"])[0]
-    if page == 'resume':
+    try:
+        page = st.query_params.get("page", ["resume"])[0]
+        if page in ['resume', 'interview1', 'interview2']:
+            st.session_state['current_page'] = page
+    except:
         st.session_state['current_page'] = 'resume'
-    elif page == 'interview1':
-        st.session_state['current_page'] = 'interview1'
-    elif page == 'interview2':
-        st.session_state['current_page'] = 'interview2'
-    else:
-        st.session_state['current_page'] = 'resume'
-        st.query_params.update(page='resume')
 
 # 페이지 설정 호출
 set_page_config()
@@ -349,28 +349,24 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # 메뉴 버튼 추가
+    page_options = {
+        "🤖 이력서분석": "resume",
+        "☝️ 1차 면접 질문": "interview1",
+        "✌️ 2차 면접 질문": "interview2"
+    }
+    
     selected_page = st.radio(
         "",
-        ["🤖 이력서분석", "☝️ 1차 면접 질문", "✌️ 2차 면접 질문"],
+        list(page_options.keys()),
         key="menu_radio",
         horizontal=False,
         label_visibility="collapsed",
-        index=["🤖 이력서분석", "☝️ 1차 면접 질문", "✌️ 2차 면접 질문"].index(
-            "🤖 이력서분석" if st.session_state['current_page'] == 'resume'
-            else "☝️ 1차 면접 질문" if st.session_state['current_page'] == 'interview1'
-            else "✌️ 2차 면접 질문"
-        )
+        index=list(page_options.values()).index(st.session_state['current_page'])
     )
     
-    if selected_page == "🤖 이력서분석":
-        st.session_state['current_page'] = 'resume'
-        st.query_params.update(page='resume')
-    elif selected_page == "☝️ 1차 면접 질문":
-        st.session_state['current_page'] = 'interview1'
-        st.query_params.update(page='interview1')
-    elif selected_page == "✌️ 2차 면접 질문":
-        st.session_state['current_page'] = 'interview2'
-        st.query_params.update(page='interview2')
+    # 선택된 페이지에 따라 상태 업데이트
+    st.session_state['current_page'] = page_options[selected_page]
+    st.query_params.update(page=st.session_state['current_page'])
 
     st.markdown("<br>", unsafe_allow_html=True)
     
