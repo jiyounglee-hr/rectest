@@ -262,11 +262,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 페이지 전환 함수
-def switch_page(page_name: str):
-    st.query_params["page"] = page_name
-    st.rerun()
-
 # URL 파라미터로 현재 페이지 설정
 try:
     current_page = st.query_params.get("page", ["resume"])[0]
@@ -318,7 +313,7 @@ with st.sidebar:
     # 메뉴 버튼 스타일 추가
     st.markdown("""
         <style>
-        .menu-button {
+        .stButton button {
             width: 100%;
             padding: 10px;
             margin: 5px 0;
@@ -328,10 +323,10 @@ with st.sidebar:
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .menu-button:hover {
+        .stButton button:hover {
             background-color: #f0f0f0;
         }
-        .menu-button.active {
+        .stButton button[data-baseweb="button"][kind="primary"] {
             background-color: #e6e6e6;
             border-color: #999;
         }
@@ -339,16 +334,37 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # 페이지 전환 버튼 추가
-    col1, col2, col3 = st.columns(3)
+    resume_btn = st.button(
+        "🤖 이력서분석",
+        key="btn_resume",
+        type="primary" if current_page == "resume" else "secondary",
+        use_container_width=True
+    )
     
-    if st.button("🤖 이력서분석", key="btn_resume", type="primary" if current_page == "resume" else "secondary", use_container_width=True):
-        switch_page("resume")
+    interview1_btn = st.button(
+        "☝️ 1차 면접 질문",
+        key="btn_interview1",
+        type="primary" if current_page == "interview1" else "secondary",
+        use_container_width=True
+    )
     
-    if st.button("☝️ 1차 면접 질문", key="btn_interview1", type="primary" if current_page == "interview1" else "secondary", use_container_width=True):
-        switch_page("interview1")
-    
-    if st.button("✌️ 2차 면접 질문", key="btn_interview2", type="primary" if current_page == "interview2" else "secondary", use_container_width=True):
-        switch_page("interview2")
+    interview2_btn = st.button(
+        "✌️ 2차 면접 질문",
+        key="btn_interview2",
+        type="primary" if current_page == "interview2" else "secondary",
+        use_container_width=True
+    )
+
+    # 버튼 클릭 처리
+    if resume_btn:
+        st.query_params["page"] = "resume"
+        st.rerun()
+    elif interview1_btn:
+        st.query_params["page"] = "interview1"
+        st.rerun()
+    elif interview2_btn:
+        st.query_params["page"] = "interview2"
+        st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     
