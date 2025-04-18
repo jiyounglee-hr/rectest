@@ -578,7 +578,13 @@ if analyze_button:
                         {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                     ]
                 )
-                st.session_state.analysis_result = response.choices[0].message.content
+                analysis_result = response.choices[0].message.content
+                
+                # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
+                if 'total_decimal_years' in locals() and total_decimal_years is not None:
+                    analysis_result = analysis_result.replace("[총 경력 연월]", f"{total_decimal_years}년")
+                
+                st.session_state.analysis_result = analysis_result
             except Exception as e:
                 st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
     else:
