@@ -265,7 +265,24 @@ if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
 
 # 페이지 설정
-st.set_page_config(page_title="뉴로핏 채용 - 이력서 분석", layout="wide")
+def set_page_config():
+    st.set_page_config(
+        page_title="HR Resume Analyzer",
+        page_icon="📄",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    
+    # URL 파라미터 확인
+    query_params = st.experimental_get_query_params()
+    if 'page' in query_params:
+        page = query_params['page'][0]
+        if page == 'resume':
+            st.session_state['current_page'] = 'resume'
+        elif page == 'interview1':
+            st.session_state['current_page'] = 'interview1'
+        elif page == 'interview2':
+            st.session_state['current_page'] = 'interview2'
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -338,10 +355,13 @@ with st.sidebar:
     
     if selected_page == "🤖 이력서분석":
         st.session_state['current_page'] = 'resume'
+        st.experimental_set_query_params(page='resume')
     elif selected_page == "☝️ 1차 면접 질문":
         st.session_state['current_page'] = 'interview1'
+        st.experimental_set_query_params(page='interview1')
     elif selected_page == "✌️ 2차 면접 질문":
         st.session_state['current_page'] = 'interview2'
+        st.experimental_set_query_params(page='interview2')
 
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -729,7 +749,8 @@ elif st.session_state['current_page'] == 'interview1':
             7~10번은 핵심가치 기반의 '[도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다'와 관련된 사례 질문
         </small>
     """, unsafe_allow_html=True)
-
+    
+    st.markdown("---")
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
