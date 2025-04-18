@@ -254,19 +254,6 @@ def calculate_experience(experience_text):
     
     return result, total_years, total_remaining_months, total_decimal_years
 
-# 세션 상태 초기화
-if 'analysis_result' not in st.session_state:
-    st.session_state['analysis_result'] = None
-if 'interview_questions' not in st.session_state:
-    st.session_state['interview_questions'] = None
-if 'job_description' not in st.session_state:
-    st.session_state['job_description'] = None
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
-
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
 # 페이지 설정
 def set_page_config():
     st.set_page_config(
@@ -275,25 +262,29 @@ def set_page_config():
         layout="wide",
         initial_sidebar_state="expanded"
     )
-    
-    # 세션 상태 초기화
-    if 'current_page' not in st.session_state:
-        st.session_state['current_page'] = 'resume'
-    
-    # URL 파라미터 확인
-    try:
-        page = st.query_params.get("page", ["resume"])[0]
-        if page in ['resume', 'interview1', 'interview2']:
-            st.session_state['current_page'] = page
-            # 페이지가 변경되었을 때 강제로 새로고침
-            if st.session_state.get('last_page') != page:
-                st.session_state['last_page'] = page
-                st.rerun()
-    except:
-        st.session_state['current_page'] = 'resume'
 
 # 페이지 설정 호출
 set_page_config()
+
+# URL 파라미터 확인 및 페이지 상태 설정
+try:
+    page = st.query_params.get("page", ["resume"])[0]
+    if page in ['resume', 'interview1', 'interview2']:
+        st.session_state['current_page'] = page
+except:
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = 'resume'
+
+# 세션 상태 초기화
+if 'analysis_result' not in st.session_state:
+    st.session_state['analysis_result'] = None
+if 'interview_questions' not in st.session_state:
+    st.session_state['interview_questions'] = None
+if 'job_description' not in st.session_state:
+    st.session_state['job_description'] = None
+
+# OpenAI API 키 설정
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # 사이드바 스타일 수정
 st.markdown("""
