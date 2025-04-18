@@ -266,6 +266,16 @@ def set_page_config():
 # 페이지 설정 호출
 set_page_config()
 
+# 세션 상태 초기화
+if 'current_page' not in st.session_state:
+    st.session_state['current_page'] = 'resume'
+if 'analysis_result' not in st.session_state:
+    st.session_state['analysis_result'] = None
+if 'interview_questions' not in st.session_state:
+    st.session_state['interview_questions'] = None
+if 'job_description' not in st.session_state:
+    st.session_state['job_description'] = None
+
 # URL 파라미터로 현재 페이지 설정
 try:
     current_page = st.query_params.get("page", ["resume"])[0]
@@ -273,17 +283,8 @@ try:
         st.session_state['current_page'] = current_page
         # URL 파라미터 유지
         st.query_params["page"] = current_page
-except:
-    if 'current_page' not in st.session_state:
-        st.session_state['current_page'] = 'resume'
-
-# 세션 상태 초기화
-if 'analysis_result' not in st.session_state:
-    st.session_state['analysis_result'] = None
-if 'interview_questions' not in st.session_state:
-    st.session_state['interview_questions'] = None
-if 'job_description' not in st.session_state:
-    st.session_state['job_description'] = None
+except Exception as e:
+    st.session_state['current_page'] = 'resume'
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -502,7 +503,9 @@ job_descriptions = {
 }
 
 # 현재 페이지에 따른 내용 표시
-if st.session_state['current_page'] == 'resume':
+current_page = st.session_state.get('current_page', 'resume')
+
+if current_page == 'resume':
     # 기존의 이력서 분석 페이지 내용
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
@@ -727,7 +730,7 @@ if st.session_state['current_page'] == 'resume':
         st.text_area("분석 결과", st.session_state.analysis_result, height=400)
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif st.session_state['current_page'] == 'interview1':
+elif current_page == 'interview1':
     # URL 파라미터 유지
     st.query_params["page"] = "interview1"
     
@@ -794,7 +797,7 @@ elif st.session_state['current_page'] == 'interview1':
         st.text_area("면접 질문", st.session_state.interview_questions, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif st.session_state['current_page'] == 'interview2':
+elif current_page == 'interview2':
     # URL 파라미터 유지
     st.query_params["page"] = "interview2"
     
