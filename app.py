@@ -264,6 +264,9 @@ if 'job_description' not in st.session_state:
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
 
+# OpenAI API 키 설정
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
 # 페이지 설정
 def set_page_config():
     st.set_page_config(
@@ -283,9 +286,13 @@ def set_page_config():
             st.session_state['current_page'] = 'interview1'
         elif page == 'interview2':
             st.session_state['current_page'] = 'interview2'
+    else:
+        # 기본 페이지 설정
+        st.session_state['current_page'] = 'resume'
+        st.experimental_set_query_params(page='resume')
 
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# 페이지 설정 호출
+set_page_config()
 
 # 사이드바 스타일 수정
 st.markdown("""
