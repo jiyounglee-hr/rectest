@@ -272,13 +272,13 @@ if 'interview_questions' not in st.session_state:
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 
-# URL 파라미터 확인 및 세션 상태 업데이트
-try:
-    page_param = st.query_params.get("page", ["resume"])[0]
-    if page_param in ['resume', 'interview1', 'interview2']:
-        st.session_state['current_page'] = page_param
-except Exception:
-    st.session_state['current_page'] = 'resume'
+# URL 파라미터 처리
+page_param = st.query_params.get("page", "resume")
+valid_pages = ['resume', 'interview1', 'interview2']
+
+# URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
+if isinstance(page_param, str) and page_param in valid_pages:
+    st.session_state['current_page'] = page_param
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -337,16 +337,16 @@ with st.sidebar:
 
     # 페이지 전환 함수들
     def switch_to_resume():
-        st.session_state['current_page'] = 'resume'
         st.query_params["page"] = "resume"
+        st.session_state['current_page'] = 'resume'
 
     def switch_to_interview1():
-        st.session_state['current_page'] = 'interview1'
         st.query_params["page"] = "interview1"
+        st.session_state['current_page'] = 'interview1'
 
     def switch_to_interview2():
-        st.session_state['current_page'] = 'interview2'
         st.query_params["page"] = "interview2"
+        st.session_state['current_page'] = 'interview2'
 
     # 페이지 전환 버튼 추가
     col1, col2, col3 = st.columns(3)
