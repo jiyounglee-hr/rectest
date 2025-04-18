@@ -447,10 +447,10 @@ st.markdown("""
     <style>
         .label-text {
             font-size: 15px;
-            font-weight: normal;
+            font-weight: semi-bold;
             color: rgb(49, 51, 63);
             font-family: "Source Sans Pro", sans-serif;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: block;
         }
         .stTextArea textarea {
