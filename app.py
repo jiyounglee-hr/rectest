@@ -311,8 +311,9 @@ st.markdown("""
             border-radius: 5px;
             background-color: white;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             font-size: 0.9em !important;
+            color: rgb(49, 51, 63) !important;
         }
         [data-testid="stSidebar"] .stButton button:hover {
             background-color: #f0f0f0;
@@ -320,6 +321,7 @@ st.markdown("""
         [data-testid="stSidebar"] .stButton button[data-baseweb="button"][kind="primary"] {
             background-color: #e6e6e6;
             border-color: #999;
+            color: rgb(49, 51, 63) !important;
         }
         /* 사이드바 버튼 컨테이너 스타일 */
         [data-testid="stSidebar"] .button-container {
