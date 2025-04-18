@@ -680,15 +680,15 @@ if analyze_button:
                     
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
                     experience_patterns = [
-                        r"- 총 경력 기간:.*",
-                        r"- 총 경력기간:.*"
+                        r"ㆍ총 경력 기간:.*",
+                        r"ㆍ총 경력기간:.*"
                     ]
                     
                     # 경력 요건이 없는 경우와 있는 경우 분리
                     if not experience_type:
-                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
+                        replacement = f"ㆍ총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
                     else:
-                        replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 ({fit_status})"
+                        replacement = f"ㆍ총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 ({fit_status})"
                     
                     for pattern in experience_patterns:
                         analysis_result = re.sub(pattern, replacement, analysis_result)
