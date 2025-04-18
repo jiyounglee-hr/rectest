@@ -273,9 +273,12 @@ if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 
 # URL 파라미터 확인 및 세션 상태 업데이트
-params = st.query_params.get("page", ["resume"])[0]
-if params in ['resume', 'interview1', 'interview2']:
-    st.session_state['current_page'] = params
+try:
+    page_param = st.query_params.get("page", ["resume"])[0]
+    if page_param in ['resume', 'interview1', 'interview2']:
+        st.session_state['current_page'] = page_param
+except Exception:
+    st.session_state['current_page'] = 'resume'
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
