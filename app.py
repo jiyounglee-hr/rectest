@@ -246,13 +246,16 @@ def calculate_experience(experience_text):
     total_remaining_months = total_months % 12
     total_decimal_years = round(total_months / 12, 1)
     
+    # 경력기간 정보를 세션 상태에 저장
+    st.session_state.experience_years = total_years
+    st.session_state.experience_months = total_remaining_months
+    st.session_state.experience_decimal_years = total_decimal_years
+    
     # 결과 문자열 생성
     result = ""
     if experience_periods:
         result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n"
         result += "\n".join(experience_periods)
-        
-
     
     return result
 
@@ -529,11 +532,6 @@ with left_col:
         try:
             result = calculate_experience(experience_text)
             st.text(result)
-            
-            # 경력기간 정보를 세션 상태에 저장
-            if 'total_years' in locals() and 'total_remaining_months' in locals():
-                st.session_state.experience_years = total_years
-                st.session_state.experience_months = total_remaining_months
         except Exception as e:
             st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
