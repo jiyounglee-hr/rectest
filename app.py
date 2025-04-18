@@ -527,8 +527,13 @@ with left_col:
 
     if experience_text:
         try:
-            result = calculate_experience(experience_text)        
+            result = calculate_experience(experience_text)
             st.text(result)
+            
+            # 경력기간 정보를 세션 상태에 저장
+            if 'total_years' in locals() and 'total_remaining_months' in locals():
+                st.session_state.experience_years = total_years
+                st.session_state.experience_months = total_remaining_months
         except Exception as e:
             st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
@@ -581,8 +586,11 @@ if analyze_button:
                 analysis_result = response.choices[0].message.content
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
-                if 'total_decimal_years' in locals() and total_decimal_years is not None:
-                    analysis_result = analysis_result.replace("[총 경력 연월]", f"총 {total_years}년 {total_remaining_months}개월 (1순위 경력기간 산정에 의한 값, 2순위 결과값)")
+                if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
+                    analysis_result = analysis_result.replace(
+                        "[총 경력 연월]", 
+                        f"총 {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정에 의한 값, 2순위 결과값)"
+                    )
                 
                 st.session_state.analysis_result = analysis_result
             except Exception as e:
