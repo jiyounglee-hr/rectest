@@ -589,7 +589,7 @@ if analyze_button:
                 if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
                     analysis_result = analysis_result.replace(
                         "[총 경력 연월]", 
-                        f"총 {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정에 의한 값, 2순위 결과값)"
+                        f"총 {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정 결과가 있는 경우, 2순위 분석결과값)"
                     )
                 
                 st.session_state.analysis_result = analysis_result
