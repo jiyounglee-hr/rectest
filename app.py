@@ -527,7 +527,7 @@ with left_col:
     if experience_text:
         try:
             result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
-            st.success("조회결과", result)
+            st.text_area("조회결과", result)
             # 경력기간 정보를 세션 상태에 저장
             st.session_state.experience_years = total_years
             st.session_state.experience_months = total_remaining_months
