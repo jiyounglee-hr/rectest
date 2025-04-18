@@ -585,6 +585,11 @@ if analyze_button:
                 
                 # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
                 if 'experience_years' in st.session_state and 'experience_months' in st.session_state:
+                    st.write("📝 경력기간 산정 결과:")
+                    st.write(f"- 연도: {st.session_state.experience_years}년")
+                    st.write(f"- 개월: {st.session_state.experience_months}개월")
+                    st.write(f"- 소수점 연도: {st.session_state.experience_decimal_years}년")
+                    
                     analysis_result = analysis_result.replace(
                         "[총 경력 연월]", 
                         f"총 {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정 결과가 있는 경우, 2순위 분석결과값)"
