@@ -323,11 +323,19 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # 메뉴 버튼 추가
-    if st.button("🤖 이력서분석", key="menu_resume"):
+    selected_page = st.radio(
+        "",
+        ["🤖 이력서분석", "☝️ 1차 면접 질문", "✌️ 2차 면접 질문"],
+        key="menu_radio",
+        horizontal=False,
+        label_visibility="collapsed"
+    )
+    
+    if selected_page == "🤖 이력서분석":
         st.session_state['current_page'] = 'resume'
-    if st.button("☝️ 1차 면접 질문", key="menu_interview1"):
+    elif selected_page == "☝️ 1차 면접 질문":
         st.session_state['current_page'] = 'interview1'
-    if st.button("✌️ 2차 면접 질문", key="menu_interview2"):
+    elif selected_page == "✌️ 2차 면접 질문":
         st.session_state['current_page'] = 'interview2'
 
     st.markdown("<br>", unsafe_allow_html=True)
