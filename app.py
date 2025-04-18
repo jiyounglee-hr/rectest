@@ -591,9 +591,17 @@ if analyze_button:
                     st.write(f"- 소수점 연도: {st.session_state.experience_decimal_years}년")
                     
                     # 분석 결과에서 경력기간 부분을 찾아서 교체
-                    experience_pattern = r"- 총 경력 기간: \[총 경력 연월\]"
-                    replacement = f"- 총 경력 기간: 총 {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정 결과가 있는 경우, 2순위 분석결과값)"
-                    analysis_result = re.sub(experience_pattern, replacement, analysis_result)
+                    experience_patterns = [
+                        r"- 총 경력 기간: \[총 경력 연월\]",
+                        r"- 총 경력 기간: .*년.*개월",
+                        r"- 총 경력기간: \[총 경력 연월\]",
+                        r"- 총 경력기간: .*년.*개월"
+                    ]
+                    
+                    replacement = f"- 총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 (1순위 경력기간 산정 결과가 있는 경우, 2순위 분석결과값)"
+                    
+                    for pattern in experience_patterns:
+                        analysis_result = re.sub(pattern, replacement, analysis_result)
                 
                 st.session_state.analysis_result = analysis_result
             except Exception as e:
