@@ -319,6 +319,11 @@ with st.sidebar:
             background-color: #e6e6e6;
             border-color: #999;
         }
+        /* 라디오 버튼 스타일 수정 */
+        div[data-testid="stRadio"] label {
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
