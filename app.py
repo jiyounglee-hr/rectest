@@ -263,11 +263,8 @@ st.set_page_config(
 )
 
 # URL 파라미터로 현재 페이지 설정
-try:
-    current_page = st.query_params.get("page", ["resume"])[0]
-    if current_page not in ['resume', 'interview1', 'interview2']:
-        current_page = 'resume'
-except:
+current_page = st.query_params.get("page", ["resume"])[0]
+if current_page not in ['resume', 'interview1', 'interview2']:
     current_page = 'resume'
 
 # 세션 상태 초기화
@@ -335,15 +332,15 @@ with st.sidebar:
 
     # 페이지 전환 버튼 추가
     if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
-        st.query_params.update(page="resume")
+        st.query_params["page"] = "resume"
         st.rerun()
     
     if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
-        st.query_params.update(page="interview1")
+        st.query_params["page"] = "interview1"
         st.rerun()
     
     if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
-        st.query_params.update(page="interview2")
+        st.query_params["page"] = "interview2"
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -492,8 +489,7 @@ job_descriptions = {
 }
 
 # 현재 페이지에 따른 내용 표시
-if current_page == 'resume':
-    # 기존의 이력서 분석 페이지 내용
+if current_page == "resume":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             🤖 이력서분석
@@ -717,7 +713,7 @@ if current_page == 'resume':
         st.text_area("분석 결과", st.session_state.analysis_result, height=400)
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif current_page == 'interview1':
+elif current_page == "interview1":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ☝️ 1차 면접 질문
@@ -781,7 +777,7 @@ elif current_page == 'interview1':
         st.text_area("면접 질문", st.session_state.interview_questions, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif current_page == 'interview2':
+elif current_page == "interview2":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
             ✌️ 2차 면접 질문
