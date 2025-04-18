@@ -266,15 +266,6 @@ def set_page_config():
 # 페이지 설정 호출
 set_page_config()
 
-# URL 파라미터 확인 및 페이지 상태 설정
-try:
-    page = st.query_params.get("page", ["resume"])[0]
-    if page in ['resume', 'interview1', 'interview2']:
-        st.session_state['current_page'] = page
-except:
-    if 'current_page' not in st.session_state:
-        st.session_state['current_page'] = 'resume'
-
 # 세션 상태 초기화
 if 'analysis_result' not in st.session_state:
     st.session_state['analysis_result'] = None
@@ -282,6 +273,13 @@ if 'interview_questions' not in st.session_state:
     st.session_state['interview_questions'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
+if 'current_page' not in st.session_state:
+    st.session_state['current_page'] = 'resume'
+
+# URL 파라미터로 현재 페이지 설정
+current_page = st.query_params.get("page", ["resume"])[0]
+if current_page in ['resume', 'interview1', 'interview2']:
+    st.session_state['current_page'] = current_page
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -340,18 +338,18 @@ with st.sidebar:
 
     # 페이지 전환 버튼 추가
     if st.button("🤖 이력서분석", key="btn_resume", use_container_width=True):
+        st.query_params["page"] = "resume"
         st.session_state['current_page'] = 'resume'
-        st.query_params.update(page='resume')
         st.rerun()
     
     if st.button("☝️ 1차 면접 질문", key="btn_interview1", use_container_width=True):
+        st.query_params["page"] = "interview1"
         st.session_state['current_page'] = 'interview1'
-        st.query_params.update(page='interview1')
         st.rerun()
     
     if st.button("✌️ 2차 면접 질문", key="btn_interview2", use_container_width=True):
+        st.query_params["page"] = "interview2"
         st.session_state['current_page'] = 'interview2'
-        st.query_params.update(page='interview2')
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
