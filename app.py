@@ -634,9 +634,9 @@ if st.session_state['current_page'] == "resume":
 
     # 오른쪽 컬럼: 이력서 내용
     with right_col:
-        if uploaded_file:
+        if 'resume_text' in st.session_state and st.session_state.resume_text:
             st.markdown('<div class="label-text">📄 이력서 내용 </div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="resume-text">{st.session_state.resume_text}</div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
