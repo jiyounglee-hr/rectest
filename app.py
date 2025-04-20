@@ -452,73 +452,62 @@ with st.sidebar:
 
 # 채용공고 데이터
 job_descriptions = {
-    "ra_manager": {
-        "title": "의료기기 인허가(RA) 팀장",
-        "url": "https://career.neurophet.com/1d29976c-730b-80b6-92b2-d8cd39bfbfd9",
-        "responsibilities": [
-            "국내외 의료기기 인허가 (MFDS, FDA, CE, MHLW 등) 및 사후관리",
-            "국가별 기술문서 작성 및 최신화",
-            "국가별 의료기기 규제 요구사항 분석",
-            "의료기기법/규격/가이던스 변경사항 모니터링",
-            "품질시스템 심사 대응 (ISO 13485, KGMP, MDSAP 등)"
-        ],
-        "required_qualifications": [
-            "의료기기 제품 인허가 업무경력 7년~15년",
-            "의료기기 인증팀 관리 경험",
-            "SaMD, SiMD, 전기전자 의료기기 인허가 경험",
-            "영어 중급 이상 (Reading & Writing 필수)"
-        ],
-        "preferred_qualifications": [
-            "3등급 SW 의료기기 허가 경험",
-            "의료기기 개발 프로세스에 대한 이해",
-            "의료기기 RA(의료기기 규제과학 전문가) 자격증 소지자"
-        ]
-    },
-    "marketing": {
-        "title": "의료 AI 솔루션 마케팅",
-        "url": "",
-        "responsibilities": [
-            "의료 AI 솔루션 마케팅 전략 수립 및 실행",
-            "제품 포지셔닝 및 가치 제안",
-            "디지털 마케팅 캠페인 기획 및 실행",
-            "마케팅 성과 분석 및 보고"
-        ],
-        "required_qualifications": [
-            "의료기기/헬스케어 마케팅 경력 3년 이상",
-            "디지털 마케팅 전략 수립 및 실행 경험",
-            "데이터 기반 마케팅 성과 분석 능력"
-        ],
-        "preferred_qualifications": [
-            "AI/의료 분야 이해도 보유",
-            "글로벌 마케팅 경험",
-            "의료진 대상 마케팅 경험"
-        ]
-    },
-    "japan_head": {
-        "title": "일본 법인장",
-        "url": "",
-        "responsibilities": [
-            "일본 법인 총괄 및 운영 관리",
-            "일본 시장 사업 전략 수립 및 실행",
-            "현지 영업/마케팅 조직 구축 및 관리",
-            "일본 시장 매출 및 수익성 관리"
-        ],
-        "required_qualifications": [
-            "일본 의료기기 시장 경력 10년 이상",
-            "의료기기 기업 임원급 경험 보유",
-            "일본어 비즈니스 레벨 이상"
-        ],
-        "preferred_qualifications": [
-            "AI 의료기기 관련 경험",
-            "일본 의료기기 인허가 경험",
-            "글로벌 기업 경영 경험"
-        ]
-    }
-}
+    "ra_manager": """[의료기기 인허가(RA) 팀장]
 
-# 세션 상태에 채용공고 데이터 초기화
-if 'current_job_description' not in st.session_state:
-    st.session_state['current_job_description'] = None
+담당업무
+- 국내외 의료기기 인허가 (MFDS, FDA, CE, MHLW 등) 및 사후관리
+- 국가별 기술문서 작성 및 최신화
+- 국가별 의료기기 규제 요구사항 분석
+- 의료기기법/규격/가이던스 변경사항 모니터링
+- 품질시스템 심사 대응 (ISO 13485, KGMP, MDSAP 등)
+
+필수자격
+- 제품 인허가 업무경력 7년이상
+- 의료기기 인증팀 관리 경험
+- SaMD, SiMD, 전기전자 의료기기 인허가 경험
+- 영어 중급 이상 (Reading & Writing 필수)
+
+우대사항
+- 3등급 SW 의료기기 허가 경험
+- 의료기기 개발 프로세스에 대한 이해
+- 의료기기 RA(의료기기 규제과학 전문가) 자격증 소지자""",
+    
+    "marketing": """[의료 AI 솔루션 마케팅(3~6년)]
+
+담당업무
+- 의료 AI 솔루션 마케팅 전략 수립 및 실행
+- 제품 포지셔닝 및 가치 제안
+- 디지털 마케팅 캠페인 기획 및 실행
+- 마케팅 성과 분석 및 보고
+
+필수자격
+- 의료기기/헬스케어 마케팅 경력 3년 이상
+- 디지털 마케팅 전략 수립 및 실행 경험
+- 데이터 기반 마케팅 성과 분석 능력
+
+우대사항
+- AI/의료 분야 이해도 보유
+- 글로벌 마케팅 경험
+- 의료진 대상 마케팅 경험""",
+    
+    "japan_head": """[일본 법인장]
+
+담당업무
+- 일본 법인 총괄 및 운영 관리
+- 일본 시장 사업 전략 수립 및 실행
+- 현지 영업/마케팅 조직 구축 및 관리
+- 일본 시장 매출 및 수익성 관리
+
+필수자격
+- 일본 의료기기 시장 경력 10년 이상
+- 의료기기 기업 임원급 경험 보유
+- 일본어 비즈니스 레벨 이상
+
+우대사항
+- AI 의료기기 관련 경험
+- 일본 의료기기 인허가 경험
+- 글로벌 기업 경영 경험"""
+}
 
 # 현재 페이지에 따른 내용 표시
 if st.session_state['current_page'] == "resume":
@@ -533,88 +522,44 @@ if st.session_state['current_page'] == "resume":
 
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
-        # 채용공고 선택을 위한 매핑 생성
-        job_options = {
-            "선택해주세요": None,
-            "의료기기 인허가(RA) 팀장": "ra_manager",
-            "의료 AI 솔루션 마케팅": "marketing",
-            "일본 법인장": "japan_head",
-            "직접 입력": "custom"
-        }
-        
-        # 채용공고 선택
-        selected_job = st.selectbox(
-            "채용공고 선택",
-            options=list(job_options.keys())
+        job_option = st.selectbox(
+            "채용공고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
+            ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
         )
-        
-        if selected_job == "선택해주세요":
-            st.warning("채용공고를 선택해주세요.")
-        elif selected_job == "직접 입력":
-            job_url = st.text_input("채용공고 URL")
-            responsibilities = st.text_area("담당업무 (각 항목을 새 줄로 구분)", height=150)
-            required_quals = st.text_area("필수자격 (각 항목을 새 줄로 구분)", height=150)
-            preferred_quals = st.text_area("우대사항 (각 항목을 새 줄로 구분)", height=150)
-            
-            if st.button("저장"):
-                # 텍스트 영역의 내용을 리스트로 변환
-                responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
-                required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
-                preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
-                
-                # 세션 상태에 저장
-                st.session_state['current_job_description'] = {
-                    "url": job_url,
-                    "responsibilities": responsibilities_list,
-                    "required_qualifications": required_quals_list,
-                    "preferred_qualifications": preferred_quals_list
-                }
-                st.success("채용공고가 저장되었습니다.")
+
+        if job_option == "직접 입력":
+            job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
-            # 선택된 채용공고의 키 값 가져오기
-            selected_job_key = job_options[selected_job]
-            job_data = job_descriptions[selected_job_key]
-            st.session_state['current_job_description'] = job_data
-            
-            with st.expander("채용공고 내용 확인 및 수정", expanded=True):
-                st.markdown("#### 🔗 채용공고 링크")
-                st.markdown(f"[채용공고 바로가기]({job_data['url']})" if job_data['url'] else "링크 없음")
-                
-                st.markdown("#### 📝 담당업무")
-                responsibilities = st.text_area(
-                    "각 항목을 새 줄로 구분",
-                    value='\n'.join(job_data['responsibilities']),
-                    height=150
+            job_map = {
+                "의료기기 인허가(RA) 팀장": "ra_manager",
+                "의료 AI 솔루션 마케팅": "marketing",
+                "일본 법인장": "japan_head"
+            }
+            if job_option in job_map:
+                default_description = job_descriptions[job_map[job_option]]
+                job_description = st.text_area(
+                    "- 채용공고 내용 (필요시 수정 가능합니다)",
+                    value=default_description,
+                    height=220
                 )
+            else:
+                job_description = ""
+        experience_text = st.text_area(
+            "- 경력기간 입력",  
+            height=120
+        )
+
+        if experience_text:
+            try:
+                result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
+                st.markdown(f'<div class="resume-text">{result}</div>', unsafe_allow_html=True)
                 
-                st.markdown("#### ✅ 필수자격")
-                required_quals = st.text_area(
-                    "각 항목을 새 줄로 구분",
-                    value='\n'.join(job_data['required_qualifications']),
-                    height=150
-                )
-                
-                st.markdown("#### 🎯 우대사항")
-                preferred_quals = st.text_area(
-                    "각 항목을 새 줄로 구분",
-                    value='\n'.join(job_data['preferred_qualifications']),
-                    height=150
-                )
-                
-                if st.button("수정사항 저장"):
-                    # 텍스트 영역의 내용을 리스트로 변환
-                    responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
-                    required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
-                    preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
-                    
-                    # 세션 상태에 저장
-                    st.session_state['current_job_description'] = {
-                        "url": job_data['url'],
-                        "responsibilities": responsibilities_list,
-                        "required_qualifications": required_quals_list,
-                        "preferred_qualifications": preferred_quals_list
-                    }
-                    st.success("수정사항이 저장되었습니다.")
+                # 경력기간 정보를 세션 상태에 저장
+                st.session_state.experience_years = total_years
+                st.session_state.experience_months = total_remaining_months
+                st.session_state.experience_decimal_years = total_decimal_years
+            except Exception as e:
+                st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
     # 오른쪽 컬럼: 이력서 내용
     with right_col:
@@ -635,7 +580,7 @@ if st.session_state['current_page'] == "resume":
 
     # 분석 로직
     if analyze_button:
-        if uploaded_file is not None and st.session_state.current_job_description:
+        if uploaded_file is not None and job_description:
             with st.spinner("이력서를 분석중입니다..."):
                 try:
                     # 이미 추출된 텍스트 사용
@@ -671,7 +616,7 @@ if st.session_state['current_page'] == "resume":
 - "없다"고 단정하지 말고, '명확히 나타나지 않음' / '구체적인 내용 부족' / '경험이 불분명함' 등 완곡하고 객관적인 표현을 사용해 주세요.
 - 경력 연수나 특정 인증, 시스템 경험 등이 불충분하거나 확인 어려운 경우 구체적으로 짚어주세요.
 - 최대 5개 이내의 항목으로 간결하게 정리해주세요."""},
-                            {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{st.session_state.current_job_description['responsibilities']}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
+                            {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                         ]
                     )
                     analysis_result = response.choices[0].message.content
@@ -684,7 +629,7 @@ if st.session_state['current_page'] == "resume":
                         required_years_max = 0
                         experience_type = None
                         
-                        if "경력" in st.session_state.current_job_description['responsibilities']:
+                        if "경력" in job_description:
                             # 1. x년 이상 패턴
                             pattern_over = r'경력\s*(\d+)년\s*이상'
                             # 2. x~y년 패턴
@@ -692,14 +637,14 @@ if st.session_state['current_page'] == "resume":
                             # 3. x년 미만/이하 패턴
                             pattern_under = r'경력\s*(\d+)년\s*(미만|이하|이내)'
                             
-                            if match := re.search(pattern_over, st.session_state.current_job_description['responsibilities']):
+                            if match := re.search(pattern_over, job_description):
                                 required_years = int(match.group(1))
                                 experience_type = "over"
-                            elif match := re.search(pattern_range, st.session_state.current_job_description['responsibilities']):
+                            elif match := re.search(pattern_range, job_description):
                                 required_years_min = int(match.group(1))
                                 required_years_max = int(match.group(2))
                                 experience_type = "range"
-                            elif match := re.search(pattern_under, st.session_state.current_job_description['responsibilities']):
+                            elif match := re.search(pattern_under, job_description):
                                 required_years = int(match.group(1))
                                 experience_type = "under"
                         
@@ -791,95 +736,14 @@ elif st.session_state['current_page'] == "interview1":
             ☝️ 1차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
+    st.markdown("""
+        <small style='color: #666666;'>
+            1~6번은 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문<br>
+            7~10번은 핵심가치 기반의 '[도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다'와 관련된 사례 질문
+        </small>
+    """, unsafe_allow_html=True)
     
-    # 채용공고 선택 및 수정 섹션
-    st.markdown("### 📋 채용공고 선택")
-    
-    # 채용공고 선택을 위한 매핑 생성
-    job_options = {
-        "의료기기 인허가(RA) 팀장": "ra_manager",
-        "의료 AI 솔루션 마케팅": "marketing",
-        "일본 법인장": "japan_head",
-        "직접 입력": "custom"
-    }
-    
-    # 채용공고 선택
-    selected_job = st.selectbox(
-        "채용공고를 선택해주세요",
-        options=list(job_options.keys())
-    )
-    
-    # 선택된 채용공고의 키 값 가져오기
-    selected_job_key = job_options[selected_job]
-    
-    if selected_job_key == "custom":
-        # 직접 입력 폼
-        job_url = st.text_input("채용공고 URL")
-        responsibilities = st.text_area("담당업무 (각 항목을 새 줄로 구분)", height=150)
-        required_quals = st.text_area("필수자격 (각 항목을 새 줄로 구분)", height=150)
-        preferred_quals = st.text_area("우대사항 (각 항목을 새 줄로 구분)", height=150)
-        
-        if st.button("저장"):
-            # 텍스트 영역의 내용을 리스트로 변환
-            responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
-            required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
-            preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
-            
-            # 세션 상태에 저장
-            st.session_state['current_job_description'] = {
-                "url": job_url,
-                "responsibilities": responsibilities_list,
-                "required_qualifications": required_quals_list,
-                "preferred_qualifications": preferred_quals_list
-            }
-            st.success("채용공고가 저장되었습니다.")
-    else:
-        # 기존 채용공고 표시 및 수정
-        job_data = job_descriptions[selected_job_key]
-        st.session_state['current_job_description'] = job_data
-        
-        with st.expander("채용공고 내용 확인 및 수정", expanded=True):
-            st.markdown("#### 🔗 채용공고 링크")
-            st.markdown(f"[채용공고 바로가기]({job_data['url']})" if job_data['url'] else "링크 없음")
-            
-            st.markdown("#### 📝 담당업무")
-            responsibilities = st.text_area(
-                "각 항목을 새 줄로 구분",
-                value='\n'.join(job_data['responsibilities']),
-                height=150
-            )
-            
-            st.markdown("#### ✅ 필수자격")
-            required_quals = st.text_area(
-                "각 항목을 새 줄로 구분",
-                value='\n'.join(job_data['required_qualifications']),
-                height=150
-            )
-            
-            st.markdown("#### 🎯 우대사항")
-            preferred_quals = st.text_area(
-                "각 항목을 새 줄로 구분",
-                value='\n'.join(job_data['preferred_qualifications']),
-                height=150
-            )
-            
-            if st.button("수정사항 저장"):
-                # 텍스트 영역의 내용을 리스트로 변환
-                responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
-                required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
-                preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
-                
-                # 세션 상태에 저장
-                st.session_state['current_job_description'] = {
-                    "url": job_data['url'],
-                    "responsibilities": responsibilities_list,
-                    "required_qualifications": required_quals_list,
-                    "preferred_qualifications": preferred_quals_list
-                }
-                st.success("수정사항이 저장되었습니다.")
-
     st.markdown("---")
-
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -915,7 +779,7 @@ elif st.session_state['current_page'] == "interview1":
 
 각 질문은 다음 형식으로 작성:
 1. [구체적인 상황/경험에 대한 질문] + [역할과 결과에 대한 추가 질문]"""},
-                            {"role": "user", "content": f"이력서 분석 결과:\n{st.session_state.analysis_result}\n\n채용공고:\n{st.session_state.current_job_description['responsibilities']}\n\n위 내용을 바탕으로 상세한 면접 질문 10개를 생성해주세요."}
+                            {"role": "user", "content": f"이력서 분석 결과:\n{st.session_state.analysis_result}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 상세한 면접 질문 10개를 생성해주세요."}
                         ]
                     )
                     st.session_state.interview_questions = response.choices[0].message.content
