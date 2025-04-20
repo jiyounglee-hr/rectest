@@ -886,7 +886,7 @@ elif st.session_state['current_page'] == "interview1":
     with col1:
         question_button = st.button(
             "질문 추출하기",
-            key="question_button",
+            key="question_button1",
             help="분석 결과를 바탕으로 면접 질문을 생성합니다"
         )
 
@@ -898,8 +898,8 @@ elif st.session_state['current_page'] == "interview1":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
-                    # 기존 분석 로직
-                    response = openai.ChatCompletion.create(
+                    # 1차 면접 질문 생성
+                    response1 = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """[당신의 역할]  
@@ -958,16 +958,16 @@ elif st.session_state['current_page'] == "interview1":
                             {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
                         ]
                     )
-                    st.session_state.interview_questions = response.choices[0].message.content
+                    st.session_state.interview_questions1 = response1.choices[0].message.content
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
             st.warning("이력서와 채용공고를 모두 입력해주세요.")
 
     # 면접 질문 결과 표시
-    if st.session_state.interview_questions:
+    if st.session_state.interview_questions1:
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
-        st.text_area("면접 질문", st.session_state.interview_questions, height=450)
+        st.text_area("1차 면접 질문", st.session_state.interview_questions1, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif st.session_state['current_page'] == "interview2":
@@ -1124,7 +1124,7 @@ elif st.session_state['current_page'] == "interview2":
     with col1:
         question_button = st.button(
             "질문 추출하기",
-            key="question_button",
+            key="question_button2",
             help="분석 결과를 바탕으로 면접 질문을 생성합니다"
         )
 
@@ -1136,8 +1136,8 @@ elif st.session_state['current_page'] == "interview2":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
-                    # 기존 분석 로직
-                    response = openai.ChatCompletion.create(
+                    # 2차 면접 질문 생성
+                    response2 = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """[당신의 역할]  
@@ -1213,14 +1213,14 @@ elif st.session_state['current_page'] == "interview2":
                             {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 2차 면접 질문을 생성해주세요. 각 핵심가치별로 3개씩의 질문을 생성해주세요."}
                         ]
                     )
-                    st.session_state.interview_questions = response.choices[0].message.content
+                    st.session_state.interview_questions2 = response2.choices[0].message.content
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
             st.warning("이력서와 채용공고를 모두 입력해주세요.")
 
     # 면접 질문 결과 표시
-    if st.session_state.interview_questions:
+    if st.session_state.interview_questions2:
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
-        st.text_area("면접 질문", st.session_state.interview_questions, height=450)
+        st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
