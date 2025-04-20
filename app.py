@@ -602,7 +602,7 @@ if st.session_state['current_page'] == "resume":
                         raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
                     
                     # 채용공고 내용 표시
-                    st.text_area("채용공고 내용", job_description, height=300)
+                    st.text_area("채용공고 내용", job_description, height=220)
                     
                 except ValueError as ve:
                     st.error(str(ve))
