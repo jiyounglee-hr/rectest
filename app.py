@@ -770,38 +770,70 @@ elif st.session_state['current_page'] == "interview1":
             response = requests.get(job_link, headers=headers, timeout=10)
             response.raise_for_status()
             
+            # 인코딩 설정
+            response.encoding = 'utf-8'
+            
             # HTML 파싱
             soup = BeautifulSoup(response.text, 'lxml')
             
-            # 채용공고 내용 추출
-            job_title = soup.find('h1').text.strip()
-            
-            # 담당업무, 필수자격, 우대사항 추출
-            sections = soup.find_all('div', class_='section')
-            job_description = f"[{job_title}]\n\n"
-            
-            for section in sections:
-                section_title = section.find('h2')
-                if section_title:
-                    section_title = section_title.text.strip()
-                    if "함께 할 업무입니다" in section_title:
-                        job_description += "담당업무\n"
-                    elif "이런 역량을 가진 분을 찾고 있습니다" in section_title:
-                        job_description += "\n필수자격\n"
-                    elif "이런 경험이 있다면 더 좋습니다" in section_title:
-                        job_description += "\n우대사항\n"
-                    
-                    items = section.find_all('li')
-                    for item in items:
-                        job_description += f"- {item.text.strip()}\n"
-            
-            # 채용공고 내용이 비어있는 경우 처리
-            if not job_description.strip():
-                st.error("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
+            try:
+                # 채용공고 내용 추출
+                job_title = soup.find('h1')
+                if job_title:
+                    job_title = job_title.get_text(strip=True)
+                else:
+                    raise ValueError("채용공고 제목을 찾을 수 없습니다.")
+                
+                # 담당업무, 필수자격, 우대사항 추출
+                sections = soup.find_all('div', class_='section')
+                job_description = f"[{job_title}]\n\n"
+                
+                if not sections:
+                    # class가 없는 경우 대체 방법 시도
+                    sections = soup.find_all(['div', 'section'])
+                
+                section_found = False
+                for section in sections:
+                    section_title = section.find(['h2', 'h3', 'strong'])
+                    if section_title:
+                        section_text = section_title.get_text(strip=True)
+                        if "함께 할 업무" in section_text:
+                            job_description += "담당업무\n"
+                            section_found = True
+                        elif "역량을 가진 분" in section_text or "이런 분을 찾" in section_text:
+                            job_description += "\n필수자격\n"
+                            section_found = True
+                        elif "경험이 있다면 더 좋" in section_text:
+                            job_description += "\n우대사항\n"
+                            section_found = True
+                        
+                        items = section.find_all(['li', 'p'])
+                        for item in items:
+                            text = item.get_text(strip=True)
+                            if text and not text.startswith("함께 할 업무") and not text.startswith("이런 분을"):
+                                job_description += f"- {text}\n"
+                
+                if not section_found:
+                    # 섹션을 찾지 못한 경우 전체 텍스트 추출 시도
+                    main_content = soup.find(['main', 'article', 'div.content'])
+                    if main_content:
+                        paragraphs = main_content.find_all(['p', 'li'])
+                        for p in paragraphs:
+                            text = p.get_text(strip=True)
+                            if text:
+                                job_description += f"- {text}\n"
+                
+                # 채용공고 내용이 비어있는 경우 처리
+                if not job_description.strip():
+                    st.error("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
+                    job_description = ""
+                else:
+                    # 채용공고 내용 표시
+                    st.text_area("채용공고 내용", job_description, height=300)
+                
+            except ValueError as ve:
+                st.error(str(ve))
                 job_description = ""
-            else:
-                # 채용공고 내용 표시
-                st.text_area("채용공고 내용", job_description, height=300)
             
         except requests.exceptions.RequestException as e:
             st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
