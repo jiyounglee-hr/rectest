@@ -378,9 +378,9 @@ with st.sidebar:
     
     # 1. 이력서 첨부 섹션
     st.markdown("""
-        <h4 style='color: #333333; margin-bottom: 20px;'>
-           이력서 분석 및 면접 질문 TIP
-        </h4>
+        <h5 style='color: #333333; margin-bottom: 5px;'>
+           이력서 업데이트
+        </h5>
     """, unsafe_allow_html=True)
     
     # 파일 업로더 스타일 수정
