@@ -752,12 +752,26 @@ elif st.session_state['current_page'] == "interview1":
     
     if job_link:
         try:
+            # 웹 브라우저처럼 보이기 위한 헤더 설정
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1'
+            }
+            
             # 웹 페이지 가져오기
-            response = requests.get(job_link)
+            response = requests.get(job_link, headers=headers, timeout=10)
             response.raise_for_status()
             
             # HTML 파싱
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'lxml')
             
             # 채용공고 내용 추출
             job_title = soup.find('h1').text.strip()
@@ -767,21 +781,31 @@ elif st.session_state['current_page'] == "interview1":
             job_description = f"[{job_title}]\n\n"
             
             for section in sections:
-                section_title = section.find('h2').text.strip()
-                if "함께 할 업무입니다" in section_title:
-                    job_description += "담당업무\n"
-                elif "이런 역량을 가진 분을 찾고 있습니다" in section_title:
-                    job_description += "\n필수자격\n"
-                elif "이런 경험이 있다면 더 좋습니다" in section_title:
-                    job_description += "\n우대사항\n"
-                
-                items = section.find_all('li')
-                for item in items:
-                    job_description += f"- {item.text.strip()}\n"
+                section_title = section.find('h2')
+                if section_title:
+                    section_title = section_title.text.strip()
+                    if "함께 할 업무입니다" in section_title:
+                        job_description += "담당업무\n"
+                    elif "이런 역량을 가진 분을 찾고 있습니다" in section_title:
+                        job_description += "\n필수자격\n"
+                    elif "이런 경험이 있다면 더 좋습니다" in section_title:
+                        job_description += "\n우대사항\n"
+                    
+                    items = section.find_all('li')
+                    for item in items:
+                        job_description += f"- {item.text.strip()}\n"
             
-            # 채용공고 내용 표시
-            st.text_area("채용공고 내용", job_description, height=300)
+            # 채용공고 내용이 비어있는 경우 처리
+            if not job_description.strip():
+                st.error("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
+                job_description = ""
+            else:
+                # 채용공고 내용 표시
+                st.text_area("채용공고 내용", job_description, height=300)
             
+        except requests.exceptions.RequestException as e:
+            st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
+            job_description = ""
         except Exception as e:
             st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
             job_description = ""
