@@ -8,6 +8,8 @@ from datetime import datetime
 import pandas as pd
 import re
 import base64
+import requests
+from bs4 import BeautifulSoup
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -745,29 +747,46 @@ elif st.session_state['current_page'] == "interview1":
     
     st.markdown("---")
     
-    # 채용공고 선택
-    job_option = st.selectbox(
-        "채용공고 선택",
-        ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
-    )
-
-    if job_option == "직접 입력":
-        job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
-    else:
-        job_map = {
-            "의료기기 인허가(RA) 팀장": "ra_manager",
-            "의료 AI 솔루션 마케팅": "marketing",
-            "일본 법인장": "japan_head"
-        }
-        if job_option in job_map:
-            default_description = job_descriptions[job_map[job_option]]
-            job_description = st.text_area(
-                "- 채용공고 내용 (필요시 수정 가능합니다)",
-                value=default_description,
-                height=220
-            )
-        else:
+    # 채용공고 링크 입력
+    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
+    
+    if job_link:
+        try:
+            # 웹 페이지 가져오기
+            response = requests.get(job_link)
+            response.raise_for_status()
+            
+            # HTML 파싱
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # 채용공고 내용 추출
+            job_title = soup.find('h1').text.strip()
+            
+            # 담당업무, 필수자격, 우대사항 추출
+            sections = soup.find_all('div', class_='section')
+            job_description = f"[{job_title}]\n\n"
+            
+            for section in sections:
+                section_title = section.find('h2').text.strip()
+                if "함께 할 업무입니다" in section_title:
+                    job_description += "담당업무\n"
+                elif "이런 역량을 가진 분을 찾고 있습니다" in section_title:
+                    job_description += "\n필수자격\n"
+                elif "이런 경험이 있다면 더 좋습니다" in section_title:
+                    job_description += "\n우대사항\n"
+                
+                items = section.find_all('li')
+                for item in items:
+                    job_description += f"- {item.text.strip()}\n"
+            
+            # 채용공고 내용 표시
+            st.text_area("채용공고 내용", job_description, height=300)
+            
+        except Exception as e:
+            st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
             job_description = ""
+    else:
+        job_description = ""
 
     st.markdown("---")
     
