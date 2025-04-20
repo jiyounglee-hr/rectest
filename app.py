@@ -585,7 +585,8 @@ if st.session_state['current_page'] == "resume":
                     # 이미 추출된 텍스트 사용
                     text = st.session_state.resume_text
                     
-                    # 기존 분석 로직
+                    # OpenAI 클라이언트 초기화
+                    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
