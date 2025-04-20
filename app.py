@@ -870,12 +870,7 @@ elif st.session_state['current_page'] == "interview1":
         job_description = ""
 
     st.markdown("---")
-    st.markdown("""
-        <small style='color: #666666;'>
-            업무 지식 및 직무기술 직무 수행 태도 및 자세 관련 질문입니다. <br>
-            인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
-        </small>
-    """, unsafe_allow_html=True)   
+ 
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -884,7 +879,12 @@ elif st.session_state['current_page'] == "interview1":
             key="question_button1",
             help="분석 결과를 바탕으로 면접 질문을 생성합니다"
         )
-
+    st.markdown("""
+        <small style='color: #666666;'>
+            업무 지식 및 직무기술 직무 수행 태도 및 자세 관련 질문입니다. <br>
+            인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
+        </small>
+    """, unsafe_allow_html=True)  
     # 질문 생성 로직
     if question_button:
         if uploaded_file and job_description:
@@ -971,7 +971,6 @@ elif st.session_state['current_page'] == "interview2":
             ✌️ 2차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
-    st.markdown("---")
     
     # 채용공고 링크 입력
     job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
