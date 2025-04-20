@@ -832,7 +832,9 @@ elif st.session_state['current_page'] == "interview1":
                         # 불필요한 문자 제거
                         text = text.replace("•", "").strip()
                         if text and len(text) > 1:  # 빈 항목이나 단일 문자 제외
-                            sections[current_section].append(text)
+                            # 중복 체크 후 추가
+                            if text not in sections[current_section]:
+                                sections[current_section].append(text)
                 
                 # 정리된 내용을 job_description에 추가
                 if sections["담당업무"]:
