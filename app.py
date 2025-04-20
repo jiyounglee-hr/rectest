@@ -455,63 +455,7 @@ with st.sidebar:
     st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
 
 # 채용공고 데이터
-job_descriptions = {
-    "ra_manager": """[의료기기 인허가(RA) 팀장]
-
-담당업무
-- 국내외 의료기기 인허가 (MFDS, FDA, CE, MHLW 등) 및 사후관리
-- 국가별 기술문서 작성 및 최신화
-- 국가별 의료기기 규제 요구사항 분석
-- 의료기기법/규격/가이던스 변경사항 모니터링
-- 품질시스템 심사 대응 (ISO 13485, KGMP, MDSAP 등)
-
-필수자격
-- 제품 인허가 업무경력 7년이상
-- 의료기기 인증팀 관리 경험
-- SaMD, SiMD, 전기전자 의료기기 인허가 경험
-- 영어 중급 이상 (Reading & Writing 필수)
-
-우대사항
-- 3등급 SW 의료기기 허가 경험
-- 의료기기 개발 프로세스에 대한 이해
-- 의료기기 RA(의료기기 규제과학 전문가) 자격증 소지자""",
-    
-    "marketing": """[의료 AI 솔루션 마케팅(3~6년)]
-
-담당업무
-- 의료 AI 솔루션 마케팅 전략 수립 및 실행
-- 제품 포지셔닝 및 가치 제안
-- 디지털 마케팅 캠페인 기획 및 실행
-- 마케팅 성과 분석 및 보고
-
-필수자격
-- 의료기기/헬스케어 마케팅 경력 3년 이상
-- 디지털 마케팅 전략 수립 및 실행 경험
-- 데이터 기반 마케팅 성과 분석 능력
-
-우대사항
-- AI/의료 분야 이해도 보유
-- 글로벌 마케팅 경험
-- 의료진 대상 마케팅 경험""",
-    
-    "japan_head": """[일본 법인장]
-
-담당업무
-- 일본 법인 총괄 및 운영 관리
-- 일본 시장 사업 전략 수립 및 실행
-- 현지 영업/마케팅 조직 구축 및 관리
-- 일본 시장 매출 및 수익성 관리
-
-필수자격
-- 일본 의료기기 시장 경력 10년 이상
-- 의료기기 기업 임원급 경험 보유
-- 일본어 비즈니스 레벨 이상
-
-우대사항
-- AI 의료기기 관련 경험
-- 일본 의료기기 인허가 경험
-- 글로벌 기업 경영 경험"""
-}
+job_descriptions = {}
 
 # 현재 페이지에 따른 내용 표시
 if st.session_state['current_page'] == "resume":
@@ -527,27 +471,31 @@ if st.session_state['current_page'] == "resume":
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
         job_option = st.selectbox(
-            "채용공고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-            ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
+            "채용공고 선택",
+            ["선택해주세요", "직접 입력"]
         )
 
         if job_option == "직접 입력":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
-            job_map = {
-                "의료기기 인허가(RA) 팀장": "ra_manager",
-                "의료 AI 솔루션 마케팅": "marketing",
-                "일본 법인장": "japan_head"
-            }
-            if job_option in job_map:
-                default_description = job_descriptions[job_map[job_option]]
-                job_description = st.text_area(
-                    "- 채용공고 내용 (필요시 수정 가능합니다)",
-                    value=default_description,
-                    height=220
-                )
-            else:
-                job_description = ""
+            job_link = st.text_input("채용공고 링크를 입력해주세요")
+            if job_link:
+                try:
+                    # 채용공고 링크에서 내용 추출
+                    response = requests.get(job_link)
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    
+                    # 채용공고 내용 추출 (사이트에 따라 선택자 수정 필요)
+                    job_description = soup.find('div', class_='job-description').text
+                    
+                    st.text_area(
+                        "- 채용공고 내용 (필요시 수정 가능합니다)",
+                        value=job_description,
+                        height=220
+                    )
+                except Exception as e:
+                    st.error(f"채용공고 내용을 불러오는 중 오류가 발생했습니다: {str(e)}")
+                    job_description = ""
         experience_text = st.text_area(
             "- 경력기간 입력",  
             height=120
