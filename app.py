@@ -1006,7 +1006,7 @@ elif st.session_state['current_page'] == "interview2":
             job_title = job_title.get_text(strip=True)
             
             # 담당업무, 필수자격, 우대사항 추출
-            job_description = f"[{job_title}]\n\n"
+            job_description = f"[{job_title}]\n"
             
             # 불필요한 내용 필터링을 위한 패턴
             skip_patterns = [
