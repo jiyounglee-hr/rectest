@@ -360,25 +360,7 @@ with st.sidebar:
         st.query_params["page"] = "interview2"
         st.session_state['current_page'] = 'interview2'
 
-    # 페이지 전환 버튼 추가
-    st.button("🤖 이력서분석", 
-            key="btn_resume", 
-            on_click=switch_to_resume,
-            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
-
-    st.button("☝️ 1차 면접 질문", 
-            key="btn_interview1", 
-            on_click=switch_to_interview1,
-            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
-
-    st.button("✌️ 2차 면접 질문", 
-            key="btn_interview2", 
-            on_click=switch_to_interview2,
-            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    
+        
     # 파일 업로더 스타일 수정
     st.markdown("""
         <style>
@@ -444,6 +426,24 @@ with st.sidebar:
     else:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
 
+    # 페이지 전환 버튼 추가
+    st.button("🤖 이력서분석", 
+            key="btn_resume", 
+            on_click=switch_to_resume,
+            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
+
+    st.button("☝️ 1차 면접 질문", 
+            key="btn_interview1", 
+            on_click=switch_to_interview1,
+            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
+
+    st.button("✌️ 2차 면접 질문", 
+            key="btn_interview2", 
+            on_click=switch_to_interview2,
+            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # 맨 마지막에 도움말 추가
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("도움말"):
