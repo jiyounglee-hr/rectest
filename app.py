@@ -777,21 +777,61 @@ elif st.session_state['current_page'] == "interview1":
             
             # 채용공고 내용 추출
             job_title = None
-            # h1 태그에서 제목 찾기
-            job_title = soup.find('h1')
+
+            # 디버깅을 위한 HTML 내용 확인
+            st.write("HTML 내용 확인:", soup.prettify()[:1000])  # 처음 1000자만 표시
+
+            # 다양한 방법으로 제목 찾기 시도
+            title_candidates = []
+
+            # 1. h1 태그에서 제목 찾기
+            h1_tags = soup.find_all('h1')
+            if h1_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in h1_tags])
+
+            # 2. h2 태그에서 제목 찾기
+            h2_tags = soup.find_all('h2')
+            if h2_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in h2_tags])
+
+            # 3. class나 id에 특정 키워드가 포함된 요소 찾기
+            title_keywords = ['title', 'heading', 'job-title', 'position', 'recruit']
+            for keyword in title_keywords:
+                elements = soup.find_all(class_=lambda x: x and keyword.lower() in x.lower())
+                elements.extend(soup.find_all(id=lambda x: x and keyword.lower() in x.lower()))
+                if elements:
+                    title_candidates.extend([el.get_text(strip=True) for el in elements])
+
+            # 4. strong 태그나 b 태그에서 제목 찾기
+            bold_tags = soup.find_all(['strong', 'b'])
+            if bold_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in bold_tags])
+
+            # 디버깅을 위해 후보 제목들 출력
+            st.write("제목 후보들:", title_candidates)
+
+            # 후보 중에서 가장 적절한 제목 선택
+            if title_candidates:
+                # 가장 짧은 텍스트 중에서 의미 있는 제목 선택
+                valid_titles = [title for title in title_candidates 
+                               if len(title) > 5 and len(title) < 100]  # 너무 짧거나 긴 텍스트 제외
+                if valid_titles:
+                    job_title = min(valid_titles, key=len)  # 가장 짧은 유효한 제목 선택
+                else:
+                    job_title = title_candidates[0]  # 유효한 제목이 없으면 첫 번째 후보 선택
+            else:
+                # 마지막 시도: 첫 번째 의미 있는 텍스트 블록 찾기
+                for tag in soup.find_all(['div', 'p', 'span']):
+                    text = tag.get_text(strip=True)
+                    if text and len(text) > 5 and len(text) < 100:
+                        job_title = text
+                        break
+
             if not job_title:
-                # h2 태그에서 제목 찾기
-                job_title = soup.find('h2')
-            if not job_title:
-                # class나 id에 title, heading, job-title 등이 포함된 요소에서 제목 찾기
-                job_title = soup.find(class_=lambda x: x and any(keyword in x.lower() for keyword in ['title', 'heading', 'job-title']))
-            if not job_title:
-                # 첫 번째 h1, h2, h3 태그에서 제목 찾기
-                job_title = soup.find(['h1', 'h2', 'h3'])
-            if not job_title:
-                raise ValueError("채용공고 제목을 찾을 수 없습니다.")
-            job_title = job_title.get_text(strip=True)
-            
+                raise ValueError("채용공고 제목을 찾을 수 없습니다. URL을 확인해주세요.")
+
+            st.write("선택된 제목:", job_title)
+
             # 담당업무, 필수자격, 우대사항 추출
             job_description = f"[{job_title}]\n\n"
             
@@ -1026,21 +1066,61 @@ elif st.session_state['current_page'] == "interview2":
             
             # 채용공고 내용 추출
             job_title = None
-            # h1 태그에서 제목 찾기
-            job_title = soup.find('h1')
+
+            # 디버깅을 위한 HTML 내용 확인
+            st.write("HTML 내용 확인:", soup.prettify()[:1000])  # 처음 1000자만 표시
+
+            # 다양한 방법으로 제목 찾기 시도
+            title_candidates = []
+
+            # 1. h1 태그에서 제목 찾기
+            h1_tags = soup.find_all('h1')
+            if h1_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in h1_tags])
+
+            # 2. h2 태그에서 제목 찾기
+            h2_tags = soup.find_all('h2')
+            if h2_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in h2_tags])
+
+            # 3. class나 id에 특정 키워드가 포함된 요소 찾기
+            title_keywords = ['title', 'heading', 'job-title', 'position', 'recruit']
+            for keyword in title_keywords:
+                elements = soup.find_all(class_=lambda x: x and keyword.lower() in x.lower())
+                elements.extend(soup.find_all(id=lambda x: x and keyword.lower() in x.lower()))
+                if elements:
+                    title_candidates.extend([el.get_text(strip=True) for el in elements])
+
+            # 4. strong 태그나 b 태그에서 제목 찾기
+            bold_tags = soup.find_all(['strong', 'b'])
+            if bold_tags:
+                title_candidates.extend([tag.get_text(strip=True) for tag in bold_tags])
+
+            # 디버깅을 위해 후보 제목들 출력
+            st.write("제목 후보들:", title_candidates)
+
+            # 후보 중에서 가장 적절한 제목 선택
+            if title_candidates:
+                # 가장 짧은 텍스트 중에서 의미 있는 제목 선택
+                valid_titles = [title for title in title_candidates 
+                               if len(title) > 5 and len(title) < 100]  # 너무 짧거나 긴 텍스트 제외
+                if valid_titles:
+                    job_title = min(valid_titles, key=len)  # 가장 짧은 유효한 제목 선택
+                else:
+                    job_title = title_candidates[0]  # 유효한 제목이 없으면 첫 번째 후보 선택
+            else:
+                # 마지막 시도: 첫 번째 의미 있는 텍스트 블록 찾기
+                for tag in soup.find_all(['div', 'p', 'span']):
+                    text = tag.get_text(strip=True)
+                    if text and len(text) > 5 and len(text) < 100:
+                        job_title = text
+                        break
+
             if not job_title:
-                # h2 태그에서 제목 찾기
-                job_title = soup.find('h2')
-            if not job_title:
-                # class나 id에 title, heading, job-title 등이 포함된 요소에서 제목 찾기
-                job_title = soup.find(class_=lambda x: x and any(keyword in x.lower() for keyword in ['title', 'heading', 'job-title']))
-            if not job_title:
-                # 첫 번째 h1, h2, h3 태그에서 제목 찾기
-                job_title = soup.find(['h1', 'h2', 'h3'])
-            if not job_title:
-                raise ValueError("채용공고 제목을 찾을 수 없습니다.")
-            job_title = job_title.get_text(strip=True)
-            
+                raise ValueError("채용공고 제목을 찾을 수 없습니다. URL을 확인해주세요.")
+
+            st.write("선택된 제목:", job_title)
+
             # 담당업무, 필수자격, 우대사항 추출
             job_description = f"[{job_title}]\n\n"
             
