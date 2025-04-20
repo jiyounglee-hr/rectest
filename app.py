@@ -471,8 +471,8 @@ if st.session_state['current_page'] == "resume":
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
         job_option = st.selectbox(
-            "채용공고 선택",
-            ["선택해주세요", "직접 입력"]
+            "채용공고 타입 선택",
+            ["링크 입력", "직접 입력"]
         )
 
         if job_option == "직접 입력":
