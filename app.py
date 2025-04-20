@@ -526,9 +526,8 @@ if st.session_state['current_page'] == "resume":
 
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
-        st.markdown('<div class="label-text">🚀 채용요건</div>', unsafe_allow_html=True)
         job_option = st.selectbox(
-            "- 공고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
+            "채용공고고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
             ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
         )
 
@@ -549,9 +548,6 @@ if st.session_state['current_page'] == "resume":
                 )
             else:
                 job_description = ""
-        
-        st.markdown('<div class="label-text">📝 경력기간 체크 <a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 링크 ></a></div>', unsafe_allow_html=True)
-        
         experience_text = st.text_area(
             "- 경력기간 입력",  
             height=120
