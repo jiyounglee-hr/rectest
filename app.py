@@ -785,43 +785,44 @@ elif st.session_state['current_page'] == "interview1":
                     raise ValueError("채용공고 제목을 찾을 수 없습니다.")
                 
                 # 담당업무, 필수자격, 우대사항 추출
-                sections = soup.find_all('div', class_='section')
                 job_description = f"[{job_title}]\n\n"
                 
-                if not sections:
-                    # class가 없는 경우 대체 방법 시도
-                    sections = soup.find_all(['div', 'section'])
+                # 모든 텍스트 블록 찾기
+                content_blocks = soup.find_all(['h2', 'h3', 'h4', 'div', 'p', 'ul'])
                 
-                section_found = False
-                for section in sections:
-                    section_title = section.find(['h2', 'h3', 'strong'])
-                    if section_title:
-                        section_text = section_title.get_text(strip=True)
-                        if "함께 할 업무" in section_text:
-                            job_description += "담당업무\n"
-                            section_found = True
-                        elif "역량을 가진 분" in section_text or "이런 분을 찾" in section_text:
-                            job_description += "\n필수자격\n"
-                            section_found = True
-                        elif "경험이 있다면 더 좋" in section_text:
-                            job_description += "\n우대사항\n"
-                            section_found = True
-                        
-                        items = section.find_all(['li', 'p'])
-                        for item in items:
-                            text = item.get_text(strip=True)
-                            if text and not text.startswith("함께 할 업무") and not text.startswith("이런 분을"):
-                                job_description += f"- {text}\n"
-                
-                if not section_found:
-                    # 섹션을 찾지 못한 경우 전체 텍스트 추출 시도
-                    main_content = soup.find(['main', 'article', 'div.content'])
-                    if main_content:
-                        paragraphs = main_content.find_all(['p', 'li'])
-                        for p in paragraphs:
-                            text = p.get_text(strip=True)
-                            if text:
-                                job_description += f"- {text}\n"
+                current_section = None
+                for block in content_blocks:
+                    text = block.get_text(strip=True)
+                    
+                    # 섹션 제목 확인
+                    if any(keyword in text for keyword in ["함께 할 업무", "업무 내용", "주요 업무"]):
+                        current_section = "담당업무"
+                        job_description += "\n담당업무\n"
+                        continue
+                    elif any(keyword in text for keyword in ["역량을 가진 분", "이런 분을 찾", "자격 요건", "필수 자격"]):
+                        current_section = "필수자격"
+                        job_description += "\n필수자격\n"
+                        continue
+                    elif any(keyword in text for keyword in ["경험이 있다면 더 좋", "우대 사항", "우대", "이런 분이면 더 좋"]):
+                        current_section = "우대사항"
+                        job_description += "\n우대사항\n"
+                        continue
+                    
+                    # 현재 섹션에 내용 추가
+                    if current_section and text:
+                        # 섹션 제목이나 다른 메타 텍스트 제외
+                        if not any(keyword in text for keyword in ["함께 할 업무", "역량을 가진 분", "경험이 있다면 더 좋"]):
+                            # li 태그 찾기
+                            list_items = block.find_all('li')
+                            if list_items:
+                                for item in list_items:
+                                    item_text = item.get_text(strip=True)
+                                    if item_text and len(item_text) > 1:  # 빈 항목이나 단일 문자 제외
+                                        job_description += f"- {item_text}\n"
+                            else:
+                                # li 태그가 없는 경우 텍스트 직접 추가
+                                if len(text) > 1 and not text.startswith('-'):  # 빈 텍스트나 이미 처리된 항목 제외
+                                    job_description += f"- {text}\n"
                 
                 # 채용공고 내용이 비어있는 경우 처리
                 if not job_description.strip():
