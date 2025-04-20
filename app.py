@@ -602,7 +602,7 @@ if st.session_state['current_page'] == "resume":
                         raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
                     
                     # 채용공고 내용 표시
-                    st.text_area("채용공고 내용", job_description, height=220)
+                    st.text_area("채용공고 내용", job_description, height=300)
                     
                 except ValueError as ve:
                     st.error(str(ve))
@@ -1250,21 +1250,25 @@ elif st.session_state['current_page'] == "interview2":
 
 [출력 형식 예시]  
 [도전]두려워 말고 시도합니다
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
 [책임감]대충은 없습니다 
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
 [협력]동료와 협업합니다  
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
 [전문성]능동적으로 일합니다  
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
