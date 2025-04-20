@@ -898,8 +898,8 @@ elif st.session_state['current_page'] == "interview1":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
-                    # 1차 면접 질문 생성
-                    response1 = openai.ChatCompletion.create(
+                    # 기존 분석 로직
+                    response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """[당신의 역할]  
@@ -958,7 +958,7 @@ elif st.session_state['current_page'] == "interview1":
                             {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
                         ]
                     )
-                    st.session_state.interview_questions = response1.choices[0].message.content
+                    st.session_state.interview_questions = response.choices[0].message.content
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
@@ -1137,7 +1137,7 @@ elif st.session_state['current_page'] == "interview2":
                     text = st.session_state.resume_text
                     
                     # 기존 분석 로직
-                    response2 = openai.ChatCompletion.create(
+                    response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """[당신의 역할]  
@@ -1213,7 +1213,7 @@ elif st.session_state['current_page'] == "interview2":
                             {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 2차 면접 질문을 생성해주세요. 각 핵심가치별로 3개씩의 질문을 생성해주세요."}
                         ]
                     )
-                    st.session_state.interview_questions2 = response2.choices[0].message.content
+                    st.session_state.interview_questions = response.choices[0].message.content
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
