@@ -592,77 +592,135 @@ if st.session_state['current_page'] == "resume":
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": """[목적]  
-다음 정보를 바탕으로, 지원자의 경험과 역량을 효과적으로 검증할 수 있는 면접 질문을 STAR 구조로 생성하세요.  
-각 질문은 다음 4단계가 자연스럽게 드러나야 합니다:  
-- Situation (상황)  
-- Task (과제)  
-- Action (행동)  
-- Result (결과)  
+                            {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
+다음 형식에 맞춰 이력서를 분석해주세요:
 
-[입력 데이터]  
-① 이력서: 지원자의 경력, 프로젝트 경험, 사용 기술, 직무 배경, 업무 이력  
-② 채용공고: 담당업무, 필수 자격요건, 우대사항
+📝경력 요약
+    ㆍ총 경력 기간: 총 X년 Y개월
+    ㆍ주요 경력:
+        [최근 회사명]: [직위/직책]
+        [이전 회사명]: [직위/직책]
+        [이전 회사명]: [직위/직책]
+    ㆍ주요 업무 : [핵심 업무 내용 요약]
 
-[질문 생성 요구사항]  
-1. 각 카테고리별로 최소 개수 이상의 질문을 생성해야 합니다.  
-2. 모든 질문은 STAR 구조를 따릅니다.  
-3. 질문은 구체적이고 실제적인 경험을 이끌어내는 형식으로 구성해야 합니다.  
-4. 질문은 이력서의 내용과 채용공고 요구사항의 연관성을 고려해 작성해야 합니다.
+🧠 추측되는 성격
+    ㆍ[성격 특성] (예: [이력서에서 발견된 근거 문장])
+    ㆍ[성격 특성] (예: [이력서에서 발견된 근거 문장])
+    ㆍ[성격 특성] (예: [이력서에서 발견된 근거 문장])
+    ㆍ[성격 특성] (예: [이력서에서 발견된 근거 문장])
 
-[질문 카테고리 및 예시]
+⚠️ 미확인/부족한 요건:
+    ㆍ[공고에서 요구하는 항목이 이력서에 없거나 불충분한 경우 요약]
+    ㆍ...
+    ㆍ...
 
-1. 업무 지식 및 직무기술 (최소 15개 질문)  
-- 지원자가 기술적으로 수행했던 실무 경험과 전문성을 STAR 구조로 질문  
-예시:  
-- 의료기기 인허가 프로세스에서 가장 어려웠던 상황과, 그 상황에서 어떤 과제를 해결해야 했으며, 어떻게 대응했는지, 그 결과는 어떠했는지 설명해주세요.  
-- Python을 활용한 데이터 분석 프로젝트에서 복잡한 데이터셋을 다뤘던 경험이 있다면, 당시 상황과 해결 과제, 접근 방식, 결과까지 구체적으로 설명해주세요.
-
-2. 직무 수행 태도 및 자세 (최소 6개 질문)  
-- 지원자의 협업, 책임감, 도전정신 등을 확인할 수 있는 질문  
-예시:  
-- 팀 프로젝트에서 의견 충돌이 있었던 상황을 설명하고, 당시 맡은 역할과 어떻게 문제를 해결했는지, 결과는 어땠는지 말씀해 주세요.  
-- 업무 중 예상치 못한 난관에 직면했던 경험이 있다면, 상황과 대응 과정을 STAR 구조로 말씀해 주세요.
-
-3. 기본인성 (최소 5개, 이 중 관찰 4개 + 질문 1개)  
-
-[기본자세 – 관찰 사항] (질문 없이 평가자가 면접 중 관찰)  
-- 복장은 단정한가?  
-- 태도는 예의 바른가?  
-- 적극적으로 답변하는가?  
-- 첫인상이 호감이 가는가?
-
-[커뮤니케이션 – 관찰 사항] (면접 대화 과정 중 평가)  
-- 자신의 의견을 논리 정연하게 잘 표현하는가?  
-- 질문의 요지를 잘 이해하고 있는가?
-
-[이직사유 – 질문]  
-- 이직을 결심하게 된 상황과 그 과정에서 느낀 점, 그리고 새로운 직장을 선택함에 있어 본인이 중요하게 여긴 기준을 구체적으로 설명해 주세요.
-
-[출력 형식 예시]  
-<업무 지식 및 직무기술>  
-1. 질문 1 (STAR 구조)  
-2. 질문 2 (STAR 구조)  
-...
-
-<직무 수행 태도 및 자세>  
-1. 질문 1 (STAR 구조)  
-...
-
-<기본인성>  
-(관찰 포인트)  
-- 복장, 태도, 표현력, 질문 이해력 등  
-(질문)  
-- 이직 사유 관련 STAR 질문
-
-[주의사항]  
-- 각 질문은 반드시 STAR 구조를 포함해야 합니다.  
-- 채용공고에서 요구한 직무 기술, 경험, 자격요건과 이력서 경험 간 연결점을 활용하세요.  
-- 질문은 기술적, 경험적, 태도적 역량을 유도해야 하며, 단순 확인성 질문은 피하세요."""},
-                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
+조건:
+- "없다"고 단정하지 말고, '명확히 나타나지 않음' / '구체적인 내용 부족' / '경험이 불분명함' 등 완곡하고 객관적인 표현을 사용해 주세요.
+- 경력 연수나 특정 인증, 시스템 경험 등이 불충분하거나 확인 어려운 경우 구체적으로 짚어주세요.
+- 최대 5개 이내의 항목으로 간결하게 정리해주세요."""},
+                            {"role": "user", "content": f"다음은 이력서 내용입니다:\n\n{text}\n\n다음은 채용공고입니다:\n\n{job_description}\n\n위 형식에 맞춰 이력서를 분석해주세요."}
                         ]
                     )
-                    st.session_state.analysis_result = response.choices[0].message.content
+                    analysis_result = response.choices[0].message.content
+                    
+                    # 경력기간 산정 결과가 있는 경우 분석 결과에 반영
+                    if 'experience_years' in st.session_state and 'experience_months' in st.session_state:                    
+                        # 채용공고에서 필수 경력 연차 추출
+                        required_years = 0
+                        required_years_min = 0
+                        required_years_max = 0
+                        experience_type = None
+                        
+                        if "경력" in job_description:
+                            # 1. x년 이상 패턴
+                            pattern_over = r'경력\s*(\d+)년\s*이상'
+                            # 2. x~y년 패턴
+                            pattern_range = r'경력\s*(\d+)~(\d+)년'
+                            # 3. x년 미만/이하 패턴
+                            pattern_under = r'경력\s*(\d+)년\s*(미만|이하|이내)'
+                            
+                            if match := re.search(pattern_over, job_description):
+                                required_years = int(match.group(1))
+                                experience_type = "over"
+                            elif match := re.search(pattern_range, job_description):
+                                required_years_min = int(match.group(1))
+                                required_years_max = int(match.group(2))
+                                experience_type = "range"
+                            elif match := re.search(pattern_under, job_description):
+                                required_years = int(match.group(1))
+                                experience_type = "under"
+                        
+                        # 경력 부합도 계산
+                        experience_years = st.session_state.experience_years + (st.session_state.experience_months / 12)
+                        fit_status = ""
+                        
+                        if experience_type == "over":
+                            if experience_years >= required_years:
+                                fit_status = "부합"
+                            else:
+                                # 정수 부분과 소수 부분을 분리하여 계산
+                                exp_years = int(experience_years)
+                                exp_months = int((experience_years % 1) * 12)
+                                
+                                # 부족한 년수 계산
+                                remaining_years = required_years - exp_years
+                                
+                                # 부족한 개월수 계산
+                                if exp_months > 0:
+                                    remaining_months = 12 - exp_months
+                                    remaining_years -= 1  # 개월이 있으면 년수를 1 빼고 개월을 더함
+                                else:
+                                    remaining_months = 0
+                                
+                                fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
+                        elif experience_type == "range":
+                            if required_years_min <= experience_years <= required_years_max:
+                                fit_status = "부합"
+                            else:
+                                if experience_years < required_years_min:
+                                    # 정수 부분과 소수 부분을 분리하여 계산
+                                    exp_years = int(experience_years)
+                                    exp_months = int((experience_years % 1) * 12)
+                                    
+                                    # 부족한 년수 계산
+                                    remaining_years = required_years_min - exp_years
+                                    
+                                    # 부족한 개월수 계산
+                                    if exp_months > 0:
+                                        remaining_months = 12 - exp_months
+                                        remaining_years -= 1  # 개월이 있으면 년수를 1 빼고 개월을 더함
+                                    else:
+                                        remaining_months = 0
+                                    
+                                    fit_status = f"{remaining_years}년{f' {remaining_months}개월' if remaining_months > 0 else ''} 부족"
+                                else:
+                                    over_years = int(experience_years - required_years_max)
+                                    over_months = int((experience_years % 1) * 12)
+                                    fit_status = f"{over_years}년{f' {over_months}개월' if over_months > 0 else ''} 초과"
+                        elif experience_type == "under":
+                            if experience_years <= required_years:
+                                fit_status = "부합"
+                            else:
+                                over_years = int(experience_years - required_years)
+                                over_months = int((experience_years % 1) * 12)
+                                fit_status = f"{over_years}년{f' {over_months}개월' if over_months > 0 else ''} 초과"
+                        
+                        # 분석 결과에서 경력기간 부분을 찾아서 교체
+                        experience_patterns = [
+                            r"ㆍ총 경력 기간:.*",
+                            r"ㆍ총 경력기간:.*"
+                        ]
+                        
+                        # 경력 요건이 없는 경우와 있는 경우 분리
+                        if not experience_type:
+                            replacement = f"ㆍ총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월"
+                        else:
+                            replacement = f"ㆍ총 경력 기간: {st.session_state.experience_years}년 {st.session_state.experience_months}개월 ({fit_status})"
+                        
+                        for pattern in experience_patterns:
+                            analysis_result = re.sub(pattern, replacement, analysis_result)
+                    
+                    st.session_state.analysis_result = analysis_result
                 except Exception as e:
                     st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
         else:
@@ -844,7 +902,11 @@ elif st.session_state['current_page'] == "interview1":
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": """[목적]  
+                            {"role": "system", "content": """[당신의 역할]  
+당신은 지원자의 이력서와 채용공고 내용을 바탕으로 면접 질문을 준비하는 **면접관**입니다.  
+지원자의 과거 경험을 구체적으로 확인하고, 실제 업무 수행 역량을 검증하기 위해 STAR 기법에 기반한 질문을 작성해야 합니다.
+
+[목적]  
 다음 정보를 바탕으로, 지원자의 경험과 역량을 효과적으로 검증할 수 있는 면접 질문을 STAR 구조로 생성하세요.  
 각 질문은 다음 4단계가 자연스럽게 드러나야 합니다:  
 - Situation (상황)  
@@ -860,36 +922,35 @@ elif st.session_state['current_page'] == "interview1":
 1. 각 카테고리별로 최소 개수 이상의 질문을 생성해야 합니다.  
 2. 모든 질문은 STAR 구조를 따릅니다.  
 3. 질문은 구체적이고 실제적인 경험을 이끌어내는 형식으로 구성해야 합니다.  
-4. 질문은 이력서의 내용과 채용공고 요구사항의 연관성을 고려해 작성해야 합니다.
+4. 질문은 이력서의 내용과 채용공고 요구사항의 연관성을 고려해 작성해야 합니다.  
+5. 기본인성 항목 중 관찰 항목은 질문하지 마십시오.
 
 [질문 카테고리 및 예시]
 
 1. 업무 지식 및 직무기술 (최소 15개 질문)  
-- 지원자가 기술적으로 수행했던 실무 경험과 전문성을 STAR 구조로 질문  
+지원자의 전문성과 실무 기술을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
-- 의료기기 인허가 프로세스에서 가장 어려웠던 상황과, 그 상황에서 어떤 과제를 해결해야 했으며, 어떻게 대응했는지, 그 결과는 어떠했는지 설명해주세요.  
-- Python을 활용한 데이터 분석 프로젝트에서 복잡한 데이터셋을 다뤘던 경험이 있다면, 당시 상황과 해결 과제, 접근 방식, 결과까지 구체적으로 설명해주세요.
+- 의료기기 인허가 프로젝트 중 예상치 못한 문제가 발생했던 경험이 있다면, 그 당시 상황과 해결 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
 2. 직무 수행 태도 및 자세 (최소 6개 질문)  
-- 지원자의 협업, 책임감, 도전정신 등을 확인할 수 있는 질문  
+지원자의 책임감, 도전정신, 팀워크 등을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
-- 팀 프로젝트에서 의견 충돌이 있었던 상황을 설명하고, 당시 맡은 역할과 어떻게 문제를 해결했는지, 결과는 어땠는지 말씀해 주세요.  
-- 업무 중 예상치 못한 난관에 직면했던 경험이 있다면, 상황과 대응 과정을 STAR 구조로 말씀해 주세요.
+- 의견 충돌이 있었던 팀 프로젝트 상황에서 본인의 입장과 대응 방식, 그리고 그 결과에 대해 설명해 주세요.
 
-3. 기본인성 (최소 5개, 이 중 관찰 4개 + 질문 1개)  
+3. 기본인성 (총 5개 항목)
 
-[기본자세 – 관찰 사항] (질문 없이 평가자가 면접 중 관찰)  
+[기본자세 – 관찰 사항] (질문하지 않음)  
 - 복장은 단정한가?  
 - 태도는 예의 바른가?  
 - 적극적으로 답변하는가?  
 - 첫인상이 호감이 가는가?
 
-[커뮤니케이션 – 관찰 사항] (면접 대화 과정 중 평가)  
+[커뮤니케이션 – 관찰 사항] (질문하지 않음)  
 - 자신의 의견을 논리 정연하게 잘 표현하는가?  
 - 질문의 요지를 잘 이해하고 있는가?
 
-[이직사유 – 질문]  
-- 이직을 결심하게 된 상황과 그 과정에서 느낀 점, 그리고 새로운 직장을 선택함에 있어 본인이 중요하게 여긴 기준을 구체적으로 설명해 주세요.
+[이직사유 – 질문 1개]  
+- 이직을 결심하게 된 상황과 그 과정에서 느낀 점, 그리고 새로운 직장을 선택함에 있어 본인이 중요하게 여긴 기준을 구체적으로 말씀해 주세요. (반드시 STAR 구조로)
 
 [출력 형식 예시]  
 <업무 지식 및 직무기술>  
@@ -908,9 +969,10 @@ elif st.session_state['current_page'] == "interview1":
 - 이직 사유 관련 STAR 질문
 
 [주의사항]  
-- 각 질문은 반드시 STAR 구조를 포함해야 합니다.  
-- 채용공고에서 요구한 직무 기술, 경험, 자격요건과 이력서 경험 간 연결점을 활용하세요.  
-- 질문은 기술적, 경험적, 태도적 역량을 유도해야 하며, 단순 확인성 질문은 피하세요."""},
+- 모든 질문은 STAR 구조를 따릅니다.  
+- 기본인성 중 관찰 항목은 질문 형태로 생성하지 않습니다.  
+- 질문은 단순 사실 확인이 아닌, 지원자의 행동과 결과를 이끌어낼 수 있도록 구성하세요.  
+- 이력서와 채용공고의 연결고리를 고려해 질문을 구성하세요."""},
                             {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
                         ]
                     )
