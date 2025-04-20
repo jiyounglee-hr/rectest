@@ -305,8 +305,8 @@ st.markdown("""
         /* 사이드바 버튼 스타일 */
         [data-testid="stSidebar"] .stButton button {
             width: 200px !important;
-            padding: 8px 6px !important;
-            margin: 3px 3px !important;
+            padding: 5px 6px !important;
+            margin: 2px 2px !important;
             border: 1px solid #ddd;
             border-radius: 5px;
             background-color: white;
