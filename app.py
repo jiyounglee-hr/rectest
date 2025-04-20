@@ -744,6 +744,33 @@ elif st.session_state['current_page'] == "interview1":
     """, unsafe_allow_html=True)
     
     st.markdown("---")
+    
+    # 채용공고 선택
+    job_option = st.selectbox(
+        "채용공고 선택",
+        ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
+    )
+
+    if job_option == "직접 입력":
+        job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
+    else:
+        job_map = {
+            "의료기기 인허가(RA) 팀장": "ra_manager",
+            "의료 AI 솔루션 마케팅": "marketing",
+            "일본 법인장": "japan_head"
+        }
+        if job_option in job_map:
+            default_description = job_descriptions[job_map[job_option]]
+            job_description = st.text_area(
+                "- 채용공고 내용 (필요시 수정 가능합니다)",
+                value=default_description,
+                height=220
+            )
+        else:
+            job_description = ""
+
+    st.markdown("---")
+    
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -755,7 +782,7 @@ elif st.session_state['current_page'] == "interview1":
 
     # 질문 생성 로직
     if question_button:
-        if st.session_state.analysis_result and st.session_state.analysis_result != "":
+        if st.session_state.analysis_result and st.session_state.analysis_result != "" and job_description:
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
                     response = openai.ChatCompletion.create(
@@ -786,7 +813,7 @@ elif st.session_state['current_page'] == "interview1":
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
-            st.warning("먼저 이력서 분석을 진행해주세요.")
+            st.warning("이력서 분석 결과와 채용공고를 모두 입력해주세요.")
 
     # 면접 질문 결과 표시
     if st.session_state.interview_questions:
