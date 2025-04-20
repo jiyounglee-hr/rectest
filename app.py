@@ -278,6 +278,8 @@ if 'interview_questions2' not in st.session_state:
     st.session_state['interview_questions2'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
+if 'job_link' not in st.session_state:
+    st.session_state['job_link'] = None
 
 # URL 파라미터 처리
 page_param = st.query_params.get("page", "resume")
@@ -742,9 +744,12 @@ elif st.session_state['current_page'] == "interview1":
     """, unsafe_allow_html=True)
     
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
-    
+    job_link = st.text_input("채용공고 링크를 입력해주세요", 
+                            placeholder="https://career.neurophet.com/...",
+                            value=st.session_state.job_link)
+
     if job_link:
+        st.session_state.job_link = job_link
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
@@ -854,20 +859,24 @@ elif st.session_state['current_page'] == "interview1":
             if not job_description.strip():
                 raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
             
+            # 채용공고 내용을 세션 상태에 저장
+            st.session_state.job_description = job_description
+            
             # 채용공고 내용 표시
-            st.text_area("채용공고 내용", job_description, height=300)
+            st.text_area("채용공고 내용", st.session_state.job_description, height=300)
             
         except ValueError as ve:
             st.error(str(ve))
-            job_description = ""
+            st.session_state.job_description = None
         except requests.exceptions.RequestException as e:
             st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
-            job_description = ""
+            st.session_state.job_description = None
         except Exception as e:
             st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
-            job_description = ""
+            st.session_state.job_description = None
     else:
-        job_description = ""
+        st.session_state.job_link = None
+        st.session_state.job_description = None
 
     st.markdown("---")
  
@@ -887,7 +896,7 @@ elif st.session_state['current_page'] == "interview1":
     """, unsafe_allow_html=True)  
     # 질문 생성 로직
     if question_button:
-        if uploaded_file and job_description:
+        if uploaded_file and st.session_state.job_description:
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
                     # 이력서 내용 가져오기
@@ -950,7 +959,7 @@ elif st.session_state['current_page'] == "interview1":
 - 모든 질문은 STAR 구조를 따릅니다.  
 - 질문은 단순 사실 확인이 아닌, 지원자의 행동과 결과를 이끌어낼 수 있도록 구성하세요.  
 - 이력서와 채용공고의 연결고리를 고려해 질문을 구성하세요."""},
-                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
+                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{st.session_state.job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
                         ]
                     )
                     st.session_state.interview_questions1 = response1.choices[0].message.content
@@ -973,9 +982,12 @@ elif st.session_state['current_page'] == "interview2":
     """, unsafe_allow_html=True)
     
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
-    
+    job_link = st.text_input("채용공고 링크를 입력해주세요", 
+                            placeholder="https://career.neurophet.com/...",
+                            value=st.session_state.job_link)
+
     if job_link:
+        st.session_state.job_link = job_link
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
@@ -1085,21 +1097,25 @@ elif st.session_state['current_page'] == "interview2":
             if not job_description.strip():
                 raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
             
+            # 채용공고 내용을 세션 상태에 저장
+            st.session_state.job_description = job_description
+            
             # 채용공고 내용 표시
-            st.text_area("채용공고 내용", job_description, height=300)
+            st.text_area("채용공고 내용", st.session_state.job_description, height=300)
             
         except ValueError as ve:
             st.error(str(ve))
-            job_description = ""
+            st.session_state.job_description = None
         except requests.exceptions.RequestException as e:
             st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
-            job_description = ""
+            st.session_state.job_description = None
         except Exception as e:
             st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
-            job_description = ""
+            st.session_state.job_description = None
     else:
-        job_description = ""
-    
+        st.session_state.job_link = None
+        st.session_state.job_description = None
+
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -1111,7 +1127,7 @@ elif st.session_state['current_page'] == "interview2":
 
     # 질문 생성 로직
     if question_button:
-        if uploaded_file and job_description:
+        if uploaded_file and st.session_state.job_description:
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
                     # 이력서 내용 가져오기
@@ -1191,7 +1207,7 @@ elif st.session_state['current_page'] == "interview2":
 - 모든 질문은 STAR 구조를 따릅니다.  
 - 질문은 단순 사실 확인이 아닌, 지원자의 행동과 결과를 이끌어낼 수 있도록 구성하세요.  
 - 이력서와 채용공고의 연결고리를 고려해 질문을 구성하세요."""},
-                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
+                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{st.session_state.job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
                         ]
                     )
                     st.session_state.interview_questions2 = response2.choices[0].message.content
