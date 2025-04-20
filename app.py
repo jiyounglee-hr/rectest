@@ -796,10 +796,10 @@ elif st.session_state['current_page'] == "interview1":
                 
                 # 섹션별 내용 저장을 위한 딕셔너리
                 sections = {
-                    "담당업무": set(),
-                    "필수자격": set(),
-                    "우대사항": set(),
-                    "기타정보": set()
+                    "담당업무": [],
+                    "필수자격": [],
+                    "우대사항": [],
+                    "기타정보": []
                 }
                 
                 # 모든 텍스트 블록 찾기
@@ -832,27 +832,27 @@ elif st.session_state['current_page'] == "interview1":
                         # 불필요한 문자 제거
                         text = text.replace("•", "").strip()
                         if text and len(text) > 1:  # 빈 항목이나 단일 문자 제외
-                            sections[current_section].add(text)
+                            sections[current_section].append(text)
                 
                 # 정리된 내용을 job_description에 추가
                 if sections["담당업무"]:
                     job_description += "\n담당업무\n"
-                    for item in sorted(sections["담당업무"]):
+                    for item in sections["담당업무"]:
                         job_description += f"- {item}\n"
                 
                 if sections["필수자격"]:
                     job_description += "\n필수자격\n"
-                    for item in sorted(sections["필수자격"]):
+                    for item in sections["필수자격"]:
                         job_description += f"- {item}\n"
                 
                 if sections["우대사항"]:
                     job_description += "\n우대사항\n"
-                    for item in sorted(sections["우대사항"]):
+                    for item in sections["우대사항"]:
                         job_description += f"- {item}\n"
                 
                 if sections["기타정보"]:
                     job_description += "\n기타 정보\n"
-                    for item in sorted(sections["기타정보"]):
+                    for item in sections["기타정보"]:
                         if "근무" in item or "급여" in item or "제출" in item:
                             job_description += f"- {item}\n"
                 
