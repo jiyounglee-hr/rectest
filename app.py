@@ -193,7 +193,7 @@ def calculate_experience(experience_text):
                 start = datetime.strptime(start_date, "%Y-%m-%d")
                 
                 # 종료일 처리
-                if '현재' in line or '재직중' in line:
+                if '현재' in line or '재직중' in line or '재직 중' in line:
                     end = datetime.now()
                 else:
                     # 종료일 패턴 처리 (일 부분 무시)
@@ -444,7 +444,8 @@ with st.sidebar:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성을 도와드려요. </div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">이력서 웹 링크 ></a></div>', unsafe_allow_html=True)
+
     # 맨 마지막에 도움말 추가
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("도움말"):
