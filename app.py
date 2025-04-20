@@ -635,6 +635,23 @@ if st.session_state['current_page'] == "resume":
     # 오른쪽 컬럼: 이력서 내용
     with right_col:
         if 'resume_text' in st.session_state and st.session_state.resume_text:
+            st.markdown("""
+                <style>
+                    .resume-text {
+                        background-color: white;
+                        padding: 20px;
+                        border-radius: 5px;
+                        border: 1px solid #ddd;
+                        max-height: 500px;
+                        overflow-y: auto;
+                        font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+                        font-size: 0.9em;
+                        line-height: 1.5;
+                        white-space: pre-wrap;
+                        margin: 10px 0;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
             st.markdown('<div class="label-text">📄 이력서 내용 </div>', unsafe_allow_html=True)
             st.markdown(f'<div class="resume-text">{st.session_state.resume_text}</div>', unsafe_allow_html=True)
 
