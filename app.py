@@ -478,7 +478,9 @@ if st.session_state['current_page'] == "resume":
         if job_option == "직접 입력":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
-            job_link = st.text_input("채용공고 링크를 입력해주세요")
+            # 채용공고 링크 입력
+            job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
+
             if job_link:
                 try:
                     # 웹 브라우저처럼 보이기 위한 헤더 설정
