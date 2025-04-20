@@ -740,14 +740,6 @@ elif st.session_state['current_page'] == "interview1":
             ☝️ 1차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
-    st.markdown("""
-        <small style='color: #666666;'>
-            업무 지식 및 직무기술 직무 수행 태도 및 자세 관련 질문입니다. <br>
-            인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
-        </small>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
     
     # 채용공고 링크 입력
     job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
@@ -878,7 +870,12 @@ elif st.session_state['current_page'] == "interview1":
         job_description = ""
 
     st.markdown("---")
-    
+    st.markdown("""
+        <small style='color: #666666;'>
+            업무 지식 및 직무기술 직무 수행 태도 및 자세 관련 질문입니다. <br>
+            인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
+        </small>
+    """, unsafe_allow_html=True)   
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -974,13 +971,6 @@ elif st.session_state['current_page'] == "interview2":
             ✌️ 2차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
-    st.markdown("""
-        <small style='color: #666666;'>
-            본부장이 핵심가치 기반으로 STAR 기법을 사용하여 질문합니다. <br>
-            [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다
-        </small>
-    """, unsafe_allow_html=True)
-    
     st.markdown("---")
     
     # 채용공고 링크 입력
@@ -1110,8 +1100,6 @@ elif st.session_state['current_page'] == "interview2":
             job_description = ""
     else:
         job_description = ""
-
-    st.markdown("---")
     
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
