@@ -547,16 +547,16 @@ if st.session_state['current_page'] == "resume":
                             continue
                         
                         # 섹션 제목 확인
-                        if any(keyword in text for keyword in ['담당 업무', '주요 업무', '업무 내용', '수행 업무']):
+                        if any(keyword in text for keyword in ['담당 업무', '주요 업무', '업무 내용', '수행 업무', '함께 할 업무']):
                             current_section = "담당업무"
                             continue
-                        elif any(keyword in text for keyword in ['자격 요건', '필수 요건', '지원 자격', '자격사항']):
+                        elif any(keyword in text for keyword in ['자격 요건', '필수 요건', '지원 자격', '자격사항', '이런 역량을 가진 분']):
                             current_section = "필수자격"
                             continue
-                        elif any(keyword in text for keyword in ['우대사항', '우대 사항', '우대 조건']):
+                        elif any(keyword in text for keyword in ['우대사항', '우대 사항', '우대 조건', '이런 경험이 있다면']):
                             current_section = "우대사항"
                             continue
-                        elif any(keyword in text for keyword in ['기타', '복리후생', '근무조건', '근무 환경']):
+                        elif any(keyword in text for keyword in ['기타', '복리후생', '근무조건', '근무 환경', '합류 여정', '꼭 확인해주세요']):
                             current_section = "기타정보"
                             continue
                         
