@@ -585,8 +585,9 @@ if st.session_state['current_page'] == "resume":
                     # 이미 추출된 텍스트 사용
                     text = st.session_state.resume_text
                     
-                    # OpenAI 클라이언트 초기화
-                    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                    # OpenAI 클라이언트 초기화 (기본 설정 사용)
+                    client = OpenAI()
+                    client.api_key = st.secrets["OPENAI_API_KEY"]
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
@@ -896,8 +897,9 @@ elif st.session_state['current_page'] == "interview1":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
-                    # OpenAI 클라이언트 초기화
-                    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                    # OpenAI 클라이언트 초기화 (기본 설정 사용)
+                    client = OpenAI()
+                    client.api_key = st.secrets["OPENAI_API_KEY"]
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
