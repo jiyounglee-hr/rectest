@@ -868,8 +868,6 @@ elif st.session_state['current_page'] == "interview1":
             job_description = ""
     else:
         job_description = ""
-
-    st.markdown("---")
  
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
