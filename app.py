@@ -475,6 +475,7 @@ if st.session_state['current_page'] == "resume":
             ["링크 입력", "직접 입력"]
         )
 
+        job_description = ""  # 여기로 이동
         if job_option == "직접 입력":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
