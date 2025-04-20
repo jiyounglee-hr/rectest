@@ -533,12 +533,24 @@ if st.session_state['current_page'] == "resume":
 
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
-        job_option = st.selectbox(
-            "채용공고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-            ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
+        # 채용공고 선택을 위한 매핑 생성
+        job_options = {
+            "선택해주세요": None,
+            "의료기기 인허가(RA) 팀장": "ra_manager",
+            "의료 AI 솔루션 마케팅": "marketing",
+            "일본 법인장": "japan_head",
+            "직접 입력": "custom"
+        }
+        
+        # 채용공고 선택
+        selected_job = st.selectbox(
+            "채용공고 선택",
+            options=list(job_options.keys())
         )
-
-        if job_option == "직접 입력":
+        
+        if selected_job == "선택해주세요":
+            st.warning("채용공고를 선택해주세요.")
+        elif selected_job == "직접 입력":
             job_url = st.text_input("채용공고 URL")
             responsibilities = st.text_area("담당업무 (각 항목을 새 줄로 구분)", height=150)
             required_quals = st.text_area("필수자격 (각 항목을 새 줄로 구분)", height=150)
@@ -557,8 +569,11 @@ if st.session_state['current_page'] == "resume":
                     "required_qualifications": required_quals_list,
                     "preferred_qualifications": preferred_quals_list
                 }
+                st.success("채용공고가 저장되었습니다.")
         else:
-            job_data = job_descriptions[job_option]
+            # 선택된 채용공고의 키 값 가져오기
+            selected_job_key = job_options[selected_job]
+            job_data = job_descriptions[selected_job_key]
             st.session_state['current_job_description'] = job_data
             
             with st.expander("채용공고 내용 확인 및 수정", expanded=True):
@@ -776,14 +791,95 @@ elif st.session_state['current_page'] == "interview1":
             ☝️ 1차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
-    st.markdown("""
-        <small style='color: #666666;'>
-            1~6번은 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문<br>
-            7~10번은 핵심가치 기반의 '[도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다'와 관련된 사례 질문
-        </small>
-    """, unsafe_allow_html=True)
     
+    # 채용공고 선택 및 수정 섹션
+    st.markdown("### 📋 채용공고 선택")
+    
+    # 채용공고 선택을 위한 매핑 생성
+    job_options = {
+        "의료기기 인허가(RA) 팀장": "ra_manager",
+        "의료 AI 솔루션 마케팅": "marketing",
+        "일본 법인장": "japan_head",
+        "직접 입력": "custom"
+    }
+    
+    # 채용공고 선택
+    selected_job = st.selectbox(
+        "채용공고를 선택해주세요",
+        options=list(job_options.keys())
+    )
+    
+    # 선택된 채용공고의 키 값 가져오기
+    selected_job_key = job_options[selected_job]
+    
+    if selected_job_key == "custom":
+        # 직접 입력 폼
+        job_url = st.text_input("채용공고 URL")
+        responsibilities = st.text_area("담당업무 (각 항목을 새 줄로 구분)", height=150)
+        required_quals = st.text_area("필수자격 (각 항목을 새 줄로 구분)", height=150)
+        preferred_quals = st.text_area("우대사항 (각 항목을 새 줄로 구분)", height=150)
+        
+        if st.button("저장"):
+            # 텍스트 영역의 내용을 리스트로 변환
+            responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
+            required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
+            preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
+            
+            # 세션 상태에 저장
+            st.session_state['current_job_description'] = {
+                "url": job_url,
+                "responsibilities": responsibilities_list,
+                "required_qualifications": required_quals_list,
+                "preferred_qualifications": preferred_quals_list
+            }
+            st.success("채용공고가 저장되었습니다.")
+    else:
+        # 기존 채용공고 표시 및 수정
+        job_data = job_descriptions[selected_job_key]
+        st.session_state['current_job_description'] = job_data
+        
+        with st.expander("채용공고 내용 확인 및 수정", expanded=True):
+            st.markdown("#### 🔗 채용공고 링크")
+            st.markdown(f"[채용공고 바로가기]({job_data['url']})" if job_data['url'] else "링크 없음")
+            
+            st.markdown("#### 📝 담당업무")
+            responsibilities = st.text_area(
+                "각 항목을 새 줄로 구분",
+                value='\n'.join(job_data['responsibilities']),
+                height=150
+            )
+            
+            st.markdown("#### ✅ 필수자격")
+            required_quals = st.text_area(
+                "각 항목을 새 줄로 구분",
+                value='\n'.join(job_data['required_qualifications']),
+                height=150
+            )
+            
+            st.markdown("#### 🎯 우대사항")
+            preferred_quals = st.text_area(
+                "각 항목을 새 줄로 구분",
+                value='\n'.join(job_data['preferred_qualifications']),
+                height=150
+            )
+            
+            if st.button("수정사항 저장"):
+                # 텍스트 영역의 내용을 리스트로 변환
+                responsibilities_list = [line.strip() for line in responsibilities.split('\n') if line.strip()]
+                required_quals_list = [line.strip() for line in required_quals.split('\n') if line.strip()]
+                preferred_quals_list = [line.strip() for line in preferred_quals.split('\n') if line.strip()]
+                
+                # 세션 상태에 저장
+                st.session_state['current_job_description'] = {
+                    "url": job_data['url'],
+                    "responsibilities": responsibilities_list,
+                    "required_qualifications": required_quals_list,
+                    "preferred_qualifications": preferred_quals_list
+                }
+                st.success("수정사항이 저장되었습니다.")
+
     st.markdown("---")
+
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
     with col1:
