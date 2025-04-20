@@ -892,9 +892,12 @@ elif st.session_state['current_page'] == "interview1":
 
     # 질문 생성 로직
     if question_button:
-        if st.session_state.analysis_result and st.session_state.analysis_result != "" and job_description:
+        if uploaded_file and job_description:
             with st.spinner("면접 질문을 생성중입니다..."):
                 try:
+                    # 이력서 내용 가져오기
+                    text = st.session_state.resume_text
+                    
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
@@ -916,14 +919,14 @@ elif st.session_state['current_page'] == "interview1":
 
 각 질문은 다음 형식으로 작성:
 1. [구체적인 상황/경험에 대한 질문] + [역할과 결과에 대한 추가 질문]"""},
-                            {"role": "user", "content": f"이력서 분석 결과:\n{st.session_state.analysis_result}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 상세한 면접 질문 10개를 생성해주세요."}
+                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 상세한 면접 질문 10개를 생성해주세요."}
                         ]
                     )
                     st.session_state.interview_questions = response.choices[0].message.content
                 except Exception as e:
                     st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
         else:
-            st.warning("이력서 분석 결과와 채용공고를 모두 입력해주세요.")
+            st.warning("이력서와 채용공고를 모두 입력해주세요.")
 
     # 면접 질문 결과 표시
     if st.session_state.interview_questions:
