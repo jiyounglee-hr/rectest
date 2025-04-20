@@ -787,42 +787,74 @@ elif st.session_state['current_page'] == "interview1":
                 # 담당업무, 필수자격, 우대사항 추출
                 job_description = f"[{job_title}]\n\n"
                 
+                # 불필요한 내용 필터링을 위한 패턴
+                skip_patterns = [
+                    "About us", "Recruit", "Culture", "Benefit", "FAQ",
+                    "개인정보처리방침", "이용약관", "뉴로핏 주식회사", "Copyright",
+                    "All Rights Reserved", "테헤란로", "삼원타워", "+82"
+                ]
+                
+                # 섹션별 내용 저장을 위한 딕셔너리
+                sections = {
+                    "담당업무": set(),
+                    "필수자격": set(),
+                    "우대사항": set(),
+                    "기타정보": set()
+                }
+                
                 # 모든 텍스트 블록 찾기
-                content_blocks = soup.find_all(['h2', 'h3', 'h4', 'div', 'p', 'ul'])
+                content_blocks = soup.find_all(['h2', 'h3', 'h4', 'div', 'p', 'ul', 'li'])
                 
                 current_section = None
                 for block in content_blocks:
                     text = block.get_text(strip=True)
                     
+                    # 빈 텍스트나 불필요한 내용 건너뛰기
+                    if not text or any(pattern in text for pattern in skip_patterns):
+                        continue
+                    
                     # 섹션 제목 확인
-                    if any(keyword in text for keyword in ["함께 할 업무", "업무 내용", "주요 업무"]):
+                    if "함께 할 업무" in text:
                         current_section = "담당업무"
-                        job_description += "\n담당업무\n"
                         continue
-                    elif any(keyword in text for keyword in ["역량을 가진 분", "이런 분을 찾", "자격 요건", "필수 자격"]):
+                    elif "역량을 가진 분" in text or "이런 분을 찾" in text:
                         current_section = "필수자격"
-                        job_description += "\n필수자격\n"
                         continue
-                    elif any(keyword in text for keyword in ["경험이 있다면 더 좋", "우대 사항", "우대", "이런 분이면 더 좋"]):
+                    elif "경험이 있다면 더 좋" in text or "우대" in text:
                         current_section = "우대사항"
-                        job_description += "\n우대사항\n"
+                        continue
+                    elif "합류 여정" in text or "꼭 확인해주세요" in text:
+                        current_section = "기타정보"
                         continue
                     
                     # 현재 섹션에 내용 추가
-                    if current_section and text:
-                        # 섹션 제목이나 다른 메타 텍스트 제외
-                        if not any(keyword in text for keyword in ["함께 할 업무", "역량을 가진 분", "경험이 있다면 더 좋"]):
-                            # li 태그 찾기
-                            list_items = block.find_all('li')
-                            if list_items:
-                                for item in list_items:
-                                    item_text = item.get_text(strip=True)
-                                    if item_text and len(item_text) > 1:  # 빈 항목이나 단일 문자 제외
-                                        job_description += f"- {item_text}\n"
-                            else:
-                                # li 태그가 없는 경우 텍스트 직접 추가
-                                if len(text) > 1 and not text.startswith('-'):  # 빈 텍스트나 이미 처리된 항목 제외
-                                    job_description += f"- {text}\n"
+                    if current_section:
+                        # 불필요한 문자 제거
+                        text = text.replace("•", "").strip()
+                        if text and len(text) > 1:  # 빈 항목이나 단일 문자 제외
+                            sections[current_section].add(text)
+                
+                # 정리된 내용을 job_description에 추가
+                if sections["담당업무"]:
+                    job_description += "\n담당업무\n"
+                    for item in sorted(sections["담당업무"]):
+                        job_description += f"- {item}\n"
+                
+                if sections["필수자격"]:
+                    job_description += "\n필수자격\n"
+                    for item in sorted(sections["필수자격"]):
+                        job_description += f"- {item}\n"
+                
+                if sections["우대사항"]:
+                    job_description += "\n우대사항\n"
+                    for item in sorted(sections["우대사항"]):
+                        job_description += f"- {item}\n"
+                
+                if sections["기타정보"]:
+                    job_description += "\n기타 정보\n"
+                    for item in sorted(sections["기타정보"]):
+                        if "근무" in item or "급여" in item or "제출" in item:
+                            job_description += f"- {item}\n"
                 
                 # 채용공고 내용이 비어있는 경우 처리
                 if not job_description.strip():
