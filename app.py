@@ -776,7 +776,18 @@ elif st.session_state['current_page'] == "interview1":
             soup = BeautifulSoup(response.text, 'lxml')
             
             # 채용공고 내용 추출
+            job_title = None
+            # h1 태그에서 제목 찾기
             job_title = soup.find('h1')
+            if not job_title:
+                # h2 태그에서 제목 찾기
+                job_title = soup.find('h2')
+            if not job_title:
+                # class나 id에 title, heading, job-title 등이 포함된 요소에서 제목 찾기
+                job_title = soup.find(class_=lambda x: x and any(keyword in x.lower() for keyword in ['title', 'heading', 'job-title']))
+            if not job_title:
+                # 첫 번째 h1, h2, h3 태그에서 제목 찾기
+                job_title = soup.find(['h1', 'h2', 'h3'])
             if not job_title:
                 raise ValueError("채용공고 제목을 찾을 수 없습니다.")
             job_title = job_title.get_text(strip=True)
@@ -1014,7 +1025,18 @@ elif st.session_state['current_page'] == "interview2":
             soup = BeautifulSoup(response.text, 'lxml')
             
             # 채용공고 내용 추출
+            job_title = None
+            # h1 태그에서 제목 찾기
             job_title = soup.find('h1')
+            if not job_title:
+                # h2 태그에서 제목 찾기
+                job_title = soup.find('h2')
+            if not job_title:
+                # class나 id에 title, heading, job-title 등이 포함된 요소에서 제목 찾기
+                job_title = soup.find(class_=lambda x: x and any(keyword in x.lower() for keyword in ['title', 'heading', 'job-title']))
+            if not job_title:
+                # 첫 번째 h1, h2, h3 태그에서 제목 찾기
+                job_title = soup.find(['h1', 'h2', 'h3'])
             if not job_title:
                 raise ValueError("채용공고 제목을 찾을 수 없습니다.")
             job_title = job_title.get_text(strip=True)
