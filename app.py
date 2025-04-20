@@ -750,9 +750,12 @@ elif st.session_state['current_page'] == "interview1":
     st.markdown("---")
     
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
-    
+    job_link = st.text_input("채용공고 링크를 입력해주세요", 
+                            placeholder="https://career.neurophet.com/...",
+                            value=st.session_state.get('job_link', ''))
+
     if job_link:
+        st.session_state['job_link'] = job_link
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
@@ -783,7 +786,7 @@ elif st.session_state['current_page'] == "interview1":
                 job_title = soup.find('h1')
                 if job_title:
                     job_title = job_title.get_text(strip=True)
-                else:
+                    else:
                     raise ValueError("채용공고 제목을 찾을 수 없습니다.")
                 
                 # 담당업무, 필수자격, 우대사항 추출
@@ -988,9 +991,12 @@ elif st.session_state['current_page'] == "interview2":
     st.markdown("---")
     
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
-    
+    job_link = st.text_input("채용공고 링크를 입력해주세요", 
+                            placeholder="https://career.neurophet.com/...",
+                            value=st.session_state.get('job_link', ''))
+
     if job_link:
+        st.session_state['job_link'] = job_link
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
@@ -1113,7 +1119,7 @@ elif st.session_state['current_page'] == "interview2":
         except requests.exceptions.RequestException as e:
             st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
             job_description = ""
-        except Exception as e:
+    except Exception as e:
             st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
             job_description = ""
     else:
