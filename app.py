@@ -376,12 +376,6 @@ with st.sidebar:
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 1. 이력서 첨부 섹션
-    st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 5px;'>
-           이력서 업데이트
-        </h5>
-    """, unsafe_allow_html=True)
     
     # 파일 업로더 스타일 수정
     st.markdown("""
@@ -407,7 +401,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
-        "PDF 파일을 선택해주세요",
+        "이력서를 선택해주세요.",
         type=['pdf'],
         help="200MB 이하의 PDF 파일만 가능합니다"
     )
