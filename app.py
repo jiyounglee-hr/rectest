@@ -11,9 +11,6 @@ import base64
 import requests
 from bs4 import BeautifulSoup
 
-# OpenAI API 키 설정
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
 # 날짜 정규화 함수
 def normalize_date(date_str):
     if pd.isna(date_str) or date_str == '':
@@ -898,6 +895,8 @@ elif st.session_state['current_page'] == "interview1":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
+                    # OpenAI 클라이언트 초기화
+                    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
