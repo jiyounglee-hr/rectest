@@ -2,7 +2,7 @@ import streamlit as st
 import PyPDF2
 from io import BytesIO
 import os
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime
 import pandas as pd
@@ -10,6 +10,9 @@ import re
 import base64
 import requests
 from bs4 import BeautifulSoup
+
+# OpenAI API 키 설정
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -281,9 +284,6 @@ valid_pages = ['resume', 'interview1', 'interview2']
 # URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
 if isinstance(page_param, str) and page_param in valid_pages:
     st.session_state['current_page'] = page_param
-
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # 사이드바 스타일 수정
 st.markdown("""
@@ -589,7 +589,7 @@ if st.session_state['current_page'] == "resume":
                     text = st.session_state.resume_text
                     
                     # 기존 분석 로직
-                    response = openai.ChatCompletion.create(
+                    response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": """당신은 전문 채용 담당자입니다. 
@@ -898,7 +898,6 @@ elif st.session_state['current_page'] == "interview1":
                     # 이력서 내용 가져오기
                     text = st.session_state.resume_text
                     
-                    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
