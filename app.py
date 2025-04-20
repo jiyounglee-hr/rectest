@@ -272,8 +272,10 @@ if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
 if 'analysis_result' not in st.session_state:
     st.session_state['analysis_result'] = None
-if 'interview_questions' not in st.session_state:
-    st.session_state['interview_questions'] = None
+if 'interview_questions1' not in st.session_state:
+    st.session_state['interview_questions1'] = None
+if 'interview_questions2' not in st.session_state:
+    st.session_state['interview_questions2'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
 
