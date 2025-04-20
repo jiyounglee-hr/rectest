@@ -481,8 +481,28 @@ if st.session_state['current_page'] == "resume":
             job_link = st.text_input("채용공고 링크를 입력해주세요")
             if job_link:
                 try:
-                    # 채용공고 링크에서 내용 추출
-                    response = requests.get(job_link)
+                    # 웹 브라우저처럼 보이기 위한 헤더 설정
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1',
+                        'Sec-Fetch-Dest': 'document',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'none',
+                        'Sec-Fetch-User': '?1'
+                    }
+                    
+                    # 웹 페이지 가져오기
+                    response = requests.get(job_link, headers=headers, timeout=10)
+                    response.raise_for_status()
+                    
+                    # 인코딩 설정
+                    response.encoding = 'utf-8'
+                    
+                    # HTML 파싱
                     soup = BeautifulSoup(response.text, 'html.parser')
                     
                     # 채용공고 내용 추출
@@ -492,504 +512,106 @@ if st.session_state['current_page'] == "resume":
                     
                     if not job_title:
                         job_title = "채용공고"
-import streamlit as st
-import PyPDF2
-from io import BytesIO
-import os
-import openai
-from dotenv import load_dotenv
-from datetime import datetime
-import pandas as pd
-import re
-import base64
-import requests
-from bs4 import BeautifulSoup
-
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-# 날짜 정규화 함수
-def normalize_date(date_str):
-    if pd.isna(date_str) or date_str == '':
-        return None
-    
-    # 이미 datetime 객체인 경우
-    if isinstance(date_str, (datetime, pd.Timestamp)):
-        return date_str
-    
-    # 문자열인 경우
-    if isinstance(date_str, str):
-        # 공백 제거
-        date_str = date_str.strip()
-        
-        # 빈 문자열 처리
-        if not date_str:
-            return None
-            
-        # 날짜 형식 변환 시도
-        try:
-            # YYYY-MM-DD 형식
-            if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
-                return datetime.strptime(date_str, '%Y-%m-%d')
-            # YYYY.MM.DD 형식
-            elif re.match(r'^\d{4}\.\d{2}\.\d{2}$', date_str):
-                return datetime.strptime(date_str, '%Y.%m.%d')
-            # YYYY/MM/DD 형식
-            elif re.match(r'^\d{4}/\d{2}/\d{2}$', date_str):
-                return datetime.strptime(date_str, '%Y/%m/%d')
-            # YYYYMMDD 형식
-            elif re.match(r'^\d{8}$', date_str):
-                return datetime.strptime(date_str, '%Y%m%d')
-        except ValueError:
-            return None
-    
-    return None
-
-def calculate_experience(experience_text):
-    """경력기간을 계산하는 함수"""
-    # 영문 월을 숫자로 변환하는 딕셔너리
-    month_dict = {
-        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
-        'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-    }
-    
-    total_months = 0
-    experience_periods = []
-    
-    # 각 줄을 분리하여 처리
-    lines = experience_text.split('\n')
-    current_company = None
-    
-    for line in lines:
-        # 공백과 탭 문자를 모두 일반 공백으로 변환하고 연속된 공백을 하나로 처리
-        line = re.sub(r'[\s\t]+', ' ', line.strip())
-        if not line:
-            continue
-            
-        # 회사명 추출 (숫자나 특수문자가 없는 줄)
-        if not any(c.isdigit() for c in line) and not any(c in '~-–./' for c in line):
-            current_company = line
-            continue
-            
-        # 영문 월 형식 패턴 (예: Nov 2021 – Oct 2024)
-        en_pattern = r'([A-Za-z]{3})\s*(\d{4})\s*[–-]\s*([A-Za-z]{3})\s*(\d{4})'
-        en_match = re.search(en_pattern, line)
-        
-        # 한국어 날짜 형식 패턴 (예: 2021 년 11월 – 2024 년 10월)
-        kr_pattern = r'(\d{4})\s*년?\s*(\d{1,2})\s*월\s*[-–~]\s*(\d{4})\s*년?\s*(\d{1,2})\s*월'
-        kr_match = re.search(kr_pattern, line)
-        
-        if en_match:
-            start_month, start_year, end_month, end_year = en_match.groups()
-            start_date = f"{start_year}-{month_dict[start_month]}-01"
-            end_date = f"{end_year}-{month_dict[end_month]}-01"
-            
-            start = datetime.strptime(start_date, "%Y-%m-%d")
-            end = datetime.strptime(end_date, "%Y-%m-%d")
-            
-            months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-            total_months += months
-            
-            years = months // 12
-            remaining_months = months % 12
-            decimal_years = round(months / 12, 1)
-            
-            period_str = f"{start_year}-{month_dict[start_month]}~{end_year}-{month_dict[end_month]} ({years}년 {remaining_months}개월, {decimal_years}년)"
-            if current_company:
-                period_str = f"{current_company}: {period_str}"
-            experience_periods.append(period_str)
-            continue
-            
-        elif kr_match:
-            start_year, start_month, end_year, end_month = kr_match.groups()
-            start_date = f"{start_year}-{start_month.zfill(2)}-01"
-            end_date = f"{end_year}-{end_month.zfill(2)}-01"
-            
-            start = datetime.strptime(start_date, "%Y-%m-%d")
-            end = datetime.strptime(end_date, "%Y-%m-%d")
-            
-            months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-            total_months += months
-            
-            years = months // 12
-            remaining_months = months % 12
-            decimal_years = round(months / 12, 1)
-            
-            period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
-            if current_company:
-                period_str = f"{current_company}: {period_str}"
-            experience_periods.append(period_str)
-            continue
-            
-        # 날짜 패턴 처리
-        # 1. 2023. 04 ~ 2024. 07 형식
-        pattern1 = r'(\d{4})\.\s*(\d{1,2})\s*[~-–]\s*(\d{4})\.\s*(\d{1,2})'
-        # 2. 2015.01.~2016.06 형식
-        pattern2 = r'(\d{4})\.(\d{1,2})\.\s*[~-–]\s*(\d{4})\.(\d{1,2})'
-        # 3. 2024.05 ~ 형식
-        pattern3 = r'(\d{4})\.(\d{1,2})\s*[~-–]'
-        # 4. 2024-05 ~ 형식
-        pattern4 = r'(\d{4})-(\d{1,2})\s*[~-–]'
-        # 5. 2024/05 ~ 형식
-        pattern5 = r'(\d{4})/(\d{1,2})\s*[~-–]'
-        # 6. 2024.05.01 ~ 형식 (일 부분 무시)
-        pattern6 = r'(\d{4})\.(\d{1,2})\.\d{1,2}\s*[~-–]'
-        # 7. 2024-05-01 ~ 형식 (일 부분 무시)
-        pattern7 = r'(\d{4})-(\d{1,2})-\d{1,2}\s*[~-–]'
-        # 8. 2024/05/01 ~ 형식 (일 부분 무시)
-        pattern8 = r'(\d{4})/(\d{1,2})/\d{1,2}\s*[~-–]'
-        # 9. 2023/05 - 2024.04 형식
-        pattern9 = r'(\d{4})[/\.](\d{1,2})\s*[-]\s*(\d{4})[/\.](\d{1,2})'
-        # 10. 2023-04-24 ~ 2024-05-10 형식
-        pattern10 = r'(\d{4})-(\d{1,2})-(\d{1,2})\s*[~-–]\s*(\d{4})-(\d{1,2})-(\d{1,2})'
-        # 11. 2021-03-2026-08 형식
-        pattern11 = r'(\d{4})-(\d{1,2})-(\d{4})-(\d{1,2})'
-        # 12. 2021-03~2022-08 형식
-        pattern12 = r'(\d{4})-(\d{1,2})\s*[~-–]\s*(\d{4})-(\d{1,2})'
-        
-        # 패턴 매칭 시도
-        match = None
-        current_pattern = None
-        
-        # 먼저 패턴 10으로 시도 (2023-04-24 ~ 2024-05-10 형식)
-        match = re.search(pattern10, line)
-        if match:
-            current_pattern = pattern10
-        # 다음으로 패턴 12로 시도 (2021-03~2022-08 형식)
-        elif re.search(pattern12, line):
-            match = re.search(pattern12, line)
-            current_pattern = pattern12
-        else:
-            # 다른 패턴 시도
-            for pattern in [pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern11]:
-                match = re.search(pattern, line)
-                if match:
-                    current_pattern = pattern
-                    break
-                
-        if match and current_pattern:
-            if current_pattern in [pattern1, pattern2, pattern9]:
-                start_year, start_month, end_year, end_month = match.groups()
-                start_date = f"{start_year}-{start_month.zfill(2)}-01"
-                end_date = f"{end_year}-{end_month.zfill(2)}-01"
-                start = datetime.strptime(start_date, "%Y-%m-%d")
-                end = datetime.strptime(end_date, "%Y-%m-%d")
-            elif current_pattern == pattern10:
-                start_year, start_month, start_day, end_year, end_month, end_day = match.groups()
-                start_date = f"{start_year}-{start_month.zfill(2)}-{start_day.zfill(2)}"
-                end_date = f"{end_year}-{end_month.zfill(2)}-{end_day.zfill(2)}"
-                start = datetime.strptime(start_date, "%Y-%m-%d")
-                end = datetime.strptime(end_date, "%Y-%m-%d")
-            elif current_pattern in [pattern11, pattern12]:
-                start_year, start_month, end_year, end_month = match.groups()
-                start_date = f"{start_year}-{start_month.zfill(2)}-01"
-                end_date = f"{end_year}-{end_month.zfill(2)}-01"
-                start = datetime.strptime(start_date, "%Y-%m-%d")
-                end = datetime.strptime(end_date, "%Y-%m-%d")
-            else:
-                start_year, start_month = match.groups()
-                start_date = f"{start_year}-{start_month.zfill(2)}-01"
-                start = datetime.strptime(start_date, "%Y-%m-%d")
-                
-                # 종료일 처리
-                if '현재' in line or '재직중' in line or '재직 중' in line:
-                    end = datetime.now()
-                else:
-                    # 종료일 패턴 처리 (일 부분 무시)
-                    end_pattern = r'[~-–]\s*(\d{4})[\.-/](\d{1,2})(?:[\.-/]\d{1,2})?'
-                    end_match = re.search(end_pattern, line)
-                    if end_match:
-                        end_year, end_month = end_match.groups()
-                        end_date = f"{end_year}-{end_month.zfill(2)}-01"
-                        end = datetime.strptime(end_date, "%Y-%m-%d")
                     else:
-                        # 종료일이 없는 경우
-                        period_str = f"{start_year}-{start_month.zfill(2)}~종료일 입력 필요"
-                        if current_company:
-                            period_str = f"{current_company}: {period_str}"
-                        experience_periods.append(period_str)
-                        continue
-            
-            # 경력기간 계산
-            if current_pattern in [pattern10, pattern11, pattern12]:
-                # 패턴 10, 11, 12의 경우 정확한 일자 계산
-                months = (end.year - start.year) * 12 + (end.month - start.month)
-                if end.day < start.day:
-                    months -= 1
-                if months < 0:
-                    months = 0
-            else:
-                # 다른 패턴의 경우 기존 로직 유지
-                months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-            
-            total_months += months
-            
-            years = months // 12
-            remaining_months = months % 12
-            decimal_years = round(months / 12, 1)
-            
-            # 결과 문자열 생성
-            if current_pattern == pattern10:
-                period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
-            elif current_pattern in [pattern11, pattern12]:
-                period_str = f"{start_year}-{start_month.zfill(2)}~{end_year}-{end_month.zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
-            else:
-                period_str = f"{start_year}-{start_month.zfill(2)}~{end.year}-{str(end.month).zfill(2)} ({years}년 {remaining_months}개월, {decimal_years}년)"
-            
-            if current_company:
-                period_str = f"{current_company}: {period_str}"
-            experience_periods.append(period_str)
-    
-    # 총 경력기간 계산
-    total_years = total_months // 12
-    total_remaining_months = total_months % 12
-    total_decimal_years = round(total_months / 12, 1)
-    
-    # 결과 문자열 생성
-    result = ""
-    if experience_periods:
-        result = f"총 경력기간: {total_years}년 {total_remaining_months}개월 ({total_decimal_years}년)\n"
-        result += "\n".join(experience_periods)
-    
-    return result, total_years, total_remaining_months, total_decimal_years
-
-# 페이지 설정 (반드시 첫 번째 명령어여야 함)
-st.set_page_config(
-    page_title="HR Resume Analyzer",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# 세션 상태 초기화
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'resume'
-if 'analysis_result' not in st.session_state:
-    st.session_state['analysis_result'] = None
-if 'interview_questions1' not in st.session_state:
-    st.session_state['interview_questions1'] = None
-if 'interview_questions2' not in st.session_state:
-    st.session_state['interview_questions2'] = None
-if 'job_description' not in st.session_state:
-    st.session_state['job_description'] = None
-
-# URL 파라미터 처리
-page_param = st.query_params.get("page", "resume")
-valid_pages = ['resume', 'interview1', 'interview2']
-
-# URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
-if isinstance(page_param, str) and page_param in valid_pages:
-    st.session_state['current_page'] = page_param
-
-# 사이드바 스타일 수정
-st.markdown("""
-    <style>
-        [data-testid="stSidebar"] {
-            min-width: 400px !important;
-            max-width: 400px !important;
-            background-color: #f8f9fa;
-        }
-        [data-testid="stSidebar"] > div:first-child {
-            padding: 2rem;
-        }
-        .sidebar-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333333;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        /* 사이드바 버튼 스타일 */
-        [data-testid="stSidebar"] .stButton button {
-            width: 200px !important;
-            padding: 5px 6px !important;
-            margin: 2px 2px !important;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9em !important;
-            color: rgb(49, 51, 63) !important;
-        }
-        [data-testid="stSidebar"] .stButton button:hover {
-            background-color: #f0f0f0;
-        }
-        [data-testid="stSidebar"] .stButton button[data-baseweb="button"][kind="primary"] {
-            background-color: #e6e6e6;
-            border-color: #999;
-            color: rgb(49, 51, 63) !important;
-        }
-        /* 사이드바 버튼 컨테이너 스타일 */
-        [data-testid="stSidebar"] .button-container {
-            display: flex;
-            justify-content: flex-start;
-            gap: 5px;
-            margin-bottom: 20px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# 사이드바 내용
-with st.sidebar:
-    st.image("https://neurophethr.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fe3948c44-a232-43dd-9c54-c4142a1b670b%2Fneruophet_logo.png?table=block&id=893029a6-2091-4dd3-872b-4b7cd8f94384&spaceId=9453ab34-9a3e-45a8-a6b2-ec7f1cefbd7f&width=410&userId=&cache=v2", 
-             width=120)
-    
-    st.markdown("<div class='sidebar-title'>HR-채용</div>", unsafe_allow_html=True)
-
-    # 버튼 컨테이너 추가
-    st.markdown('<div class="button-container">', unsafe_allow_html=True)
-    
-    # 페이지 전환 함수들
-    def switch_to_resume():
-        st.query_params["page"] = "resume"
-        st.session_state['current_page'] = 'resume'
-
-    def switch_to_interview1():
-        st.query_params["page"] = "interview1"
-        st.session_state['current_page'] = 'interview1'
-
-    def switch_to_interview2():
-        st.query_params["page"] = "interview2"
-        st.session_state['current_page'] = 'interview2'
-
-        
-    # 파일 업로더 스타일 수정
-    st.markdown("""
-        <style>
-            [data-testid="stFileUploader"] {
-                width: 100%;
-            }
-            [data-testid="stFileUploader"] section {
-                border: 2px dashed #ccc;
-                border-radius: 4px;
-                padding: 20px;
-                background: #f8f9fa;
-            }
-            .upload-text {
-                color: #666;
-                font-size: 14px;
-            }
-            /* 파일명 숨기기 */
-            .st-emotion-cache-1v0mbdj > span {
-                display: none;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    uploaded_file = st.file_uploader(
-        "이력서를 선택해주세요.",
-        type=['pdf'],
-        help="200MB 이하의 PDF 파일만 가능합니다"
-    )
-    
-    if uploaded_file:
-        # PDF 내용 추출 및 표시
-        pdf_data = uploaded_file.read()
-        pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-        
-        # 이력서 내용을 세션 상태에 저장
-        if 'resume_text' not in st.session_state:
-            st.session_state.resume_text = ""
-        st.session_state.resume_text = text
-        
-        # 이력서 내용 표시 스타일
-        st.markdown("""
-            <style>
-                .resume-text {
-                    background-color: white;
-                    padding: 20px;
-                    border-radius: 5px;
-                    border: 1px solid #ddd;
-                    max-height: 500px;
-                    overflow-y: auto;
-                    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-                    font-size: 0.9em;
-                    line-height: 1.3;
-                    white-space: pre-wrap;
-                    margin: 10px 0;
-                }
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
-            </style>
-        """, unsafe_allow_html=True)
-
-    else:
-        st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
-
-    # 페이지 전환 버튼 추가
-    st.button("🤖 이력서분석", 
-            key="btn_resume", 
-            on_click=switch_to_resume,
-            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
-
-    st.button("☝️ 1차 면접 질문", 
-            key="btn_interview1", 
-            on_click=switch_to_interview1,
-            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
-
-    st.button("✌️ 2차 면접 질문", 
-            key="btn_interview2", 
-            on_click=switch_to_interview2,
-            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # 맨 마지막에 도움말 추가
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.expander("도움말"):
-        st.write("""
-        🤖 이력서분석 : PDF 형식의 이력서 파일을 업로드 > 채용요건 확인 > 경력기간 체크(필요 시) > '분석 시작하기' \n
-        ☝️ 1차 면접 질문 : 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문\n
-        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다
-        """)
-    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
-
-# 채용공고 데이터
-job_descriptions = {}
-
-# 현재 페이지에 따른 내용 표시
-if st.session_state['current_page'] == "resume":
-    st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
-            🤖 이력서분석
-        </h5>
-    """, unsafe_allow_html=True)
-    
-    # 화면을 두 개의 컬럼으로 분할
-    left_col, right_col = st.columns(2)
-
-    # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
-    with left_col:
-        job_option = st.selectbox(
-            "채용공고 선택",
-            ["선택해주세요", "직접 입력"]
-        )
-
-        if job_option == "직접 입력":
-            job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
-        else:
-            job_link = st.text_input("채용공고 링크를 입력해주세요")
-            if job_link:
-                try:
-                    # 채용공고 링크에서 내용 추출
-                    response = requests.get(job_link)
-                    soup = BeautifulSoup(response.text, 'html.parser')
+                        job_title = job_title.get_text(strip=True)
                     
-                    # 채용공고 내용 추출 (사이트에 따라 선택자 수정 필요)
-                    job_description = soup.find('div', class_='job-description').text
+                    # 담당업무, 필수자격, 우대사항 추출
+                    job_description = f"[{job_title}]\n"
                     
-                    st.text_area(
-                        "- 채용공고 내용 (필요시 수정 가능합니다)",
-                        value=job_description,
-                        height=220
-                    )
-                except Exception as e:
-                    st.error(f"채용공고 내용을 불러오는 중 오류가 발생했습니다: {str(e)}")
+                    # 불필요한 내용 필터링을 위한 패턴
+                    skip_patterns = [
+                        "About us", "Recruit", "Culture", "Benefit", "FAQ",
+                        "개인정보처리방침", "이용약관", "뉴로핏 주식회사", "Copyright",
+                        "All Rights Reserved", "테헤란로", "삼원타워", "+82"
+                    ]
+                    
+                    # 섹션별 내용 저장을 위한 딕셔너리
+                    sections = {
+                        "담당업무": [],
+                        "필수자격": [],
+                        "우대사항": [],
+                        "기타정보": []
+                    }
+                    
+                    # 모든 텍스트 블록 찾기
+                    content_blocks = soup.find_all(['div', 'p', 'ul', 'li', 'section', 'article'])
+                    
+                    current_section = None
+                    for block in content_blocks:
+                        text = block.get_text(strip=True)
+                        
+                        # 빈 텍스트나 불필요한 내용 건너뛰기
+                        if not text or any(pattern in text for pattern in skip_patterns):
+                            continue
+                        
+                        # 섹션 제목 확인
+                        if any(keyword in text for keyword in ['담당 업무', '주요 업무', '업무 내용', '수행 업무']):
+                            current_section = "담당업무"
+                            continue
+                        elif any(keyword in text for keyword in ['자격 요건', '필수 요건', '지원 자격', '자격사항']):
+                            current_section = "필수자격"
+                            continue
+                        elif any(keyword in text for keyword in ['우대사항', '우대 사항', '우대 조건']):
+                            current_section = "우대사항"
+                            continue
+                        elif any(keyword in text for keyword in ['기타', '복리후생', '근무조건', '근무 환경']):
+                            current_section = "기타정보"
+                            continue
+                        
+                        # 현재 섹션에 내용 추가
+                        if current_section:
+                            # 불필요한 문자 제거
+                            text = text.replace("•", "").replace("·", "").replace("-", "").strip()
+                            if text and len(text) > 1:  # 빈 항목이나 단일 문자 제외
+                                # 중복 체크 후 추가
+                                if text not in sections[current_section]:
+                                    sections[current_section].append(text)
+                    
+                    # 섹션이 비어있는 경우 대체 방법으로 내용 추출
+                    if all(len(section) == 0 for section in sections.values()):
+                        # 모든 텍스트 내용을 추출
+                        all_text = soup.get_text(separator='\n', strip=True)
+                        job_description = f"[{job_title}]\n\n{all_text}"
+                    else:
+                        # 정리된 내용을 job_description에 추가
+                        if sections["담당업무"]:
+                            job_description += "\n담당업무\n"
+                            for item in sections["담당업무"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["필수자격"]:
+                            job_description += "\n필수자격\n"
+                            for item in sections["필수자격"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["우대사항"]:
+                            job_description += "\n우대사항\n"
+                            for item in sections["우대사항"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["기타정보"]:
+                            job_description += "\n기타 정보\n"
+                            for item in sections["기타정보"]:
+                                job_description += f"- {item}\n"
+                    
+                    # 채용공고 내용이 비어있는 경우 처리
+                    if not job_description.strip():
+                        raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
+                    
+                    # 채용공고 내용 표시
+                    st.text_area("채용공고 내용", job_description, height=300)
+                    
+                except ValueError as ve:
+                    st.error(str(ve))
                     job_description = ""
+                except requests.exceptions.RequestException as e:
+                    st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
+                    job_description = ""
+                except Exception as e:
+                    st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
+                    job_description = ""
+            else:
+                job_description = ""
         experience_text = st.text_area(
             "- 경력기간 입력",  
             height=120
