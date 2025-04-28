@@ -1,4 +1,13 @@
 import streamlit as st
+
+# 페이지 설정 (반드시 첫 번째 명령어여야 함)
+st.set_page_config(
+    page_title="HR Resume Analyzer",
+    page_icon="📄",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 import PyPDF2
 from io import BytesIO
 import os
@@ -13,14 +22,6 @@ from bs4 import BeautifulSoup
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
-
-# 페이지 설정 (반드시 첫 번째 명령어여야 함)
-st.set_page_config(
-    page_title="HR Resume Analyzer",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -309,14 +310,6 @@ def calculate_experience(experience_text):
         result += "\n".join(experience_periods)
     
     return result, total_years, total_remaining_months, total_decimal_years
-
-# 페이지 설정 (반드시 첫 번째 명령어여야 함)
-st.set_page_config(
-    page_title="HR Resume Analyzer",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # 세션 상태 초기화
 if 'current_page' not in st.session_state:
