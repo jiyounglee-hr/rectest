@@ -27,6 +27,44 @@ import time
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+def get_eval_template_from_sheet(selected_dept, selected_job):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials_dict = {
+        "type": st.secrets["google_credentials"]["type"],
+        "project_id": st.secrets["google_credentials"]["project_id"],
+        "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+        "private_key": st.secrets["google_credentials"]["private_key"],
+        "client_email": st.secrets["google_credentials"]["client_email"],
+        "client_id": st.secrets["google_credentials"]["client_id"],
+        "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+        "token_uri": st.secrets["google_credentials"]["token_uri"],
+        "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+        "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+    }
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+    gc = gspread.authorize(credentials)
+    sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+    worksheet = gc.open_by_key(sheet_id).sheet1
+    data = worksheet.get_all_records()
+    for row in data:
+        if row['본부'] == selected_dept and row['직무'] == selected_job:
+            def split_items(val):
+                if not val:
+                    return []
+                return [item.strip("• ").strip() for item in str(val).replace('\n', ',').split(',') if item.strip()]
+            return [
+                {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30},
+                {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30},
+                {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30},
+                {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+            ]
+    return [
+        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
+        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
+        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+    ]
+
 # 구글 스프레드시트 인증 및 데이터 가져오기
 def get_google_sheet_data():
     try:
@@ -1573,42 +1611,4 @@ elif st.session_state['current_page'] == "evaluation":
         b64 = base64.b64encode(pdf).decode()
         href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
         st.markdown(href, unsafe_allow_html=True)
-
-def get_eval_template_from_sheet(selected_dept, selected_job):
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials_dict = {
-        "type": st.secrets["google_credentials"]["type"],
-        "project_id": st.secrets["google_credentials"]["project_id"],
-        "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-        "private_key": st.secrets["google_credentials"]["private_key"],
-        "client_email": st.secrets["google_credentials"]["client_email"],
-        "client_id": st.secrets["google_credentials"]["client_id"],
-        "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-        "token_uri": st.secrets["google_credentials"]["token_uri"],
-        "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-        "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-    }
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-    gc = gspread.authorize(credentials)
-    sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
-    worksheet = gc.open_by_key(sheet_id).sheet1
-    data = worksheet.get_all_records()
-    for row in data:
-        if row['본부'] == selected_dept and row['직무'] == selected_job:
-            def split_items(val):
-                if not val:
-                    return []
-                return [item.strip("• ").strip() for item in str(val).replace('\n', ',').split(',') if item.strip()]
-            return [
-                {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30},
-                {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30},
-                {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30},
-                {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
-            ]
-    return [
-        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
-        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
-        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
-        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
-    ]
 
