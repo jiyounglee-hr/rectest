@@ -535,10 +535,14 @@ with st.sidebar:
         {"구분": "직무 수행 태도 및 자세", "내용": "요구사항을 수행하려는 적극성, 명품을 만들기 위한 디테일, 도전정신", "만점": 30},
         {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
     ]
+
+    # 평가 템플릿 가져오기
+    eval_templates = get_evaluation_template()
     
-    # 본부와 직무 선택을 위한 두 개의 컬럼 생성
-    col1, col2 = st.columns(2)
-    
+    # 선택된 본부와 직무에 해당하는 템플릿 가져오기
+    selected_template_key = f"{selected_dept}-{selected_job}" if selected_dept and selected_job else None
+    eval_template = eval_templates.get(selected_template_key, default_template)
+
 # 채용공고 데이터
 job_descriptions = {}
 
@@ -1389,12 +1393,66 @@ elif st.session_state['current_page'] == "evaluation":
     departments, jobs = get_google_sheet_data()
     
     # 직무별 평가 항목 템플릿(공통)
-    eval_template = [
-        {"구분": "업무 지식", "내용": "Web front Architecture, Data Structure, RESTful Design, ...", "만점": 30},
-        {"구분": "직무기술", "내용": "AWS Cloud, Typescript+ReactJS, Webpack, ...", "만점": 30},
-        {"구분": "직무 수행 태도 및 자세", "내용": "요구사항을 수행하려는 적극성, 명품을 만들기 위한 디테일, 도전정신", "만점": 30},
-        {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
+    def get_evaluation_template():
+        try:
+            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+            credentials_dict = {
+                "type": st.secrets["google_credentials"]["type"],
+                "project_id": st.secrets["google_credentials"]["project_id"],
+                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+                "private_key": st.secrets["google_credentials"]["private_key"],
+                "client_email": st.secrets["google_credentials"]["client_email"],
+                "client_id": st.secrets["google_credentials"]["client_id"],
+                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+                "token_uri": st.secrets["google_credentials"]["token_uri"],
+                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+            }
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+            gc = gspread.authorize(credentials)
+            
+            # 평가 항목 데이터가 있는 시트 ID
+            sheet_id = st.secrets["google_sheets"]["evaluation_template_sheet_id"]
+            worksheet = gc.open_by_key(sheet_id).sheet1
+            
+            # 데이터 가져오기
+            data = worksheet.get_all_records()
+            
+            # 직무별 평가 항목 정리
+            eval_templates = {}
+            for row in data:
+                dept = row.get('본부', '')
+                job = row.get('직무', '')
+                if dept and job:
+                    key = f"{dept}-{job}"
+                    if key not in eval_templates:
+                        eval_templates[key] = []
+                    eval_templates[key].append({
+                        "구분": row.get('구분', ''),
+                        "내용": row.get('내용', '').split('\n'),  # 줄바꿈으로 구분된 내용을 리스트로 변환
+                        "만점": int(row.get('만점', 0))
+                    })
+            
+            return eval_templates
+            
+        except Exception as e:
+            st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
+            return {}
+
+    # 기본 평가 템플릿
+    default_template = [
+        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
+        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
+        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
     ]
+
+    # 평가 템플릿 가져오기
+    eval_templates = get_evaluation_template()
+    
+    # 선택된 본부와 직무에 해당하는 템플릿 가져오기
+    selected_template_key = f"{selected_dept}-{selected_job}" if selected_dept and selected_job else None
+    eval_template = eval_templates.get(selected_template_key, default_template)
     
     # 본부와 직무 선택을 위한 두 개의 컬럼 생성
     col1, col2 = st.columns(2)
