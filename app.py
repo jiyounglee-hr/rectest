@@ -14,6 +14,14 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 
+# 페이지 설정 (반드시 첫 번째 명령어여야 함)
+st.set_page_config(
+    page_title="HR Resume Analyzer",
+    page_icon="📄",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
