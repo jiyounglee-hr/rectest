@@ -513,28 +513,32 @@ with st.sidebar:
     # 사이드바에 본부와 직무 선택 UI 추가
     st.sidebar.title("채용 정보 필터")
 
-    # 본부 선택
-    selected_department = st.sidebar.selectbox(
-        "본부 선택",
-        departments,
-        index=0 if departments else None
-    )
-
-    # 직무 선택
-    if selected_department and jobs.get(selected_department):
-        selected_job = st.sidebar.selectbox(
-            "직무 선택",
-            jobs[selected_department],
-            index=0
-    )
-    else:
-        selected_job = None
-
-    # 선택된 본부와 직무로 데이터 필터링
-    if selected_department and selected_job:
-        st.sidebar.info(f"선택된 필터: {selected_department} - {selected_job}")
-    else:
-        st.sidebar.warning("본부와 직무를 선택해주세요.")
+    # 본부와 직무 데이터 가져오기
+    departments, jobs = get_google_sheet_data()
+    
+    # 직무별 평가 항목 템플릿(공통)
+    eval_template = [
+        {"구분": "업무 지식", "내용": "Web front Architecture, Data Structure, RESTful Design, ...", "만점": 30},
+        {"구분": "직무기술", "내용": "AWS Cloud, Typescript+ReactJS, Webpack, ...", "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": "요구사항을 수행하려는 적극성, 명품을 만들기 위한 디테일, 도전정신", "만점": 30},
+        {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
+    ]
+    
+    # 본부와 직무 선택을 위한 두 개의 컬럼 생성
+    col1, col2 = st.columns(2)
+    
+    # 왼쪽 컬럼: 본부 선택
+    with col1:
+        selected_dept = st.selectbox("본부를 선택하세요", departments)
+        st.markdown(f"**선택된 본부:** {selected_dept}")
+    
+    # 오른쪽 컬럼: 직무 선택
+    with col2:
+        if selected_dept and jobs.get(selected_dept):
+            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
+        else:
+            selected_job = None
+        st.markdown(f"**선택된 직무:** {selected_job if selected_job else '직무를 선택해주세요'}")
 
 # 채용공고 데이터
 job_descriptions = {}
@@ -1393,15 +1397,21 @@ elif st.session_state['current_page'] == "evaluation":
         {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
     ]
     
-    # 본부 선택
-    selected_dept = st.selectbox("본부를 선택하세요", departments)
-    # 직무 선택 (본부에 따라 동적 변경)
-    if selected_dept and jobs.get(selected_dept):
-        selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
-    else:
-        selected_job = None
-
-    st.markdown(f"**선택된 본부:** {selected_dept}  |  **선택된 직무:** {selected_job}")
+    # 본부와 직무 선택을 위한 두 개의 컬럼 생성
+    col1, col2 = st.columns(2)
+    
+    # 왼쪽 컬럼: 본부 선택
+    with col1:
+        selected_dept = st.selectbox("본부를 선택하세요", departments)
+        st.markdown(f"**선택된 본부:** {selected_dept}")
+    
+    # 오른쪽 컬럼: 직무 선택
+    with col2:
+        if selected_dept and jobs.get(selected_dept):
+            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
+        else:
+            selected_job = None
+        st.markdown(f"**선택된 직무:** {selected_job if selected_job else '직무를 선택해주세요'}")
 
     # 평가표 데이터 입력
     if 'eval_data' not in st.session_state:
