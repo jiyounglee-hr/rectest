@@ -46,7 +46,7 @@ def get_google_sheet_data():
         gc = gspread.authorize(credentials)
         
         # 본부와 직무 데이터가 있는 시트 ID
-        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+        sheet_id = "1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE"
         worksheet = gc.open_by_key(sheet_id).sheet1
         
         # 데이터 가져오기
@@ -1496,42 +1496,3 @@ elif st.session_state['current_page'] == "evaluation":
         href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
         st.markdown(href, unsafe_allow_html=True)
 
-# 구글 스프레드시트 인증 및 데이터 가져오기
-def get_google_sheet_data():
-    try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials_dict = {
-            "type": st.secrets["google_credentials"]["type"],
-            "project_id": st.secrets["google_credentials"]["project_id"],
-            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-            "private_key": st.secrets["google_credentials"]["private_key"],
-            "client_email": st.secrets["google_credentials"]["client_email"],
-            "client_id": st.secrets["google_credentials"]["client_id"],
-            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-            "token_uri": st.secrets["google_credentials"]["token_uri"],
-            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-        }
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-        gc = gspread.authorize(credentials)
-        
-        # 본부와 직무 데이터가 있는 시트 ID
-        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
-        worksheet = gc.open_by_key(sheet_id).sheet1
-        
-        # 데이터 가져오기
-        data = worksheet.get_all_records()
-        
-        # 본부와 직무 데이터 정리
-        departments = sorted(list(set(row['본부'] for row in data if row['본부'])))
-        jobs = {}
-        for dept in departments:
-            jobs[dept] = sorted(list(set(row['직무'] for row in data if row['본부'] == dept and row['직무'])))
-            
-        return departments, jobs
-    except Exception as e:
-        st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
-        return [], {}
-
-# 본부와 직무 데이터 가져오기
-departments, jobs = get_google_sheet_data()
