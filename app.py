@@ -22,6 +22,7 @@ from bs4 import BeautifulSoup
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
+import time
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -29,6 +30,10 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # 구글 스프레드시트 인증 및 데이터 가져오기
 def get_google_sheet_data():
     try:
+        # 캐시된 데이터가 있으면 반환
+        if 'cached_departments' in st.session_state and 'cached_jobs' in st.session_state:
+            return st.session_state.cached_departments, st.session_state.cached_jobs
+
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         credentials_dict = {
             "type": st.secrets["google_credentials"]["type"],
@@ -49,8 +54,18 @@ def get_google_sheet_data():
         sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
         worksheet = gc.open_by_key(sheet_id).sheet1
         
-        # 데이터 가져오기
-        data = worksheet.get_all_records()
+        # 데이터 가져오기 (재시도 로직 추가)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                data = worksheet.get_all_records()
+                break
+            except Exception as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                time.sleep(2)  # 2초 대기 후 재시도
         
         # 본부와 직무 데이터 정리
         departments = sorted(list(set(row['본부'] for row in data if row['본부'])))
@@ -1475,7 +1490,7 @@ elif st.session_state['current_page'] == "evaluation":
             sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
             worksheet = gc.open_by_key(sheet_id).sheet1
             # 데이터 저장
-            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date, education, experience]
+            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
             for row in st.session_state.eval_data:
                 row_data.extend([row["점수"], row["의견"]])
             row_data.extend([summary, result, join_date, total_score])
