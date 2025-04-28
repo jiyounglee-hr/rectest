@@ -529,13 +529,13 @@ with st.sidebar:
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", departments)
+        selected_dept = st.selectbox("본부를 선택하세요", departments, key="sidebar_dept")
         st.markdown(f"**선택된 본부:** {selected_dept}")
     
     # 오른쪽 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
-            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
+            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept], key="sidebar_job")
         else:
             selected_job = None
         st.markdown(f"**선택된 직무:** {selected_job if selected_job else '직무를 선택해주세요'}")
@@ -1402,13 +1402,13 @@ elif st.session_state['current_page'] == "evaluation":
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", departments)
+        selected_dept = st.selectbox("본부를 선택하세요", departments, key="eval_dept")
         st.markdown(f"**선택된 본부:** {selected_dept}")
     
     # 오른쪽 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
-            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
+            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept], key="eval_job")
         else:
             selected_job = None
         st.markdown(f"**선택된 직무:** {selected_job if selected_job else '직무를 선택해주세요'}")
