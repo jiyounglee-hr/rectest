@@ -1413,6 +1413,15 @@ elif st.session_state['current_page'] == "evaluation":
             selected_job = None
         st.markdown(f"**선택된 직무:** {selected_job if selected_job else '직무를 선택해주세요'}")
 
+    # 후보자 정보 입력
+    st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
+    candidate_info_cols = st.columns(5)
+    with candidate_info_cols[0]: candidate_name = st.text_input("후보자명", key="candidate_name")
+    with candidate_info_cols[1]: interviewer_name = st.text_input("면접관성명", key="interviewer_name")
+    with candidate_info_cols[2]: interview_date = st.date_input("면접일자", key="interview_date")
+    with candidate_info_cols[3]: education = st.text_input("최종학교/전공", key="education")
+    with candidate_info_cols[4]: experience = st.text_input("경력년월", key="experience")
+
     # 평가표 데이터 입력
     if 'eval_data' not in st.session_state:
         st.session_state.eval_data = [
@@ -1466,7 +1475,7 @@ elif st.session_state['current_page'] == "evaluation":
             sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
             worksheet = gc.open_by_key(sheet_id).sheet1
             # 데이터 저장
-            row_data = [selected_dept, selected_job]
+            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date, education, experience]
             for row in st.session_state.eval_data:
                 row_data.extend([row["점수"], row["의견"]])
             row_data.extend([summary, result, join_date, total_score])
