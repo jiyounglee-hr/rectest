@@ -169,7 +169,7 @@ col1, col2 = st.columns(2)
 
 # 왼쪽 컬럼: 본부 선택
 with col1:
-    selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_form_dept_select")
+    selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="main_dept_select")
     if selected_dept == "선택해주세요":
         selected_dept = None
 
@@ -1521,7 +1521,7 @@ elif st.session_state['current_page'] == "evaluation":
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_form_dept_select")
+        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="main_dept_select")
         if selected_dept == "선택해주세요":
             selected_dept = None
     
