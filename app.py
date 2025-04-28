@@ -169,14 +169,14 @@ col1, col2 = st.columns(2)
 
 # 왼쪽 컬럼: 본부 선택
 with col1:
-    selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept_select")
+    selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="evaluation_dept_select")
     if selected_dept == "선택해주세요":
         selected_dept = None
 
 # 오른쪽 컬럼: 직무 선택
 with col2:
     if selected_dept and jobs.get(selected_dept):
-        selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job_select")
+        selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="evaluation_job_select")
         if selected_job == "선택해주세요":
             selected_job = None
     else:
@@ -1521,14 +1521,14 @@ elif st.session_state['current_page'] == "evaluation":
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept_select")
+        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="evaluation_dept_select")
         if selected_dept == "선택해주세요":
             selected_dept = None
     
     # 오른쪽 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
-            selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job_select")
+            selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="evaluation_job_select")
             if selected_job == "선택해주세요":
                 selected_job = None
         else:
