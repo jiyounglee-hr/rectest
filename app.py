@@ -108,7 +108,7 @@ def get_evaluation_template():
         return eval_templates
         
     except Exception as e:
-        st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
+        # st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
         return {}
 
 # 기본 평가 템플릿
