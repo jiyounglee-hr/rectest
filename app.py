@@ -30,10 +30,6 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # 구글 스프레드시트 인증 및 데이터 가져오기
 def get_google_sheet_data():
     try:
-        # 캐시된 데이터가 있으면 반환
-        if 'cached_departments' in st.session_state and 'cached_jobs' in st.session_state:
-            return st.session_state.cached_departments, st.session_state.cached_jobs
-
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         credentials_dict = {
             "type": st.secrets["google_credentials"]["type"],
@@ -54,18 +50,8 @@ def get_google_sheet_data():
         sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
         worksheet = gc.open_by_key(sheet_id).sheet1
         
-        # 데이터 가져오기 (재시도 로직 추가)
-        max_retries = 3
-        retry_count = 0
-        while retry_count < max_retries:
-            try:
-                data = worksheet.get_all_records()
-                break
-            except Exception as e:
-                retry_count += 1
-                if retry_count == max_retries:
-                    raise e
-                time.sleep(2)  # 2초 대기 후 재시도
+        # 데이터 가져오기
+        data = worksheet.get_all_records()
         
         # 본부와 직무 데이터 정리
         departments = sorted(list(set(row['본부'] for row in data if row['본부'])))
@@ -77,6 +63,61 @@ def get_google_sheet_data():
     except Exception as e:
         st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
         return [], {}
+
+# 평가 항목 템플릿 가져오기
+def get_evaluation_template():
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 평가 항목 데이터가 있는 시트 ID
+        sheet_id = st.secrets["google_sheets"]["evaluation_template_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
+        
+        # 데이터 가져오기
+        data = worksheet.get_all_records()
+        
+        # 직무별 평가 항목 정리
+        eval_templates = {}
+        for row in data:
+            dept = row.get('본부', '')
+            job = row.get('직무', '')
+            if dept and job:
+                key = f"{dept}-{job}"
+                if key not in eval_templates:
+                    eval_templates[key] = []
+                eval_templates[key].append({
+                    "구분": row.get('구분', ''),
+                    "내용": row.get('내용', '').split('\n'),  # 줄바꿈으로 구분된 내용을 리스트로 변환
+                    "만점": int(row.get('만점', 0))
+                })
+        
+        return eval_templates
+        
+    except Exception as e:
+        st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
+        return {}
+
+# 기본 평가 템플릿
+default_template = [
+    {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
+    {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
+    {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
+    {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+]
 
 # 본부와 직무 데이터 가져오기
 departments, jobs = get_google_sheet_data()
@@ -1393,58 +1434,11 @@ elif st.session_state['current_page'] == "evaluation":
     departments, jobs = get_google_sheet_data()
     
     # 직무별 평가 항목 템플릿(공통)
-    def get_evaluation_template():
-        try:
-            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-            credentials_dict = {
-                "type": st.secrets["google_credentials"]["type"],
-                "project_id": st.secrets["google_credentials"]["project_id"],
-                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-                "private_key": st.secrets["google_credentials"]["private_key"],
-                "client_email": st.secrets["google_credentials"]["client_email"],
-                "client_id": st.secrets["google_credentials"]["client_id"],
-                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-                "token_uri": st.secrets["google_credentials"]["token_uri"],
-                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-            }
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-            gc = gspread.authorize(credentials)
-            
-            # 평가 항목 데이터가 있는 시트 ID
-            sheet_id = st.secrets["google_sheets"]["evaluation_template_sheet_id"]
-            worksheet = gc.open_by_key(sheet_id).sheet1
-            
-            # 데이터 가져오기
-            data = worksheet.get_all_records()
-            
-            # 직무별 평가 항목 정리
-            eval_templates = {}
-            for row in data:
-                dept = row.get('본부', '')
-                job = row.get('직무', '')
-                if dept and job:
-                    key = f"{dept}-{job}"
-                    if key not in eval_templates:
-                        eval_templates[key] = []
-                    eval_templates[key].append({
-                        "구분": row.get('구분', ''),
-                        "내용": row.get('내용', '').split('\n'),  # 줄바꿈으로 구분된 내용을 리스트로 변환
-                        "만점": int(row.get('만점', 0))
-                    })
-            
-            return eval_templates
-            
-        except Exception as e:
-            st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
-            return {}
-
-    # 기본 평가 템플릿
-    default_template = [
-        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
-        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
-        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
-        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+    eval_template = [
+        {"구분": "업무 지식", "내용": "Web front Architecture, Data Structure, RESTful Design, ...", "만점": 30},
+        {"구분": "직무기술", "내용": "AWS Cloud, Typescript+ReactJS, Webpack, ...", "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": "요구사항을 수행하려는 적극성, 명품을 만들기 위한 디테일, 도전정신", "만점": 30},
+        {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
     ]
 
     # 평가 템플릿 가져오기
