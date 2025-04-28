@@ -525,9 +525,6 @@ with st.sidebar:
         """)
     st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
 
-    # 사이드바에 본부와 직무 선택 UI 추가
-    st.sidebar.title("채용 정보 필터")
-
     # 본부와 직무 데이터 가져오기
     departments, jobs = get_google_sheet_data()
     
