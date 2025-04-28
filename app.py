@@ -61,7 +61,7 @@ def get_google_sheet_data():
             
         return departments, jobs
     except Exception as e:
-        st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+        # st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
         return [], {}
 
 # 평가 항목 템플릿 가져오기
