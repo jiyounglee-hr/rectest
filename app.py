@@ -46,7 +46,7 @@ def get_google_sheet_data():
         gc = gspread.authorize(credentials)
         
         # 본부와 직무 데이터가 있는 시트 ID
-        sheet_id = "1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE"
+        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
         worksheet = gc.open_by_key(sheet_id).sheet1
         
         # 데이터 가져오기
@@ -1382,13 +1382,8 @@ elif st.session_state['current_page'] == "evaluation":
         </h5>
     """, unsafe_allow_html=True)
     
-    # 본부-직무 매핑
-    departments = {
-        "연구본부": ["의공학 연구원", "뇌공학 연구원"],
-        "프로덕트본부": ["프론트엔드", "백엔드", "RA", "SV", "QA"],
-        "경영본부": ["인사", "재무", "총무"],
-        "대표이사직속": ["비서", "전략기획"]
-    }
+    # 본부와 직무 데이터 가져오기
+    departments, jobs = get_google_sheet_data()
     
     # 직무별 평가 항목 템플릿(공통)
     eval_template = [
@@ -1399,9 +1394,12 @@ elif st.session_state['current_page'] == "evaluation":
     ]
     
     # 본부 선택
-    selected_dept = st.selectbox("본부를 선택하세요", list(departments.keys()))
+    selected_dept = st.selectbox("본부를 선택하세요", departments)
     # 직무 선택 (본부에 따라 동적 변경)
-    selected_job = st.selectbox("직무를 선택하세요", departments[selected_dept])
+    if selected_dept and jobs.get(selected_dept):
+        selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept])
+    else:
+        selected_job = None
 
     st.markdown(f"**선택된 본부:** {selected_dept}  |  **선택된 직무:** {selected_job}")
 
