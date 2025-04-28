@@ -1312,4 +1312,39 @@ elif st.session_state['current_page'] == "evaluation":
         </h5>
     """, unsafe_allow_html=True)
     
-    st.info("면접평가표 기능은 현재 개발 중입니다.")
+    # 구글 스프레드시트 연동
+    try:
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        import json
+        
+        # 구글 API 인증
+        scope = ['https://spreadsheets.google.com/feeds',
+                'https://www.googleapis.com/auth/drive']
+        
+        # secrets.toml에서 인증 정보 가져오기
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 스프레드시트 열기
+        sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
+        
+        st.success("구글 스프레드시트에 성공적으로 연결되었습니다.")
+        
+    except Exception as e:
+        st.error(f"구글 스프레드시트 연결 중 오류가 발생했습니다: {str(e)}")
+        st.info("면접평가표 기능은 현재 개발 중입니다.")
