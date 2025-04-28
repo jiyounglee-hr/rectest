@@ -122,6 +122,10 @@ default_template = [
 # 본부와 직무 데이터 가져오기
 departments, jobs = get_google_sheet_data()
 
+# 기본값 설정
+selected_dept = None
+selected_job = None
+
 # 날짜 정규화 함수
 def normalize_date(date_str):
     if pd.isna(date_str) or date_str == '':
