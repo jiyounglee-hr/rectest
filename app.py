@@ -10,6 +10,9 @@ import re
 import base64
 import requests
 from bs4 import BeautifulSoup
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -465,6 +468,32 @@ with st.sidebar:
         📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
         """)
     st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
+
+    # 사이드바에 본부와 직무 선택 UI 추가
+    st.sidebar.title("채용 정보 필터")
+
+    # 본부 선택
+    selected_department = st.sidebar.selectbox(
+        "본부 선택",
+        departments,
+        index=0 if departments else None
+    )
+
+    # 직무 선택
+    if selected_department and jobs.get(selected_department):
+        selected_job = st.sidebar.selectbox(
+            "직무 선택",
+            jobs[selected_department],
+            index=0
+    )
+    else:
+        selected_job = None
+
+    # 선택된 본부와 직무로 데이터 필터링
+    if selected_department and selected_job:
+        st.sidebar.info(f"선택된 필터: {selected_department} - {selected_job}")
+    else:
+        st.sidebar.warning("본부와 직무를 선택해주세요.")
 
 # 채용공고 데이터
 job_descriptions = {}
@@ -1425,3 +1454,43 @@ elif st.session_state['current_page'] == "evaluation":
         b64 = base64.b64encode(pdf).decode()
         href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
         st.markdown(href, unsafe_allow_html=True)
+
+# 구글 스프레드시트 인증 및 데이터 가져오기
+def get_google_sheet_data():
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 본부와 직무 데이터가 있는 시트 ID
+        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
+        
+        # 데이터 가져오기
+        data = worksheet.get_all_records()
+        
+        # 본부와 직무 데이터 정리
+        departments = sorted(list(set(row['본부'] for row in data if row['본부'])))
+        jobs = {}
+        for dept in departments:
+            jobs[dept] = sorted(list(set(row['직무'] for row in data if row['본부'] == dept and row['직무'])))
+            
+        return departments, jobs
+    except Exception as e:
+        st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+        return [], {}
+
+# 본부와 직무 데이터 가져오기
+departments, jobs = get_google_sheet_data()
