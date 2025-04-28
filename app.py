@@ -163,15 +163,40 @@ default_template = [
 # 본부와 직무 데이터 가져오기
 departments, jobs = get_google_sheet_data()
 
+# 기본값 설정
+selected_dept = None
+selected_job = None
+
+# 본부와 직무 선택을 위한 두 개의 컬럼 생성
+col1, col2 = st.columns(2)
+
+# 왼쪽 컬럼: 본부 선택
+with col1:
+    selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
+    if selected_dept == "선택해주세요":
+        selected_dept = None
+
+# 오른쪽 컬럼: 직무 선택
+with col2:
+    if selected_dept and jobs.get(selected_dept):
+        selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
+        if selected_job == "선택해주세요":
+            selected_job = None
+    else:
+        selected_job = None
+
+# 선택된 본부와 직무 정보를 메시지 형식으로 표시
+if selected_dept and selected_job:
+    st.success(f"📋 선택된 본부: {selected_dept}")
+    st.info(f"💼 선택된 직무: {selected_job}")
+else:
+    st.warning("⚠️ 본부와 직무를 선택해주세요")
+
 # 본부와 직무 선택에 따라 템플릿 자동 반영
 if selected_dept and selected_job:
     st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)
 else:
     st.session_state.eval_data = default_template
-
-# 기본값 설정
-selected_dept = None
-selected_job = None
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -1498,6 +1523,8 @@ elif st.session_state['current_page'] == "evaluation":
         selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
         if selected_dept == "선택해주세요":
             selected_dept = None
+    
+    # 오른쪽 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
             selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
