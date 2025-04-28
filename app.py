@@ -1457,15 +1457,22 @@ elif st.session_state['current_page'] == "evaluation":
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", departments, key="eval_dept")
-    
-    # 오른쪽 컬럼: 직무 선택
+        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
+        if selected_dept == "선택해주세요":
+            selected_dept = None
     with col2:
         if selected_dept and jobs.get(selected_dept):
-            selected_job = st.selectbox("직무를 선택하세요", jobs[selected_dept], key="eval_job")
+            selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
+            if selected_job == "선택해주세요":
+                selected_job = None
         else:
             selected_job = None
     st.markdown(f"**선택된 본부&직무:** {selected_dept} - {selected_job if selected_job else '직무를 선택해주세요'}")
+    # 본부/직무 선택에 따라 템플릿 자동 반영
+    if selected_dept and selected_job:
+        eval_template = get_eval_template_from_sheet(selected_dept, selected_job)
+    else:
+        eval_template = default_template
 
     # 후보자 정보 입력
     st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
@@ -1566,4 +1573,42 @@ elif st.session_state['current_page'] == "evaluation":
         b64 = base64.b64encode(pdf).decode()
         href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
         st.markdown(href, unsafe_allow_html=True)
+
+def get_eval_template_from_sheet(selected_dept, selected_job):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials_dict = {
+        "type": st.secrets["google_credentials"]["type"],
+        "project_id": st.secrets["google_credentials"]["project_id"],
+        "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+        "private_key": st.secrets["google_credentials"]["private_key"],
+        "client_email": st.secrets["google_credentials"]["client_email"],
+        "client_id": st.secrets["google_credentials"]["client_id"],
+        "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+        "token_uri": st.secrets["google_credentials"]["token_uri"],
+        "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+        "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+    }
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+    gc = gspread.authorize(credentials)
+    sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+    worksheet = gc.open_by_key(sheet_id).sheet1
+    data = worksheet.get_all_records()
+    for row in data:
+        if row['본부'] == selected_dept and row['직무'] == selected_job:
+            def split_items(val):
+                if not val:
+                    return []
+                return [item.strip("• ").strip() for item in str(val).replace('\n', ',').split(',') if item.strip()]
+            return [
+                {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30},
+                {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30},
+                {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30},
+                {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+            ]
+    return [
+        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
+        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
+        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
+    ]
 
