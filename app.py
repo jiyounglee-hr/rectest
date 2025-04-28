@@ -28,6 +28,11 @@ import time
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def get_eval_template_from_sheet(selected_dept, selected_job):
+    # 선택된 본부에 해당하는 템플릿이 있는 경우 해당 템플릿 반환
+    if selected_dept in eval_template:
+        return eval_template[selected_dept]
+        
+    # 선택된 본부에 해당하는 템플릿이 없는 경우 구글 시트에서 조회
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials_dict = {
         "type": st.secrets["google_credentials"]["type"],
@@ -46,6 +51,7 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
     sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
     worksheet = gc.open_by_key(sheet_id).sheet1
     data = worksheet.get_all_records()
+    
     for row in data:
         if row['본부'] == selected_dept and row['직무'] == selected_job:
             def split_items(val):
@@ -58,12 +64,9 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
                 {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30},
                 {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
             ]
-    return [
-        {"구분": "업무 지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30},
-        {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript+ReactJS", "Webpack"], "만점": 30},
-        {"구분": "직무 수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30},
-        {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10}
-    ]
+    
+    # 해당하는 템플릿이 없는 경우 기본 템플릿 반환
+    return default_template
 
 # 구글 스프레드시트 인증 및 데이터 가져오기
 def get_google_sheet_data():
