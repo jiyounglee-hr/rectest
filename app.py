@@ -278,10 +278,12 @@ if 'interview_questions2' not in st.session_state:
     st.session_state['interview_questions2'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
+if 'interview_evaluation' not in st.session_state:
+    st.session_state['interview_evaluation'] = None
 
 # URL 파라미터 처리
 page_param = st.query_params.get("page", "resume")
-valid_pages = ['resume', 'interview1', 'interview2']
+valid_pages = ['resume', 'interview1', 'interview2', 'evaluation']
 
 # URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
 if isinstance(page_param, str) and page_param in valid_pages:
@@ -359,6 +361,10 @@ with st.sidebar:
     def switch_to_interview2():
         st.query_params["page"] = "interview2"
         st.session_state['current_page'] = 'interview2'
+
+    def switch_to_evaluation():
+        st.query_params["page"] = "evaluation"
+        st.session_state['current_page'] = 'evaluation'
 
         
     # 파일 업로더 스타일 수정
@@ -441,6 +447,11 @@ with st.sidebar:
             key="btn_interview2", 
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
+
+    st.button("📝 면접평가표", 
+            key="btn_evaluation", 
+            on_click=switch_to_evaluation,
+            type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -450,7 +461,8 @@ with st.sidebar:
         st.write("""
         🤖 이력서분석 : PDF 형식의 이력서 파일을 업로드 > 채용요건 확인 > 경력기간 체크(필요 시) > '분석 시작하기' \n
         ☝️ 1차 면접 질문 : 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문\n
-        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다
+        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다\n
+        📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
         """)
     st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
 
@@ -1292,3 +1304,12 @@ elif st.session_state['current_page'] == "interview2":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
+
+elif st.session_state['current_page'] == "evaluation":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            📝 면접평가표
+        </h5>
+    """, unsafe_allow_html=True)
+    
+    st.info("면접평가표 기능은 현재 개발 중입니다.")
