@@ -2013,16 +2013,15 @@ elif st.session_state['current_page'] == "admin":
                 display_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견",
-                    "업무지식_점수", "업무지식_의견",
-                    "직무기술_점수", "직무기술_의견",
-                    "직무수행태도_점수", "직무수행태도_의견",
-                    "기본인성_점수", "기본인성_의견"
+                    "업무지식점수", "업무지식의견",
+                    "직무기술 점수", "직무기술 의견",
+                    "직무수행태도 및 자세점수", "직무수행태도 및 자세의견",
+                    "기본인성 점수", "기본인성 의견"
                 ]
                 
                 try:
                     filtered_df = df[display_columns]
                 except KeyError:
-                    st.error("필요한 평가 데이터 컬럼이 없습니다. 데이터를 확인해주세요.")
                     filtered_df = df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
                                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"]]
 
@@ -2053,12 +2052,28 @@ elif st.session_state['current_page'] == "admin":
                     eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
                     eval_data = []
                     for item in eval_template:
+                        score_key = ''
+                        opinion_key = ''
+                        
+                        if item['구분'] == '업무 지식':
+                            score_key = '업무지식점수'
+                            opinion_key = '업무지식의견'
+                        elif item['구분'] == '직무기술':
+                            score_key = '직무기술 점수'
+                            opinion_key = '직무기술 의견'
+                        elif item['구분'] == '직무 수행 태도 및 자세':
+                            score_key = '직무수행태도 및 자세점수'
+                            opinion_key = '직무수행태도 및 자세의견'
+                        elif item['구분'] == '기본인성':
+                            score_key = '기본인성 점수'
+                            opinion_key = '기본인성 의견'
+                            
                         eval_data.append({
                             '구분': item['구분'],
                             '내용': item['내용'],
-                            '점수': selected_row.get(f"{item['구분']}_점수", 0),
+                            '점수': selected_row.get(score_key, 0),
                             '만점': item.get('만점', 30),
-                            '의견': selected_row.get(f"{item['구분']}_의견", '')
+                            '의견': selected_row.get(opinion_key, '')
                         })
                     
                     # PDF 생성을 위한 HTML 템플릿
