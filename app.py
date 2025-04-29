@@ -1666,7 +1666,7 @@ elif st.session_state['current_page'] == "evaluation":
                 value=st.session_state.eval_opinions[i],
                 key=f"opinion_{i}",
                 label_visibility="visible",
-                height=100
+                height=70
             )
             st.session_state.eval_opinions[i] = opinion
             st.session_state.eval_data[i]["의견"] = opinion
@@ -1775,7 +1775,7 @@ elif st.session_state['current_page'] == "evaluation":
                         {''.join([f"""
                         <tr>
                             <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
-                            <td style="border: 1px solid #000; padding: 5px;">{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
+                            <td style="border: 1px solid #000; padding: 5px; white-space: pre-line;">{'\\n'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
                             <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
                             <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
                         </tr>
