@@ -1740,23 +1740,44 @@ elif st.session_state['current_page'] == "evaluation":
             
             html = f"""
             <meta charset="UTF-8">
-            <style>
+            <style type="text/css">
+                @page {{
+                    size: A4;
+                    margin: 1cm;
+                }}
                 @font-face {{
                     font-family: 'Malgun Gothic';
                     src: local('Malgun Gothic');
                 }}
                 body {{
                     font-family: 'Malgun Gothic', sans-serif;
+                    font-size: 12px;
+                    line-height: 1.5;
                 }}
-                table {{ border-collapse: collapse; width: 100%; }}
-                th, td {{ 
-                    border: 1px solid #ddd; 
-                    padding: 8px; 
-                    font-family: 'Malgun Gothic', sans-serif;
+                table {{
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin-bottom: 10px;
                 }}
-                th {{ background-color: #f8f9fa; }}
-                .header {{ margin-bottom: 20px; }}
-                .section {{ margin-bottom: 15px; }}
+                th, td {{
+                    border: 1px solid #000;
+                    padding: 5px;
+                    text-align: left;
+                    font-size: 12px;
+                }}
+                th {{
+                    background-color: #f0f0f0;
+                }}
+                .header {{
+                    margin-bottom: 20px;
+                }}
+                .section {{
+                    margin-bottom: 15px;
+                }}
+                h2 {{
+                    font-size: 18px;
+                    margin-bottom: 10px;
+                }}
             </style>
             <div class="header">
                 <h2>면접평가표</h2>
@@ -1765,11 +1786,11 @@ elif st.session_state['current_page'] == "evaluation":
             <div class="section">
                 <table>
                     <tr>
-                        <th width="15%">후보자 정보</th>
-                        <th width="20%">후보자명</th>
-                        <td width="15%">{candidate_name}</td>
-                        <th width="20%">면접관성명</th>
-                        <td width="30%">{interviewer_name}</td>
+                        <th style="width: 15%">후보자 정보</th>
+                        <th style="width: 20%">후보자명</th>
+                        <td style="width: 15%">{candidate_name}</td>
+                        <th style="width: 20%">면접관성명</th>
+                        <td style="width: 30%">{interviewer_name}</td>
                     </tr>
                     <tr>
                         <th></th>
@@ -1783,16 +1804,16 @@ elif st.session_state['current_page'] == "evaluation":
             <div class="section">
                 <table>
                     <tr>
-                        <th width="15%">평가표 입력</th>
-                        <th width="45%">내용</th>
-                        <th width="10%">점수</th>
-                        <th width="30%">의견</th>
+                        <th style="width: 15%">평가표 입력</th>
+                        <th style="width: 45%">내용</th>
+                        <th style="width: 10%">점수</th>
+                        <th style="width: 30%">의견</th>
                     </tr>
                     {''.join([f"""
                     <tr>
                         <td>{row['구분']}</td>
                         <td>{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
-                        <td style="text-align: center;">{row['점수']} / {row['만점']}</td>
+                        <td style="text-align: center">{row['점수']} / {row['만점']}</td>
                         <td>{row['의견']}</td>
                     </tr>
                     """ for row in st.session_state.eval_data])}
@@ -1801,16 +1822,16 @@ elif st.session_state['current_page'] == "evaluation":
             <div class="section">
                 <table>
                     <tr>
-                        <th width="15%">종합의견 및 결과</th>
-                        <th width="15%">종합의견</th>
+                        <th style="width: 15%">종합의견 및 결과</th>
+                        <th style="width: 15%">종합의견</th>
                         <td colspan="3">{summary}</td>
                     </tr>
                     <tr>
                         <th></th>
                         <th>전형결과</th>
-                        <td width="20%">{result}</td>
-                        <th width="15%">입사가능시기</th>
-                        <td width="35%">{join_date}</td>
+                        <td style="width: 20%">{result}</td>
+                        <th style="width: 15%">입사가능시기</th>
+                        <td style="width: 35%">{join_date}</td>
                     </tr>
                     <tr>
                         <th></th>
@@ -1821,22 +1842,36 @@ elif st.session_state['current_page'] == "evaluation":
             </div>
             """
             
-            def create_pdf(html):
+            def create_pdf(html_content):
                 result = BytesIO()
-                # 한글 폰트 설정
                 pdf = pisa.pisaDocument(
-                    BytesIO(html.encode('utf-8')),
+                    BytesIO(html_content.encode('utf-8')),
                     result,
-                    encoding='utf-8'
+                    encoding='utf-8',
+                    path=os.path.dirname(os.path.abspath(__file__))
                 )
-                if not pdf.err:
-                    return result.getvalue()
-                return None
+                if pdf.err:
+                    return None
+                return result.getvalue()
             
             pdf = create_pdf(html)
-            b64 = base64.b64encode(pdf).decode()
-            href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
-            st.markdown(href, unsafe_allow_html=True)
+            if pdf:
+                b64 = base64.b64encode(pdf).decode()
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    st.success("제출이 완료되었습니다.")
+                with col2:
+                    st.markdown(
+                        f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf" '
+                        f'style="display: inline-block; padding: 8px 16px; '
+                        f'background-color: #f0f2f6; color: #262730; '
+                        f'text-decoration: none; border-radius: 4px; '
+                        f'border: 1px solid #d1d5db;">'
+                        f'📥 PDF 다운로드</a>',
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.error("PDF 생성 중 오류가 발생했습니다. 인사팀에 문의해주세요.")
             
         except Exception as e:
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
