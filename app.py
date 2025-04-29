@@ -1149,7 +1149,7 @@ elif st.session_state['current_page'] == "interview1":
         </div>
         """, unsafe_allow_html=True)
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
+    job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 넣어주세요. )", placeholder="https://career.neurophet.com/...")
     
     if job_link:
         try:
@@ -1414,7 +1414,7 @@ elif st.session_state['current_page'] == "interview2":
     2차 면접실시 및 평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 핵심가치에 부합되는 평가를 부탁드려요! 질문 내용은 AI가 도와드려요.""")
 
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
+    job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 넣어주세요. )", placeholder="https://career.neurophet.com/...")
     
     if job_link:
         try:
