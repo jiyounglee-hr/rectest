@@ -2012,13 +2012,29 @@ elif st.session_state['current_page'] == "admin":
                 # 필요한 컬럼만 선택
                 display_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견",
+                    "업무지식_점수", "업무지식_의견",
+                    "직무기술_점수", "직무기술_의견",
+                    "직무수행태도_점수", "직무수행태도_의견",
+                    "기본인성_점수", "기본인성_의견"
+                ]
+                
+                try:
+                    filtered_df = df[display_columns]
+                except KeyError:
+                    st.error("필요한 평가 데이터 컬럼이 없습니다. 데이터를 확인해주세요.")
+                    filtered_df = df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"]]
+
+                # 데이터프레임 표시용 컬럼
+                display_view_columns = [
+                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
                 ]
-                filtered_df = filtered_df[display_columns]
-
+                
                 # 데이터프레임 표시
                 st.dataframe(
-                    filtered_df,
+                    filtered_df[display_view_columns],
                     use_container_width=True,
                     hide_index=False
                 )
@@ -2033,6 +2049,16 @@ elif st.session_state['current_page'] == "admin":
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
+                    # 평가 데이터 생성
+                    eval_data = [
+                        {
+                            '구분': '업무 지식',
+                            '내용': '• 직무 관련 전문 지식 보유 수준\n• 업무 프로세스 이해도\n• 관련 법규 및 규정 이해도',
+                            '점수': selected_row.get('업무지식_점수', 0),
+                            '만점': 30,
+                            '의견': selected_row.get('업무지식_의견', '')
+                        },
+                        {
                     # 평가 데이터 가져오기
                     eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
                     eval_data = []
