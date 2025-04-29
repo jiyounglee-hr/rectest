@@ -1634,64 +1634,39 @@ elif st.session_state['current_page'] == "evaluation":
         # 평가표 데이터 입력
         st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
         
-        # 실시간 총점 계산을 위한 컨테이너
-        score_container = st.container()
-        
-        # 총점 표시를 위한 스타일
-        st.markdown("""
-            <style>
-                .total-score {
-                    font-size: 1.2em;
-                    font-weight: bold;
-                    color: #1f77b4;
-                    padding: 10px;
-                    border-radius: 5px;
-                    background-color: #f0f2f6;
-                    margin: 10px 0;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-        
         for i, row in enumerate(st.session_state.eval_data):
             cols = st.columns([1, 3, 1, 2, 1])
             cols[0].write(row["구분"])
             cols[1].write(row["내용"])
-            
-            # 점수 입력 필드
-            score = cols[2].number_input(
-                "점수",
-                min_value=0,
-                max_value=row["만점"],
-                value=row["점수"],
-                key=f"score_{i}",
-                help=f"0~{row['만점']}점"
+            st.session_state.eval_data[i]["점수"] = cols[2].number_input(
+                "점수", 
+                min_value=0, 
+                max_value=row["만점"], 
+                value=row["점수"], 
+                key=f"score_{i}"
             )
-            st.session_state.eval_data[i]["점수"] = score
             
             # 의견 입력
             opinion = cols[3].text_input(
-                "의견",
-                value=st.session_state.eval_opinions[i],
-                key=f"opinion_{i}",
+                "의견", 
+                value=st.session_state.eval_opinions[i], 
+                key=f"opinion_{i}", 
                 label_visibility="visible"
             )
             st.session_state.eval_opinions[i] = opinion
             st.session_state.eval_data[i]["의견"] = opinion
             
             cols[4].write(f"/ {row['만점']}")
-        
-        # 실시간 총점 표시
-        total_score = sum(row["점수"] for row in st.session_state.eval_data)
-        score_container.markdown(
-            f'<div class="total-score">총점: {total_score} / 100</div>',
-            unsafe_allow_html=True
-        )
 
         # 종합의견, 전형결과, 입사가능시기
         st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
         summary = st.text_area("종합의견", key="summary", label_visibility="visible")
         result = st.selectbox("전형결과", ["합격", "불합격", "보류"], key="result", label_visibility="visible")
         join_date = st.text_input("입사가능시기", key="join_date", label_visibility="visible")
+
+        # 총점 계산
+        total_score = sum([row["점수"] for row in st.session_state.eval_data])
+        st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
 
         # 제출 버튼
         submitted = st.form_submit_button("면접평가표 제출")
