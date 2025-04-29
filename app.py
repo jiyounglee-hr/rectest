@@ -1485,8 +1485,8 @@ elif st.session_state['current_page'] == "evaluation":
     selected_template_key = f"{selected_dept}-{selected_job}" if selected_dept and selected_job else None
     eval_template = eval_templates.get(selected_template_key, default_template)
     
-    # 본부와 직무 선택을 위한 두 개의 컬럼 생성
-    col1, col2 = st.columns(2)
+    # 본부와 직무 선택을 위한 세 개의 컬럼 생성
+    col1, col2, col3 = st.columns([0.3, 0.3, 0.4])
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
@@ -1494,7 +1494,7 @@ elif st.session_state['current_page'] == "evaluation":
         if selected_dept == "선택해주세요":
             selected_dept = None
     
-    # 오른쪽 컬럼: 직무 선택
+    # 가운데 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
             selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
@@ -1502,6 +1502,11 @@ elif st.session_state['current_page'] == "evaluation":
                 selected_job = "본부 미선택"
         else:
             selected_job = None
+            
+    # 오른쪽 컬럼: 여백
+    with col3:
+        st.empty()
+    
     st.markdown(f"**선택된 본부&직무:** {selected_dept} / {selected_job if selected_job else '직무 미선택'}")
     # 본부/직무 선택에 따라 템플릿 자동 반영
     if selected_dept and selected_job:
@@ -1539,7 +1544,7 @@ elif st.session_state['current_page'] == "evaluation":
     st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
 
     # 저장 버튼
-    save_btn = st.button("Google Sheet에 저장")
+    save_btn = st.button("면접평가표 제출")
     save_result = None
     if save_btn:
         try:
@@ -1570,10 +1575,10 @@ elif st.session_state['current_page'] == "evaluation":
             row_data.extend([summary, result, join_date, total_score])
             worksheet.append_row(row_data)
             save_result = True
-            st.success("Google Sheet에 저장되었습니다.")
+            st.success("제출이 완료 되었습니다.")
         except Exception as e:
             save_result = False
-            st.error(f"Google Sheet 저장 중 오류: {str(e)}")
+            st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
 
     # PDF 저장 버튼 (html2pdf 임시)
     import base64
