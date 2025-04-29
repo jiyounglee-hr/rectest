@@ -698,8 +698,8 @@ with st.sidebar:
         <style>
         .admin-button {
             display: block;
-            margin-top: 10px;
-            margin-left: 1rem;
+            margin-top: 5px;
+            margin-left: 0.8rem;
             background: none;
             border: none;
             color: #888888;
