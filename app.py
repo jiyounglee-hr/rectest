@@ -19,6 +19,26 @@ def init_google_sheets():
     client = Client(auth=creds)
     return client
 
+# PDF 생성 함수
+def create_pdf(html_content):
+    # PDF 생성을 위한 메모리 버퍼
+    result = BytesIO()
+    
+    # HTML을 PDF로 변환
+    pdf = pisa.pisaDocument(
+        BytesIO(html_content.encode("UTF-8")),
+        result,
+        encoding='UTF-8'
+    )
+    
+    # 변환 실패 시 에러 반환
+    if pdf.err:
+        st.error("PDF 생성 중 오류가 발생했습니다.")
+        return None
+    
+    # PDF 바이트 데이터 반환
+    return result.getvalue()
+
 # 페이지 설정 (반드시 첫 번째 명령어여야 함)
 st.set_page_config(
     page_title="HR Resume Analyzer",
