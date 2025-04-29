@@ -1111,7 +1111,7 @@ if st.session_state['current_page'] == "resume":
     <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
         <img src="https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F1e526dab-dca9-4781-9265-a9ee75b2f52c%2F%EC%A0%9C%EB%AA%A9%EC%9D%84_%EC%9E%85%EB%A0%A5%ED%95%98%EC%84%B8%EC%9A%94_(38).gif&blockId=44489939-4f3a-421e-85ba-f2fe368025bb" 
                  alt="서류전형 가이드" 
-                 style="max-width: 70%; height: auto; margin-left: 0;">
+                 style="max-width: 40%; height: auto; margin-left: 0;">
     </div>
     """, unsafe_allow_html=True)
     
