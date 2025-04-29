@@ -2043,47 +2043,40 @@ elif st.session_state['current_page'] == "admin":
                 selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                 
                 # PDF 생성을 위한 HTML 템플릿
-                html_content = f"""
-                if selected_candidate:
-                    selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
-                    
-                    # PDF 생성을 위한 HTML 템플릿
-                    html_content = f"""
-                    <div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
-                        <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
-                        <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
-                        
-                        <p><br><b>ㆍ후보자 정보 </b></p>
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-                            <tr>
-                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
-                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
-                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
-                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
-                            </tr>
-                            <tr>
-                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
-                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
-                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
-                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
-                            </tr>
-                        </table>
+                html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
+    <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+    <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
+    
+    <p><br><b>ㆍ후보자 정보 </b></p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+        <tr>
+            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
+            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
+            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
+            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
+            <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
+            <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
+        </tr>
+    </table>
 
-                        <p><br><b>ㆍ종합의견 및 결과</b></p>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
-                                <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
-                            </tr>
-                            <tr>
-                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접결과</th>
-                                <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['면접결과']}</td>
-                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
-                                <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['총점']}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    """
+    <p><br><b>ㆍ종합의견 및 결과</b></p>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
+            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접결과</th>
+            <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['면접결과']}</td>
+            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
+            <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['총점']}</td>
+        </tr>
+    </table>
+</div>"""
 
                     # PDF 다운로드 버튼
                     col1, col2, col3 = st.columns([1,2,1])
