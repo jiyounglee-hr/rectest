@@ -1988,7 +1988,12 @@ elif st.session_state['current_page'] == "admin":
                 with col1:
                     dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
                 with col2:
-                    job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
+                    # 선택된 본부에 해당하는 직무만 표시
+                    if dept_filter != "전체":
+                        job_options = ["전체"] + sorted(df[df["본부"] == dept_filter]["직무"].unique().tolist())
+                    else:
+                        job_options = ["전체"] + sorted(df["직무"].unique().tolist())
+                    job_filter = st.selectbox("직무", job_options)
                 with col3:
                     name_filter = st.text_input("후보자명")
 
