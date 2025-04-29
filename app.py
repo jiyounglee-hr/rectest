@@ -1962,7 +1962,7 @@ elif st.session_state['current_page'] == "admin":
     if not st.session_state.admin_authenticated:
         password = st.text_input("비밀번호를 입력하세요", type="password")
         if st.button("확인"):
-            if password == "0314":
+            if password == "0314!":
                 st.session_state.admin_authenticated = True
                 st.rerun()
             else:
@@ -2032,6 +2032,18 @@ elif st.session_state['current_page'] == "admin":
 
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
+                    
+                    # 평가 데이터 가져오기
+                    eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
+                    eval_data = []
+                    for item in eval_template:
+                        eval_data.append({
+                            '구분': item['구분'],
+                            '내용': item['내용'],
+                            '점수': selected_row.get(f"점수_{item['구분']}", 0),
+                            '만점': item.get('만점', 30),
+                            '의견': selected_row.get(f"의견_{item['구분']}", '')
+                        })
                     
                     # PDF 생성을 위한 HTML 템플릿
                     html_content = f"""
