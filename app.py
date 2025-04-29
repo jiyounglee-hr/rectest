@@ -2137,26 +2137,30 @@ elif st.session_state['current_page'] == "admin":
                     </html>
                     """
 
-                    # PDF 생성
-                    try:
-                        pdf_buffer = BytesIO()
-                        pisa.showLogging()
-                        pdf = pisa.pisaDocument(
-                            BytesIO(html_content.encode('utf-8')),
-                            pdf_buffer,
-                            encoding='utf-8',
-                            path=os.path.dirname(os.path.abspath(__file__)),
-                            show_error_as_pdf=True
-                        )
-                        
-                        if not pdf.err:
-                            return pdf_buffer.getvalue()
-                        else:
-                            st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
-                            return None
-                    except Exception as e:
-                        st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
-                        return None
+                    # PDF 생성 및 다운로드 버튼
+                    if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
+                        try:
+                            pdf_buffer = BytesIO()
+                            pisa.showLogging()
+                            pdf = pisa.pisaDocument(
+                                BytesIO(html_content.encode('utf-8')),
+                                pdf_buffer,
+                                encoding='utf-8',
+                                path=os.path.dirname(os.path.abspath(__file__)),
+                                show_error_as_pdf=True
+                            )
+                            
+                            if not pdf.err:
+                                st.download_button(
+                                    label="PDF 다운로드",
+                                    data=pdf_buffer.getvalue(),
+                                    file_name=f"면접평가표_{selected_candidate}.pdf",
+                                    mime="application/pdf"
+                                )
+                            else:
+                                st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
+                        except Exception as e:
+                            st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
