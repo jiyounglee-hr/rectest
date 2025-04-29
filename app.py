@@ -1999,22 +1999,6 @@ elif st.session_state['current_page'] == "admin":
                 ]
                 filtered_df = filtered_df[display_columns]
 
-                # 클릭 가능한 데이터프레임 표시
-                def make_clickable(row):
-                    return f'<a href="#" onclick="handleRowClick({row.name}); return false;" style="text-decoration: underline; color: #1E88E5;">{row["후보자명"]}</a>'
-                
-                filtered_df['후보자명'] = filtered_df.apply(make_clickable, axis=1)
-                filtered_df = filtered_df.rename(columns={"면접결과": "면접결과"})
-
-                # JavaScript 함수 추가
-                st.markdown("""
-                    <script>
-                    function handleRowClick(index) {
-                        window.parent.postMessage({type: 'streamlit:set_state', value: {selected_row_index: index}}, '*');
-                    }
-                    </script>
-                """, unsafe_allow_html=True)
-
                 # 데이터프레임 스타일링을 위한 CSS 추가
                 st.markdown("""
                     <style>
@@ -2041,12 +2025,22 @@ elif st.session_state['current_page'] == "admin":
                     </style>
                 """, unsafe_allow_html=True)
 
-                # HTML 테이블로 표시
-                st.write(filtered_df.to_html(escape=False, index=True), unsafe_allow_html=True)
+                # 데이터프레임 표시
+                st.dataframe(
+                    filtered_df,
+                    use_container_width=True,
+                    hide_index=False
+                )
 
-                # 선택된 행 처리
-                if 'selected_row_index' in st.session_state:
-                    selected_row = filtered_df.loc[st.session_state.selected_row_index]
+                # 선택 박스로 후보자 선택
+                selected_candidate = st.selectbox(
+                    "평가표를 다운로드할 후보자를 선택하세요",
+                    options=filtered_df['후보자명'].tolist(),
+                    index=None
+                )
+
+                if selected_candidate:
+                    selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
                     # PDF 생성을 위한 HTML 템플릿
                     html_content = f"""
@@ -2087,15 +2081,14 @@ elif st.session_state['current_page'] == "admin":
                     """
 
                     # PDF 다운로드 버튼
-                    st.markdown("---")
                     col1, col2, col3 = st.columns([1,2,1])
                     with col2:
-                        if st.button(f"📥 {selected_row['후보자명']}님의 면접평가표 다운로드", use_container_width=True):
+                        if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
                             pdf = create_pdf(html_content)
                             st.download_button(
                                 label="PDF 다운로드",
                                 data=pdf,
-                                file_name=f"면접평가표_{selected_row['후보자명']}.pdf",
+                                file_name=f"면접평가표_{selected_candidate}.pdf",
                                 mime="application/pdf"
                             )
             else:
