@@ -898,8 +898,8 @@ if st.session_state['current_page'] == "resume":
         experience_text = st.text_area(
             "- 경력기간 입력",  
             height=120
+            help="분석결과 경력기간 산정이 잘못된 경우 활용해 보세요."
         )
-
         if experience_text:
             try:
                 result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
