@@ -1968,7 +1968,6 @@ elif st.session_state['current_page'] == "admin":
                 df = pd.DataFrame(eval_data)
                 
                 # 검색 필터
-                st.markdown("### 🔍 검색")
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
@@ -1991,12 +1990,12 @@ elif st.session_state['current_page'] == "admin":
                 filtered_df.index = range(1, len(filtered_df) + 1)
 
                 # 데이터 표시
-                st.markdown("######📋 면접평가 목록")
+                st.markdown("#####📋 면접평가 목록")
                 
                 # 필요한 컬럼만 선택
                 display_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                    "최종학교/전공", "경력년월", "총점", "전형결과", "종합의견"
+                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
                 ]
                 filtered_df = filtered_df[display_columns]
 
@@ -2007,7 +2006,7 @@ elif st.session_state['current_page'] == "admin":
                 filtered_df['후보자명'] = filtered_df.apply(make_clickable, axis=1)
 
                 # 컬럼명 변경
-                filtered_df = filtered_df.rename(columns={"전형결과": "면접결과"})
+                filtered_df = filtered_df.rename(columns={"면접결과": "면접결과"})
 
                 # 데이터프레임 스타일링을 위한 CSS 추가
                 st.markdown("""
