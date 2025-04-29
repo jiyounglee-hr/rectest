@@ -54,24 +54,28 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
     
     for row in data:
         if row['본부'] == selected_dept and row['직무'] == selected_job:
-            def split_items(val):
+            def format_items(val):
                 if not val:
-                    return []
-                return [item.strip() for item in str(val).split('\n') if item.strip()]
+                    return ""
+                items = [item.strip() for item in str(val).split('\n') if item.strip()]
+                return "\n".join(f"• {item}" for item in items)
             
             st.markdown("""
                 <style>
-                    .small-text {
+                    .eval-content {
                         font-size: 0.9em;
+                        white-space: pre-line;
+                        margin: 0;
+                        padding: 0;
                     }
                 </style>
             """, unsafe_allow_html=True)
             
             return [
-                {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10, "점수": 0, "의견": ""}
+                {"구분": "업무 지식", "내용": format_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "직무기술", "내용": format_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "직무 수행 태도 및 자세", "내용": format_items(row.get('직무수행 태도 및 자세', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "기본인성", "내용": "• 복장은 단정한가?\n• 태도는 어떤가?\n• 적극적으로 답변하는가?", "만점": 10, "점수": 0, "의견": ""}
             ]
     
     # 해당하는 템플릿이 없는 경우 기본 템플릿 반환
