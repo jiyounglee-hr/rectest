@@ -1577,16 +1577,27 @@ elif st.session_state['current_page'] == "evaluation":
             'experience': ''
         }
     
-    def update_session_state(key, value):
-        st.session_state.candidate_info[key] = value
+    def update_candidate_name():
+        st.session_state.candidate_info['candidate_name'] = st.session_state.candidate_name
+    
+    def update_interviewer_name():
+        st.session_state.candidate_info['interviewer_name'] = st.session_state.interviewer_name
+    
+    def update_interview_date():
+        st.session_state.candidate_info['interview_date'] = st.session_state.interview_date
+    
+    def update_education():
+        st.session_state.candidate_info['education'] = st.session_state.education
+    
+    def update_experience():
+        st.session_state.candidate_info['experience'] = st.session_state.experience
     
     with candidate_info_cols[0]: 
         candidate_name = st.text_input(
             "후보자명",
             value=st.session_state.candidate_info['candidate_name'],
             key="candidate_name",
-            on_change=update_session_state,
-            args=('candidate_name',),
+            on_change=update_candidate_name,
             label_visibility="visible"
         )
     with candidate_info_cols[1]: 
@@ -1594,8 +1605,7 @@ elif st.session_state['current_page'] == "evaluation":
             "면접관성명",
             value=st.session_state.candidate_info['interviewer_name'],
             key="interviewer_name",
-            on_change=update_session_state,
-            args=('interviewer_name',),
+            on_change=update_interviewer_name,
             label_visibility="visible"
         )
     with candidate_info_cols[2]: 
@@ -1603,8 +1613,7 @@ elif st.session_state['current_page'] == "evaluation":
             "면접일자",
             value=st.session_state.candidate_info['interview_date'],
             key="interview_date",
-            on_change=update_session_state,
-            args=('interview_date',),
+            on_change=update_interview_date,
             label_visibility="visible"
         )
     with candidate_info_cols[3]: 
@@ -1612,8 +1621,7 @@ elif st.session_state['current_page'] == "evaluation":
             "최종학교/전공",
             value=st.session_state.candidate_info['education'],
             key="education",
-            on_change=update_session_state,
-            args=('education',),
+            on_change=update_education,
             label_visibility="visible"
         )
     with candidate_info_cols[4]: 
@@ -1621,8 +1629,7 @@ elif st.session_state['current_page'] == "evaluation":
             "경력년월",
             value=st.session_state.candidate_info['experience'],
             key="experience",
-            on_change=update_session_state,
-            args=('experience',),
+            on_change=update_experience,
             label_visibility="visible"
         )
 
