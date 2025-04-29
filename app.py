@@ -463,7 +463,7 @@ if 'interview_evaluation' not in st.session_state:
 
 # URL 파라미터 처리
 page_param = st.query_params.get("page", "resume")
-valid_pages = ['resume', 'interview1', 'interview2', 'evaluation']
+valid_pages = ['resume', 'interview1', 'interview2', 'evaluation', 'admin']
 
 # URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
 if isinstance(page_param, str) and page_param in valid_pages:
@@ -611,7 +611,10 @@ with st.sidebar:
 
     else:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
-
+        
+    def switch_to_admin():
+        st.query_params["page"] = "admin"
+        st.session_state['current_page'] = 'admin'
     # 페이지 전환 버튼 추가
     st.button("🤖 이력서분석", 
             key="btn_resume", 
@@ -632,6 +635,11 @@ with st.sidebar:
             key="btn_evaluation", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
+
+    st.button("⚙️ 채용 관리자", 
+            key="btn_admin", 
+            on_click=switch_to_admin,
+            type="primary" if st.session_state['current_page'] == "admin" else "secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1908,4 +1916,73 @@ elif st.session_state['current_page'] == "evaluation":
             
         except Exception as e:
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
+
+elif st.session_state['current_page'] == "admin":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            ⚙️ 채용 관리자
+        </h5>
+    """, unsafe_allow_html=True)
+
+    # 비밀번호 확인을 위한 세션 상태
+    if 'admin_authenticated' not in st.session_state:
+        st.session_state.admin_authenticated = False
+
+    # 비밀번호가 확인되지 않은 경우
+    if not st.session_state.admin_authenticated:
+        password = st.text_input("비밀번호를 입력하세요", type="password")
+        if st.button("확인"):
+            if password == "0314!":
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("비밀번호가 올바르지 않습니다.")
+    
+    # 비밀번호가 확인된 경우
+    else:
+        try:
+            # Google Sheets 데이터 가져오기
+            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+            credentials_dict = {
+                "type": st.secrets["google_credentials"]["type"],
+                "project_id": st.secrets["google_credentials"]["project_id"],
+                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+                "private_key": st.secrets["google_credentials"]["private_key"],
+                "client_email": st.secrets["google_credentials"]["client_email"],
+                "client_id": st.secrets["google_credentials"]["client_id"],
+                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+                "token_uri": st.secrets["google_credentials"]["token_uri"],
+                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+            }
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+            gc = gspread.authorize(credentials)
+            
+            # 면접평가 데이터 시트
+            eval_sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
+            eval_data = eval_sheet.get_all_records()
+            
+            if eval_data:
+                df = pd.DataFrame(eval_data)
+                st.markdown("### 면접평가 데이터")
+                st.dataframe(df)
+                
+                # CSV 다운로드 버튼
+                csv = df.to_csv(index=False).encode('utf-8-sig')
+                st.download_button(
+                    label="CSV 다운로드",
+                    data=csv,
+                    file_name="면접평가_데이터.csv",
+                    mime="text/csv"
+                )
+            else:
+                st.info("저장된 면접평가 데이터가 없습니다.")
+                
+        except Exception as e:
+            st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
+
+        # 로그아웃 버튼
+        if st.button("로그아웃"):
+            st.session_state.admin_authenticated = False
+            st.rerun()
 
