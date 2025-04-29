@@ -1503,21 +1503,55 @@ elif st.session_state['current_page'] == "evaluation":
     # 본부와 직무 선택을 위한 세 개의 컬럼 생성
     col1, col2, col3 = st.columns([0.2, 0.2, 0.6])
     
+    # 세션 상태에 본부/직무 정보 초기화
+    if 'dept_job_info' not in st.session_state:
+        st.session_state.dept_job_info = {
+            'selected_dept': None,
+            'selected_job': None
+        }
+
+    def update_dept_job_state(key, value):
+        st.session_state.dept_job_info[key] = value
+        if key == 'selected_dept':  # 본부가 변경되면 직무 초기화
+            st.session_state.dept_job_info['selected_job'] = None
+    
     # 왼쪽 컬럼: 본부 선택
     with col1:
-        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
+        selected_dept = st.selectbox(
+            "본부를 선택하세요",
+            ["선택해주세요"] + departments,
+            key="eval_dept",
+            on_change=update_dept_job_state,
+            args=('selected_dept',),
+            index=0 if st.session_state.dept_job_info['selected_dept'] is None 
+                  else departments.index(st.session_state.dept_job_info['selected_dept']) + 1 
+                  if st.session_state.dept_job_info['selected_dept'] in departments else 0
+        )
         if selected_dept == "선택해주세요":
-            selected_dept = "본부 미선택"
+            selected_dept = None
+        st.session_state.dept_job_info['selected_dept'] = selected_dept
     
     # 가운데 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
-            selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
+            job_list = ["선택해주세요"] + jobs[selected_dept]
+            selected_job = st.selectbox(
+                "직무를 선택하세요",
+                job_list,
+                key="eval_job",
+                on_change=update_dept_job_state,
+                args=('selected_job',),
+                index=0 if st.session_state.dept_job_info['selected_job'] is None 
+                      else jobs[selected_dept].index(st.session_state.dept_job_info['selected_job']) + 1 
+                      if st.session_state.dept_job_info['selected_job'] in jobs[selected_dept] else 0
+            )
             if selected_job == "선택해주세요":
-                selected_job = "직무무 미선택"
+                selected_job = None
+            st.session_state.dept_job_info['selected_job'] = selected_job
         else:
             selected_job = None
-            
+            st.session_state.dept_job_info['selected_job'] = None
+    
     # 오른쪽 컬럼: 여백
     with col3:
         st.empty()
