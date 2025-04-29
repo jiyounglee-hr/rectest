@@ -896,7 +896,7 @@ if st.session_state['current_page'] == "resume":
             else:
                 job_description = ""
         experience_text = st.text_area(
-            "- 경력기간 입력",  
+            "- 경력기간 입력 (AI분석의 경력기간 산정 시 별도로 입력해 보세요. YYYY-MM-DD ~ YYYY-MM-DD 형식으로 입력)",  
             height=120,
             help="분석결과 경력기간 산정이 잘못된 경우 활용해 보세요."
         )
