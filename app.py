@@ -897,7 +897,7 @@ if st.session_state['current_page'] == "resume":
                 job_description = ""
         experience_text = st.text_area(
             "- 경력기간 입력",  
-            height=120
+            height=120,
             help="분석결과 경력기간 산정이 잘못된 경우 활용해 보세요."
         )
         if experience_text:
