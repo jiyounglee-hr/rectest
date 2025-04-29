@@ -57,16 +57,17 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
             def format_items(val):
                 if not val:
                     return ""
-                items = [item.strip() for item in str(val).split('\n') if item.strip()]
+                items = [item.strip().replace('•', '').strip() for item in str(val).split('\n') if item.strip()]
                 return "\n".join(f"• {item}" for item in items)
             
             st.markdown("""
                 <style>
                     .eval-content {
                         font-size: 0.9em;
-                        white-space: pre-line;
+                        white-space: pre-wrap;
                         margin: 0;
                         padding: 0;
+                        line-height: 1.5;
                     }
                 </style>
             """, unsafe_allow_html=True)
