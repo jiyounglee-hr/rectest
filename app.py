@@ -1621,7 +1621,8 @@ elif st.session_state['current_page'] == "interview2":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("###### 📒 면접 순서"
+
+    st.markdown("###### 📒 면접 순서")
     st.markdown("""
     1. 면접관 사전 미팅 : 면접 시작 10분 전 면접 진행 방식에 대해 의견을 조율합니다.
 
@@ -1642,7 +1643,6 @@ elif st.session_state['current_page'] == "interview2":
 
     8. 면접평가 : 면접자별 면접 평가서 작성 및 피드백을 작성한 후 인사팀에 채팅(팀즈)로 전달합니다.
     """)
-
 
 elif st.session_state['current_page'] == "evaluation":
     st.markdown("""
