@@ -721,7 +721,7 @@ with st.sidebar:
     # 채용관리자 버튼
     st.markdown(f"""
         <a href="?page=admin" class="admin-button">
-            채용관리자
+            ⚙️
         </a>
     """, unsafe_allow_html=True)
 
