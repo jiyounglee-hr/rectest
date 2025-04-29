@@ -1144,15 +1144,6 @@ elif st.session_state['current_page'] == "interview1":
     면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.
     """)
 
-    st.markdown("###### 🐝 면접 주의사항")
-    
-    st.markdown("""
-    1. 지원자에 대한 예의, 편안함, 친절함을 지켜주세요!
-    2. 테스트 하듯이 하지 말아주세요.
-       'OO님이 그렇게 생각한 게 옳은가요??' 혹은 '그게 진짜 좋은 방법이라고 생각하는 건가요?' 식의 확인 사살은 자제해주세요.
-    3. 압박 면접을 하지 말아주세요. 어렵고 난이도 높은 질문의 경우에는 생각할 시간을 줘도 됩니다.
-    """)
-
     st.markdown("###### 📒 면접 순서")
     
     st.markdown("""
@@ -1397,6 +1388,15 @@ elif st.session_state['current_page'] == "interview1":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("1차 면접 질문", st.session_state.interview_questions1, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("###### 🐯 면접 주의사항(준길님 당부)")
+    
+    st.markdown("""
+    1. 지원자에 대한 예의, 편안함, 친절함을 지켜주세요!
+    2. 테스트 하듯이 하지 말아주세요.
+       'OO님이 그렇게 생각한 게 옳은가요??' 혹은 '그게 진짜 좋은 방법이라고 생각하는 건가요?' 식의 확인 사살은 자제해주세요.
+    3. 압박 면접을 하지 말아주세요. 어렵고 난이도 높은 질문의 경우에는 생각할 시간을 줘도 됩니다.
+    """)
 
 elif st.session_state['current_page'] == "interview2":
     st.markdown("""
