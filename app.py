@@ -707,11 +707,11 @@ with st.sidebar:
             opacity: 0.3;
             cursor: pointer;
             padding: 0;
-            text-decoration: none;
+            text-decoration: none !important;
         }
         .admin-button:hover {
             opacity: 0.8;
-            text-decoration: none;
+            text-decoration: none !important;
             color: #888888;
         }
         </style>
