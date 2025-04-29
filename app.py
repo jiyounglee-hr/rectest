@@ -2022,10 +2022,11 @@ elif st.session_state['current_page'] == "admin":
                 try:
                     filtered_df = df[display_columns]
                 except KeyError:
+                    st.error("필요한 평가 데이터 컬럼이 없습니다. 데이터를 확인해주세요.")
                     filtered_df = df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
                                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"]]
 
-                # 데이터프레임 표시용 컬럼
+                # 데이터프레임 표시용 컬럼 (기본 정보만 표시)
                 display_view_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
@@ -2049,32 +2050,36 @@ elif st.session_state['current_page'] == "admin":
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
                     # 평가 데이터 가져오기
-                    eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
-                    eval_data = []
-                    for item in eval_template:
-                        score_key = ''
-                        opinion_key = ''
-                        
-                        if item['구분'] == '업무 지식':
-                            score_key = '업무지식점수'
-                            opinion_key = '업무지식의견'
-                        elif item['구분'] == '직무기술':
-                            score_key = '직무기술 점수'
-                            opinion_key = '직무기술 의견'
-                        elif item['구분'] == '직무 수행 태도 및 자세':
-                            score_key = '직무수행태도 및 자세점수'
-                            opinion_key = '직무수행태도 및 자세의견'
-                        elif item['구분'] == '기본인성':
-                            score_key = '기본인성 점수'
-                            opinion_key = '기본인성 의견'
-                            
-                        eval_data.append({
-                            '구분': item['구분'],
-                            '내용': item['내용'],
-                            '점수': selected_row.get(score_key, 0),
-                            '만점': item.get('만점', 30),
-                            '의견': selected_row.get(opinion_key, '')
-                        })
+                    eval_data = [
+                        {
+                            '구분': '업무 지식',
+                            '내용': '• 직무 관련 전문 지식 보유 수준\n• 업무 프로세스 이해도\n• 관련 법규 및 규정 이해도',
+                            '점수': selected_row.get('업무지식점수', 0),
+                            '만점': 30,
+                            '의견': selected_row.get('업무지식의견', '')
+                        },
+                        {
+                            '구분': '직무기술',
+                            '내용': '• 업무 수행을 위한 기술/기능 보유\n• 문제해결 능력\n• 업무 개선 및 혁신 능력',
+                            '점수': selected_row.get('직무기술 점수', 0),
+                            '만점': 30,
+                            '의견': selected_row.get('직무기술 의견', '')
+                        },
+                        {
+                            '구분': '직무 수행 태도 및 자세',
+                            '내용': '• 책임감과 성실성\n• 적극성과 주도성\n• 팀워크와 협조성',
+                            '점수': selected_row.get('직무수행태도 및 자세점수', 0),
+                            '만점': 30,
+                            '의견': selected_row.get('직무수행태도 및 자세의견', '')
+                        },
+                        {
+                            '구분': '기본인성',
+                            '내용': '• 복장은 단정한가?\n• 태도는 어떤가?\n• 적극적으로 답변하는가?',
+                            '점수': selected_row.get('기본인성 점수', 0),
+                            '만점': 10,
+                            '의견': selected_row.get('기본인성 의견', '')
+                        }
+                    ]
                     
                     # PDF 생성을 위한 HTML 템플릿
                     html_content = f"""
