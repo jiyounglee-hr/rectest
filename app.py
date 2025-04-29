@@ -28,67 +28,77 @@ import time
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def get_eval_template_from_sheet(selected_dept, selected_job):
-    # 선택된 본부에 해당하는 템플릿이 있는 경우 해당 템플릿 반환
-    if selected_dept in eval_template:
-        return eval_template[selected_dept]
+    try:
+        # 선택된 본부에 해당하는 템플릿이 있는 경우 해당 템플릿 반환
+        if selected_dept in eval_template:
+            return eval_template[selected_dept]
+            
+        # 선택된 본부에 해당하는 템플릿이 없는 경우 구글 시트에서 조회
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
         
-    # 선택된 본부에 해당하는 템플릿이 없는 경우 구글 시트에서 조회
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials_dict = {
-        "type": st.secrets["google_credentials"]["type"],
-        "project_id": st.secrets["google_credentials"]["project_id"],
-        "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-        "private_key": st.secrets["google_credentials"]["private_key"],
-        "client_email": st.secrets["google_credentials"]["client_email"],
-        "client_id": st.secrets["google_credentials"]["client_id"],
-        "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-        "token_uri": st.secrets["google_credentials"]["token_uri"],
-        "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-        "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-    }
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-    gc = gspread.authorize(credentials)
-    sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
-    worksheet = gc.open_by_key(sheet_id).sheet1
-    data = worksheet.get_all_records()
-    
-    for row in data:
-        if row['본부'] == selected_dept and row['직무'] == selected_job:
-            def format_items(val):
-                if not val:
-                    return ""
-                # 먼저 모든 bullet point를 제거하고 쉼표나 줄바꿈으로 분리
-                items = []
-                text = str(val).replace('•', '').strip()
-                for item in text.replace('\n', ',').split(','):
-                    if item.strip():
-                        items.append(item.strip())
-                return "\n".join(f"• {item}" for item in items)
-            
-            st.markdown("""
-                <style>
-                    .eval-content {
-                        font-size: 0.9em;
-                        white-space: pre-wrap;
-                        margin: 0;
-                        padding: 0;
-                        line-height: 1.8;
-                    }
-                    .stMarkdown div[data-testid="stMarkdownContainer"] p {
-                        white-space: pre-wrap;
-                    }
-                </style>
-            """, unsafe_allow_html=True)
-            
-            return [
-                {"구분": "업무 지식", "내용": format_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "직무기술", "내용": format_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "직무 수행 태도 및 자세", "내용": format_items(row.get('직무수행 태도 및 자세', '')), "만점": 30, "점수": 0, "의견": ""},
-                {"구분": "기본인성", "내용": "• 복장은 단정한가?\n• 태도는 어떤가?\n• 적극적으로 답변하는가?", "만점": 10, "점수": 0, "의견": ""}
-            ]
-    
-    # 해당하는 템플릿이 없는 경우 기본 템플릿 반환
-    return default_template
+        try:
+            data = worksheet.get_all_records()
+        except gspread.exceptions.APIError as e:
+            st.warning("평가 템플릿을 불러오는 중 일시적인 오류가 발생했습니다. 기본 템플릿을 사용합니다.")
+            return default_template
+        
+        for row in data:
+            if row['본부'] == selected_dept and row['직무'] == selected_job:
+                def format_items(val):
+                    if not val:
+                        return ""
+                    # 먼저 모든 bullet point를 제거하고 쉼표나 줄바꿈으로 분리
+                    items = []
+                    text = str(val).replace('•', '').strip()
+                    for item in text.replace('\n', ',').split(','):
+                        if item.strip():
+                            items.append(item.strip())
+                    return "\n".join(f"• {item}" for item in items)
+                
+                st.markdown("""
+                    <style>
+                        .eval-content {
+                            font-size: 0.9em;
+                            white-space: pre-wrap;
+                            margin: 0;
+                            padding: 0;
+                            line-height: 1.8;
+                        }
+                        .stMarkdown div[data-testid="stMarkdownContainer"] p {
+                            white-space: pre-wrap;
+                        }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                return [
+                    {"구분": "업무 지식", "내용": format_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
+                    {"구분": "직무기술", "내용": format_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
+                    {"구분": "직무 수행 태도 및 자세", "내용": format_items(row.get('직무수행 태도 및 자세', '')), "만점": 30, "점수": 0, "의견": ""},
+                    {"구분": "기본인성", "내용": "• 복장은 단정한가?\n• 태도는 어떤가?\n• 적극적으로 답변하는가?", "만점": 10, "점수": 0, "의견": ""}
+                ]
+        
+        # 해당하는 템플릿이 없는 경우 기본 템플릿 반환
+        return default_template
+        
+    except Exception as e:
+        st.warning(f"평가 템플릿을 불러오는 중 오류가 발생했습니다. 기본 템플릿을 사용합니다.")
+        return default_template
 
 # 구글 스프레드시트 인증 및 데이터 가져오기
 def get_google_sheet_data():
