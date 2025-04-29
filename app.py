@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
+from gspread.client import Client
 import json
-import time  # 추가
+import time
 from datetime import datetime
 import base64
 from io import BytesIO
@@ -1955,9 +1956,8 @@ elif st.session_state['current_page'] == "admin":
     else:
         with st.spinner("데이터를 불러오는 중..."):
             try:
-                scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-                creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
-                gc = gspread.authorize(creds)
+                # 새로운 방식으로 Google Sheets 클라이언트 초기화
+                gc = init_google_sheets()
                 sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
                 time.sleep(1)  # API 호출 간격 조절
                 data = sheet.get_all_records()
