@@ -1961,9 +1961,12 @@ elif st.session_state['current_page'] == "admin":
     
     if not st.session_state.admin_authenticated:
         password = st.text_input("비밀번호를 입력하세요", type="password")
-        if password == "0314":
-            st.session_state.admin_authenticated = True
-            st.rerun()
+        if st.button("확인"):
+            if password == "0314":
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("비밀번호가 올바르지 않습니다.")
     else:
         st.markdown("""
             <h5 style='color: #333333; margin-bottom: 20px;'>
