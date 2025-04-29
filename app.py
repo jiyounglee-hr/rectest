@@ -1988,7 +1988,6 @@ elif st.session_state['current_page'] == "admin":
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
-                    st.write(f"선택된 본부: {dept_filter}")  # 디버깅용
                 
                 with col2:
                     # 선택된 본부에 해당하는 직무만 표시
@@ -1997,17 +1996,13 @@ elif st.session_state['current_page'] == "admin":
                     else:
                         job_options = ["전체"] + sorted(df["직무"].unique().tolist())
                     job_filter = st.selectbox("직무", job_options)
-                    st.write(f"선택된 직무: {job_filter}")  # 디버깅용
                 
                 with col3:
                     name_filter = st.text_input("후보자명")
 
                 # 필터 적용
                 filtered_df = df.copy()
-                
-                # 디버깅을 위한 정보 출력
-                st.write("필터링 전 데이터 수:", len(filtered_df))
-                
+                                
                 # 본부 필터링
                 if dept_filter != "전체":
                     filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
