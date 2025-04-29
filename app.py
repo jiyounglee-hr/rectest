@@ -2030,53 +2030,46 @@ elif st.session_state['current_page'] == "admin":
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
-                    # 평가 데이터 가져오기
-                    eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
-                    eval_data = []
-                    for item in eval_template:
-                        eval_data.append({
-                            '구분': item['구분'],
-                            '내용': item['내용'],
-                            '점수': item.get('점수', 0),
-                            '만점': item.get('만점', 30),
-                            '의견': item.get('의견', '')
-                        })
-                    
                     # PDF 생성을 위한 HTML 템플릿
                     html_content = f"""
-                    <!DOCTYPE html>
                     <html>
                     <head>
-                        <meta charset="UTF-8">
+                        <meta charset="utf-8">
+                        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
                         <style>
-                            @font-face {{
-                                font-family: 'NanumGothic';
-                                src: url('https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css');
-                            }}
+                            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
                             * {{
-                                font-family: 'NanumGothic', sans-serif;
+                                font-family: 'Noto Sans KR', sans-serif !important;
                             }}
                             body {{
-                                font-family: 'NanumGothic', sans-serif;
-                                padding: 20px;
+                                font-family: 'Noto Sans KR', sans-serif !important;
+                                font-size: 12px;
+                                line-height: 1.5;
                             }}
                             table {{
                                 width: 100%;
                                 border-collapse: collapse;
-                                margin-bottom: 15px;
+                                margin-bottom: 10px;
                             }}
                             th, td {{
-                                border: 1px solid #000;
-                                padding: 5px;
-                                font-family: 'NanumGothic', sans-serif;
+                                border: 1px solid black;
+                                padding: 8px;
+                                text-align: left;
+                                font-family: 'Noto Sans KR', sans-serif !important;
                             }}
                             th {{
-                                background-color: #f0f0f0;
+                                background-color: #f2f2f2;
+                            }}
+                            h1, h2, h3, h4, h5, h6, p, span, div {{
+                                font-family: 'Noto Sans KR', sans-serif !important;
+                            }}
+                            .content-item {{
+                                margin-bottom: 8px;
                             }}
                         </style>
                     </head>
                     <body>
-                        <div>
+                        <div style="padding: 20px;">
                             <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
                             <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
                             
@@ -2142,12 +2135,25 @@ elif st.session_state['current_page'] == "admin":
                         try:
                             pdf_buffer = BytesIO()
                             pisa.showLogging()
+                            
+                            # PDF 옵션 설정
+                            pdf_options = {
+                                'encoding': 'utf-8',
+                                'page-size': 'A4',
+                                'margin-top': '1.0cm',
+                                'margin-right': '1.0cm',
+                                'margin-bottom': '1.0cm',
+                                'margin-left': '1.0cm',
+                                'enable-local-file-access': True,
+                                'load-error-handling': 'ignore'
+                            }
+                            
+                            # PDF 생성
                             pdf = pisa.pisaDocument(
                                 BytesIO(html_content.encode('utf-8')),
                                 pdf_buffer,
                                 encoding='utf-8',
-                                path=os.path.dirname(os.path.abspath(__file__)),
-                                show_error_as_pdf=True
+                                options=pdf_options
                             )
                             
                             if not pdf.err:
