@@ -1685,7 +1685,6 @@ elif st.session_state['current_page'] == "evaluation":
 
         # 총점 계산
         total_score = sum([row["점수"] for row in st.session_state.eval_data])
-        st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
 
         # 제출 버튼
         submitted = st.form_submit_button("면접평가표 제출")
@@ -1779,6 +1778,11 @@ elif st.session_state['current_page'] == "evaluation":
                             <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
                             <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
                         </tr>
+                        <tr>
+                            <td colspan="2" style="border: 1px solid #000; padding: 5px;">총점</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
+                        </tr>
                         """ for row in st.session_state.eval_data])}
                     </table>
                 </div>
@@ -1795,10 +1799,6 @@ elif st.session_state['current_page'] == "evaluation":
                             <td style="width: 20%; border: 1px solid #000; padding: 5px;">{result}</td>
                             <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">입사가능시기</th>
                             <td style="width: 35%; border: 1px solid #000; padding: 5px;">{join_date}</td>
-                        </tr>
-                        <tr>
-                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
-                            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
                         </tr>
                     </table>
                 </div>
