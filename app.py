@@ -2100,7 +2100,7 @@ elif st.session_state['current_page'] == "admin":
                             table {{
                                 width: 100%;
                                 border-collapse: collapse;
-                                margin-bottom: 10px;
+                                margin-bottom: 5px;
                             }}
                             th, td {{
                                 border: 1px solid black;
@@ -2118,7 +2118,7 @@ elif st.session_state['current_page'] == "admin":
                                 margin-bottom: 8px;
                             }}
                             .section-title {{
-                                margin-left: 20px;
+                                margin-left: 0px;
                             }}
                         </style>
                     </head>
@@ -2126,7 +2126,6 @@ elif st.session_state['current_page'] == "admin":
                         <div style="padding: 20px;">
                             <h2 style="font-size: 18px; margin-bottom: 5px;"> 면접평가표</h2>
                             <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
-                            
                             <div class="section-title"><p><br><b>ㆍ후보자 정보</b></p></div>
                             <table>
                                 <tr>
