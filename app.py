@@ -1139,7 +1139,7 @@ elif st.session_state['current_page'] == "interview1":
     st.markdown("###### 🚩 1차 면접전형 절차는 어떻게 되나요?")
     
     st.markdown("""
-    1차 면접실시 및및 면접평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.""")
+    1차 면접실시 및 평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.""")
 
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
@@ -1409,6 +1409,10 @@ elif st.session_state['current_page'] == "interview2":
         </h5>
     """, unsafe_allow_html=True)
     
+    st.markdown("###### 🚩 2차 면접전형 절차는 어떻게 되나요?")    
+    st.markdown("""
+    2차 면접실시 및 평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 질문 내용은 AI가 도와드려요.""")
+
     # 채용공고 링크 입력
     job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
     
