@@ -1139,8 +1139,11 @@ elif st.session_state['current_page'] == "interview1":
     st.markdown("###### 🚩 1차 면접전형 절차는 어떻게 되나요?")
     
     st.markdown("""
-    1차 면접실시 및 평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.""")
+    ① 1차 면접실시 : 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.
 
+    ② 1차 면접 평가제출 : 면접 결과를 제출해 주세요.     
+    """)
+    st.link_button("면접 평가서 제출", "https://rectest-evuoqvdnth3gpmddaxoen7.streamlit.app/~/+/?page=evaluation", type="primary")
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
@@ -2383,4 +2386,5 @@ elif st.session_state['current_page'] == "admin":
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
+
 
