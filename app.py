@@ -1532,20 +1532,65 @@ elif st.session_state['current_page'] == "evaluation":
     # 후보자 정보 입력
     st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
     candidate_info_cols = st.columns(5)
-    with candidate_info_cols[0]: candidate_name = st.text_input("후보자명")
-    with candidate_info_cols[1]: interviewer_name = st.text_input("면접관성명")
-    with candidate_info_cols[2]: interview_date = st.date_input("면접일자")
-    with candidate_info_cols[3]: education = st.text_input("최종학교/전공")
-    with candidate_info_cols[4]: experience = st.text_input("경력년월")
+    
+    # 세션 상태에 후보자 정보 초기화
+    if 'candidate_info' not in st.session_state:
+        st.session_state.candidate_info = {
+            'candidate_name': '',
+            'interviewer_name': '',
+            'interview_date': datetime.now(),
+            'education': '',
+            'experience': ''
+        }
+    
+    # JavaScript 코드 추가
+    st.markdown("""
+        <script>
+        // 입력값이 변경될 때마다 세션 상태를 업데이트하는 함수
+        function updateSessionState(key, value) {
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                key: key,
+                value: value
+            }, '*');
+        }
+        </script>
+    """, unsafe_allow_html=True)
+    
+    with candidate_info_cols[0]: 
+        candidate_name = st.text_input("후보자명", value=st.session_state.candidate_info['candidate_name'], key="candidate_name", on_change=lambda: None)
+        st.session_state.candidate_info['candidate_name'] = candidate_name
+    with candidate_info_cols[1]: 
+        interviewer_name = st.text_input("면접관성명", value=st.session_state.candidate_info['interviewer_name'], key="interviewer_name", on_change=lambda: None)
+        st.session_state.candidate_info['interviewer_name'] = interviewer_name
+    with candidate_info_cols[2]: 
+        interview_date = st.date_input("면접일자", value=st.session_state.candidate_info['interview_date'], key="interview_date", on_change=lambda: None)
+        st.session_state.candidate_info['interview_date'] = interview_date
+    with candidate_info_cols[3]: 
+        education = st.text_input("최종학교/전공", value=st.session_state.candidate_info['education'], key="education", on_change=lambda: None)
+        st.session_state.candidate_info['education'] = education
+    with candidate_info_cols[4]: 
+        experience = st.text_input("경력년월", value=st.session_state.candidate_info['experience'], key="experience", on_change=lambda: None)
+        st.session_state.candidate_info['experience'] = experience
 
     # 평가표 데이터 입력
     st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
+    
+    # 평가 데이터 초기화
+    if 'eval_opinions' not in st.session_state:
+        st.session_state.eval_opinions = [''] * len(st.session_state.eval_data)
+    
     for i, row in enumerate(st.session_state.eval_data):
         cols = st.columns([1, 3, 1, 2, 1])
         cols[0].write(row["구분"])
         cols[1].write(row["내용"])
         st.session_state.eval_data[i]["점수"] = cols[2].number_input("점수", min_value=0, max_value=row["만점"], value=row["점수"], key=f"score_{i}")
-        st.session_state.eval_data[i]["의견"] = cols[3].text_input("의견", value=row["의견"], key=f"opinion_{i}")
+        
+        # 의견 입력을 새로고침 없이 처리
+        opinion = cols[3].text_input("의견", value=st.session_state.eval_opinions[i], key=f"opinion_{i}", on_change=lambda: None)
+        st.session_state.eval_opinions[i] = opinion
+        st.session_state.eval_data[i]["의견"] = opinion
+        
         cols[4].write(f"/ {row['만점']}")
 
     # 종합의견, 전형결과, 입사가능시기
