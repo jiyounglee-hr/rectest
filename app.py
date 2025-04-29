@@ -654,7 +654,7 @@ with st.sidebar:
         st.query_params["page"] = "admin"
         st.session_state['current_page'] = 'admin'
     # 페이지 전환 버튼 추가
-    st.button("🤖 이력서분석", 
+    st.button("🤖 서류전형", 
             key="btn_resume", 
             on_click=switch_to_resume,
             type="primary" if st.session_state['current_page'] == "resume" else "secondary")
@@ -727,7 +727,7 @@ job_descriptions = {}
 if st.session_state['current_page'] == "resume":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            🤖 이력서분석
+            🤖 서류전형
         </h5>
     """, unsafe_allow_html=True)
 
