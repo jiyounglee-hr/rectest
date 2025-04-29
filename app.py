@@ -1635,8 +1635,8 @@ elif st.session_state['current_page'] == "evaluation":
         st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
         
         for i, row in enumerate(st.session_state.eval_data):
-            # 컬럼 비율 조정 (1:2:1:3:0)으로 변경
-            cols = st.columns([1, 2, 1, 3, 0])
+            # 컬럼 비율 조정 (1:2:1:3:0.5)으로 변경
+            cols = st.columns([1, 2, 1, 3, 0.5])
             cols[0].write(row["구분"])
             
             # 내용 컬럼에 스타일 적용
