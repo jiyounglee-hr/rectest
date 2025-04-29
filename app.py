@@ -12,6 +12,13 @@ from io import BytesIO
 import PyPDF2
 from xhtml2pdf import pisa
 
+# Google Sheets 클라이언트 초기화 함수
+def init_google_sheets():
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
+    client = Client(auth=creds)
+    return client
+
 # 페이지 설정 (반드시 첫 번째 명령어여야 함)
 st.set_page_config(
     page_title="HR Resume Analyzer",
