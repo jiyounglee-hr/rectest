@@ -2117,14 +2117,17 @@ elif st.session_state['current_page'] == "admin":
                             .content-item {{
                                 margin-bottom: 8px;
                             }}
+                            .section-title {{
+                                margin-left: 20px;
+                            }}
                         </style>
                     </head>
                     <body>
                         <div style="padding: 20px;">
-                            <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+                            <h2 style="font-size: 18px; margin-bottom: 5px;"> 면접평가표</h2>
                             <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
                             
-                            <p><br><b>ㆍ후보자 정보 </b></p>
+                            <div class="section-title"><p><br><b>ㆍ후보자 정보</b></p></div>
                             <table>
                                 <tr>
                                     <th style="width: 20%;">후보자명</th>
@@ -2139,7 +2142,8 @@ elif st.session_state['current_page'] == "admin":
                                     <td>{selected_row['최종학교/전공']}</td>
                                 </tr>
                             </table>
-                            <p><br><b>ㆍ종합의견 및 결과</b></p>
+
+                            <div class="section-title"><p><br><b>ㆍ종합의견 및 결과</b></p></div>
                             <table>
                                 <tr>
                                     <th style="width: 15%;">종합의견</th>
@@ -2152,7 +2156,8 @@ elif st.session_state['current_page'] == "admin":
                                     <td style="width: 35%;">{selected_row['총점']}</td>
                                 </tr>
                             </table>
-                            <p><br><b>ㆍ평가내용</b></p>
+
+                            <div class="section-title"><p><br><b>ㆍ평가내용</b></p></div>
                             <table>
                                 <tr>
                                     <th style="width: 18%;">평가구분</th>
