@@ -1499,10 +1499,10 @@ elif st.session_state['current_page'] == "evaluation":
         if selected_dept and jobs.get(selected_dept):
             selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
             if selected_job == "선택해주세요":
-                selected_job = None
+                selected_job = "본부 미선택"
         else:
             selected_job = None
-    st.markdown(f"**선택된 본부&직무:** {selected_dept} - {selected_job if selected_job else '직무를 선택해주세요'}")
+    st.markdown(f"**선택된 본부&직무:** {selected_dept} / {selected_job if selected_job else '직무 미선택'}")
     # 본부/직무 선택에 따라 템플릿 자동 반영
     if selected_dept and selected_job:
         st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)

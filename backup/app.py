@@ -1,4 +1,13 @@
 import streamlit as st
+
+# 페이지 설정 (반드시 첫 번째 명령어여야 함)
+st.set_page_config(
+    page_title="HR Resume Analyzer",
+    page_icon="📄",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 import PyPDF2
 from io import BytesIO
 import os
@@ -10,9 +19,154 @@ import re
 import base64
 import requests
 from bs4 import BeautifulSoup
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import json
+import time
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+def get_eval_template_from_sheet(selected_dept, selected_job):
+    # 선택된 본부에 해당하는 템플릿이 있는 경우 해당 템플릿 반환
+    if selected_dept in eval_template:
+        return eval_template[selected_dept]
+        
+    # 선택된 본부에 해당하는 템플릿이 없는 경우 구글 시트에서 조회
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials_dict = {
+        "type": st.secrets["google_credentials"]["type"],
+        "project_id": st.secrets["google_credentials"]["project_id"],
+        "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+        "private_key": st.secrets["google_credentials"]["private_key"],
+        "client_email": st.secrets["google_credentials"]["client_email"],
+        "client_id": st.secrets["google_credentials"]["client_id"],
+        "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+        "token_uri": st.secrets["google_credentials"]["token_uri"],
+        "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+        "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+    }
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+    gc = gspread.authorize(credentials)
+    sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+    worksheet = gc.open_by_key(sheet_id).sheet1
+    data = worksheet.get_all_records()
+    
+    for row in data:
+        if row['본부'] == selected_dept and row['직무'] == selected_job:
+            def split_items(val):
+                if not val:
+                    return []
+                return [item.strip("• ").strip() for item in str(val).replace('\n', ',').split(',') if item.strip()]
+            return [
+                {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "직무 수행 태도 및 자세", "내용": split_items(row.get('직무수행 태도 및 자세', '')), "만점": 30, "점수": 0, "의견": ""},
+                {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10, "점수": 0, "의견": ""}
+            ]
+    
+    # 해당하는 템플릿이 없는 경우 기본 템플릿 반환
+    return default_template
+
+# 구글 스프레드시트 인증 및 데이터 가져오기
+def get_google_sheet_data():
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 본부와 직무 데이터가 있는 시트 ID
+        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
+        
+        # 데이터 가져오기
+        data = worksheet.get_all_records()
+        
+        # 본부와 직무 데이터 정리
+        departments = sorted(list(set(row['본부'] for row in data if row['본부'])))
+        jobs = {}
+        for dept in departments:
+            jobs[dept] = sorted(list(set(row['직무'] for row in data if row['본부'] == dept and row['직무'])))
+            
+        return departments, jobs
+    except Exception as e:
+        # st.error(f"구글 스프레드시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+        return [], {}
+
+# 평가 항목 템플릿 가져오기
+def get_evaluation_template():
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 평가 항목 데이터가 있는 시트 ID
+        sheet_id = st.secrets["google_sheets"]["evaluation_template_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).sheet1
+        
+        # 데이터 가져오기
+        data = worksheet.get_all_records()
+        
+        # 직무별 평가 항목 정리
+        eval_templates = {}
+        for row in data:
+            dept = row.get('본부', '')
+            job = row.get('직무', '')
+            if dept and job:
+                key = f"{dept}-{job}"
+                if key not in eval_templates:
+                    eval_templates[key] = []
+                eval_templates[key].append({
+                    "구분": row.get('구분', ''),
+                    "내용": row.get('내용', '').split('\n'),  # 줄바꿈으로 구분된 내용을 리스트로 변환
+                    "만점": int(row.get('만점', 0))
+                })
+        
+        return eval_templates
+        
+    except Exception as e:
+        # st.error(f"평가 항목 템플릿을 가져오는 중 오류가 발생했습니다: {str(e)}")
+        return {}
+
+# 기본 평가 템플릿
+default_template = [
+    {"구분": "업무지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript + ReactJS", "Webpack"], "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "직무수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10, "점수": 0, "의견": ""}
+]
+
+# 본부와 직무 데이터 가져오기
+departments, jobs = get_google_sheet_data()
+
+# 기본값 설정
+selected_dept = None
+selected_job = None
+
 
 # 날짜 정규화 함수
 def normalize_date(date_str):
@@ -259,14 +413,6 @@ def calculate_experience(experience_text):
     
     return result, total_years, total_remaining_months, total_decimal_years
 
-# 페이지 설정 (반드시 첫 번째 명령어여야 함)
-st.set_page_config(
-    page_title="HR Resume Analyzer",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 # 세션 상태 초기화
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'resume'
@@ -278,10 +424,12 @@ if 'interview_questions2' not in st.session_state:
     st.session_state['interview_questions2'] = None
 if 'job_description' not in st.session_state:
     st.session_state['job_description'] = None
+if 'interview_evaluation' not in st.session_state:
+    st.session_state['interview_evaluation'] = None
 
 # URL 파라미터 처리
 page_param = st.query_params.get("page", "resume")
-valid_pages = ['resume', 'interview1', 'interview2']
+valid_pages = ['resume', 'interview1', 'interview2', 'evaluation']
 
 # URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
 if isinstance(page_param, str) and page_param in valid_pages:
@@ -360,25 +508,11 @@ with st.sidebar:
         st.query_params["page"] = "interview2"
         st.session_state['current_page'] = 'interview2'
 
-    # 페이지 전환 버튼 추가
-    st.button("🤖 이력서분석", 
-            key="btn_resume", 
-            on_click=switch_to_resume,
-            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
+    def switch_to_evaluation():
+        st.query_params["page"] = "evaluation"
+        st.session_state['current_page'] = 'evaluation'
 
-    st.button("☝️ 1차 면접 질문", 
-            key="btn_interview1", 
-            on_click=switch_to_interview1,
-            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
-
-    st.button("✌️ 2차 면접 질문", 
-            key="btn_interview2", 
-            on_click=switch_to_interview2,
-            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    
+        
     # 파일 업로더 스타일 수정
     st.markdown("""
         <style>
@@ -444,74 +578,51 @@ with st.sidebar:
     else:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
 
+    # 페이지 전환 버튼 추가
+    st.button("🤖 이력서분석", 
+            key="btn_resume", 
+            on_click=switch_to_resume,
+            type="primary" if st.session_state['current_page'] == "resume" else "secondary")
+
+    st.button("☝️ 1차 면접 질문", 
+            key="btn_interview1", 
+            on_click=switch_to_interview1,
+            type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
+
+    st.button("✌️ 2차 면접 질문", 
+            key="btn_interview2", 
+            on_click=switch_to_interview2,
+            type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
+
+    st.button("📝 면접평가표", 
+            key="btn_evaluation", 
+            on_click=switch_to_evaluation,
+            type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
     # 맨 마지막에 도움말 추가
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("도움말"):
         st.write("""
         🤖 이력서분석 : PDF 형식의 이력서 파일을 업로드 > 채용요건 확인 > 경력기간 체크(필요 시) > '분석 시작하기' \n
         ☝️ 1차 면접 질문 : 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문\n
-        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다
+        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다\n
+        📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
         """)
-    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크 ></a></div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
+
+    # 본부와 직무 데이터 가져오기
+    departments, jobs = get_google_sheet_data()
+    
+    # 본부와 직무 선택에 따라 템플릿 자동 반영
+    if selected_dept and selected_job:
+        st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)
+    else:
+        st.session_state.eval_data = default_template
 
 # 채용공고 데이터
-job_descriptions = {
-    "ra_manager": """[의료기기 인허가(RA) 팀장]
-
-담당업무
-- 국내외 의료기기 인허가 (MFDS, FDA, CE, MHLW 등) 및 사후관리
-- 국가별 기술문서 작성 및 최신화
-- 국가별 의료기기 규제 요구사항 분석
-- 의료기기법/규격/가이던스 변경사항 모니터링
-- 품질시스템 심사 대응 (ISO 13485, KGMP, MDSAP 등)
-
-필수자격
-- 제품 인허가 업무경력 7년이상
-- 의료기기 인증팀 관리 경험
-- SaMD, SiMD, 전기전자 의료기기 인허가 경험
-- 영어 중급 이상 (Reading & Writing 필수)
-
-우대사항
-- 3등급 SW 의료기기 허가 경험
-- 의료기기 개발 프로세스에 대한 이해
-- 의료기기 RA(의료기기 규제과학 전문가) 자격증 소지자""",
-    
-    "marketing": """[의료 AI 솔루션 마케팅(3~6년)]
-
-담당업무
-- 의료 AI 솔루션 마케팅 전략 수립 및 실행
-- 제품 포지셔닝 및 가치 제안
-- 디지털 마케팅 캠페인 기획 및 실행
-- 마케팅 성과 분석 및 보고
-
-필수자격
-- 의료기기/헬스케어 마케팅 경력 3년 이상
-- 디지털 마케팅 전략 수립 및 실행 경험
-- 데이터 기반 마케팅 성과 분석 능력
-
-우대사항
-- AI/의료 분야 이해도 보유
-- 글로벌 마케팅 경험
-- 의료진 대상 마케팅 경험""",
-    
-    "japan_head": """[일본 법인장]
-
-담당업무
-- 일본 법인 총괄 및 운영 관리
-- 일본 시장 사업 전략 수립 및 실행
-- 현지 영업/마케팅 조직 구축 및 관리
-- 일본 시장 매출 및 수익성 관리
-
-필수자격
-- 일본 의료기기 시장 경력 10년 이상
-- 의료기기 기업 임원급 경험 보유
-- 일본어 비즈니스 레벨 이상
-
-우대사항
-- AI 의료기기 관련 경험
-- 일본 의료기기 인허가 경험
-- 글로벌 기업 경영 경험"""
-}
+job_descriptions = {}
 
 # 현재 페이지에 따른 내용 표시
 if st.session_state['current_page'] == "resume":
@@ -527,25 +638,148 @@ if st.session_state['current_page'] == "resume":
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
         job_option = st.selectbox(
-            "채용공고 선택",  # 레이블을 위에서 직접 표시했으므로 여기서는 빈 문자열로 설정
-            ["선택해주세요", "의료기기 인허가(RA) 팀장", "의료 AI 솔루션 마케팅", "일본 법인장", "직접 입력"]
+            "채용공고 타입 선택",
+            ["링크 입력", "직접 입력"]
         )
 
+        job_description = ""  # 여기로 이동
         if job_option == "직접 입력":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
-            job_map = {
-                "의료기기 인허가(RA) 팀장": "ra_manager",
-                "의료 AI 솔루션 마케팅": "marketing",
-                "일본 법인장": "japan_head"
-            }
-            if job_option in job_map:
-                default_description = job_descriptions[job_map[job_option]]
-                job_description = st.text_area(
-                    "- 채용공고 내용 (필요시 수정 가능합니다)",
-                    value=default_description,
-                    height=220
-                )
+            # 채용공고 링크 입력
+            job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
+
+            if job_link:
+                try:
+                    # 웹 브라우저처럼 보이기 위한 헤더 설정
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1',
+                        'Sec-Fetch-Dest': 'document',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'none',
+                        'Sec-Fetch-User': '?1'
+                    }
+                    
+                    # 웹 페이지 가져오기
+                    response = requests.get(job_link, headers=headers, timeout=10)
+                    response.raise_for_status()
+                    
+                    # 인코딩 설정
+                    response.encoding = 'utf-8'
+                    
+                    # HTML 파싱
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    
+                    # 채용공고 내용 추출
+                    job_title = soup.find(['h1', 'h2', 'h3'], string=lambda x: x and any(keyword in x.lower() for keyword in ['채용', '모집', '공고', 'job']))
+                    if not job_title:
+                        job_title = soup.find(['h1', 'h2', 'h3'])
+                    
+                    if not job_title:
+                        job_title = "채용공고"
+                    else:
+                        job_title = job_title.get_text(strip=True)
+                    
+                    # 담당업무, 필수자격, 우대사항 추출
+                    job_description = f"[{job_title}]\n"
+                    
+                    # 불필요한 내용 필터링을 위한 패턴
+                    skip_patterns = [
+                        "About us", "Recruit", "Culture", "Benefit", "FAQ",
+                        "개인정보처리방침", "이용약관", "뉴로핏 주식회사", "Copyright",
+                        "All Rights Reserved", "테헤란로", "삼원타워", "+82"
+                    ]
+                    
+                    # 섹션별 내용 저장을 위한 딕셔너리
+                    sections = {
+                        "담당업무": [],
+                        "필수자격": [],
+                        "우대사항": [],
+                        "기타정보": []
+                    }
+                    
+                    # 모든 텍스트 블록 찾기
+                    content_blocks = soup.find_all(['div', 'p', 'ul', 'li', 'section', 'article'])
+                    
+                    current_section = None
+                    for block in content_blocks:
+                        text = block.get_text(strip=True)
+                        
+                        # 빈 텍스트나 불필요한 내용 건너뛰기
+                        if not text or any(pattern in text for pattern in skip_patterns):
+                            continue
+                        
+                        # 섹션 제목 확인
+                        if any(keyword in text for keyword in ['담당 업무', '주요 업무', '업무 내용', '수행 업무', '함께 할 업무']):
+                            current_section = "담당업무"
+                            continue
+                        elif any(keyword in text for keyword in ['자격 요건', '필수 요건', '지원 자격', '자격사항', '이런 역량을 가진 분']):
+                            current_section = "필수자격"
+                            continue
+                        elif any(keyword in text for keyword in ['우대사항', '우대 사항', '우대 조건', '이런 경험이 있다면']):
+                            current_section = "우대사항"
+                            continue
+                        elif any(keyword in text for keyword in ['기타', '복리후생', '근무조건', '근무 환경', '합류 여정', '꼭 확인해주세요']):
+                            current_section = "기타정보"
+                            continue
+                        
+                        # 현재 섹션에 내용 추가
+                        if current_section:
+                            # 불필요한 문자 제거
+                            text = text.replace("•", "").replace("·", "").replace("-", "").strip()
+                            if text and len(text) > 1:  # 빈 항목이나 단일 문자 제외
+                                # 중복 체크 후 추가
+                                if text not in sections[current_section]:
+                                    sections[current_section].append(text)
+                    
+                    # 섹션이 비어있는 경우 대체 방법으로 내용 추출
+                    if all(len(section) == 0 for section in sections.values()):
+                        # 모든 텍스트 내용을 추출
+                        all_text = soup.get_text(separator='\n', strip=True)
+                        job_description = f"[{job_title}]\n\n{all_text}"
+                    else:
+                        # 정리된 내용을 job_description에 추가
+                        if sections["담당업무"]:
+                            job_description += "\n담당업무\n"
+                            for item in sections["담당업무"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["필수자격"]:
+                            job_description += "\n필수자격\n"
+                            for item in sections["필수자격"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["우대사항"]:
+                            job_description += "\n우대사항\n"
+                            for item in sections["우대사항"]:
+                                job_description += f"- {item}\n"
+                        
+                        if sections["기타정보"]:
+                            job_description += "\n기타 정보\n"
+                            for item in sections["기타정보"]:
+                                job_description += f"- {item}\n"
+                    
+                    # 채용공고 내용이 비어있는 경우 처리
+                    if not job_description.strip():
+                        raise ValueError("채용공고 내용을 찾을 수 없습니다. 링크를 확인해주세요.")
+                    
+                    # 채용공고 내용 표시
+                    st.text_area("채용공고 내용", job_description, height=300)
+                    
+                except ValueError as ve:
+                    st.error(str(ve))
+                    job_description = ""
+                except requests.exceptions.RequestException as e:
+                    st.error(f"채용공고를 가져오는 중 네트워크 오류가 발생했습니다: {str(e)}")
+                    job_description = ""
+                except Exception as e:
+                    st.error(f"채용공고를 가져오는 중 오류가 발생했습니다: {str(e)}")
+                    job_description = ""
             else:
                 job_description = ""
         experience_text = st.text_area(
@@ -567,9 +801,26 @@ if st.session_state['current_page'] == "resume":
 
     # 오른쪽 컬럼: 이력서 내용
     with right_col:
-        if uploaded_file:
+        if 'resume_text' in st.session_state and st.session_state.resume_text:
+            st.markdown("""
+                <style>
+                    .resume-text {
+                        background-color: white;
+                        padding: 20px;
+                        border-radius: 5px;
+                        border: 1px solid #ddd;
+                        max-height: 500px;
+                        overflow-y: auto;
+                        font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+                        font-size: 0.9em;
+                        line-height: 1.5;
+                        white-space: pre-wrap;
+                        margin: 10px 0;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
             st.markdown('<div class="label-text">📄 이력서 내용 </div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="resume-text">{text}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="resume-text">{st.session_state.resume_text}</div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -599,6 +850,7 @@ if st.session_state['current_page'] == "resume":
 
 📝경력 요약
     ㆍ총 경력 기간: 총 X년 Y개월
+    ㆍ학력 : [전문대, 대학교, 대학원 / 학과]
     ㆍ주요 경력:
         [최근 회사명]: [직위/직책]
         [이전 회사명]: [직위/직책]
@@ -777,7 +1029,7 @@ elif st.session_state['current_page'] == "interview1":
             job_title = job_title.get_text(strip=True)
             
             # 담당업무, 필수자격, 우대사항 추출
-            job_description = f"[{job_title}]\n\n"
+            job_description = f"[{job_title}]\n"
             
             # 불필요한 내용 필터링을 위한 패턴
             skip_patterns = [
@@ -868,8 +1120,6 @@ elif st.session_state['current_page'] == "interview1":
             job_description = ""
     else:
         job_description = ""
-
-    st.markdown("---")
  
     # 질문 추출 버튼을 왼쪽에 배치
     col1, col2 = st.columns([1, 4])
@@ -1008,7 +1258,7 @@ elif st.session_state['current_page'] == "interview2":
             job_title = job_title.get_text(strip=True)
             
             # 담당업무, 필수자격, 우대사항 추출
-            job_description = f"[{job_title}]\n\n"
+            job_description = f"[{job_title}]\n"
             
             # 불필요한 내용 필터링을 위한 패턴
             skip_patterns = [
@@ -1145,43 +1395,47 @@ elif st.session_state['current_page'] == "interview2":
 
 [핵심가치별 질문 카테고리]
 
-1. 💡[도전]두려워 말고 시도합니다 (3개 질문)  
+1. [도전]두려워 말고 시도합니다 (3개 질문)  
 지원자의 도전정신과 새로운 시도에 대한 태도를 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
 - 새로운 기술이나 방법론을 도입해야 했던 상황에서, 그 당시 상황과 도입 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
-2. 📝[책임감]대충은 없습니다 (3개 질문)  
+2. [책임감]대충은 없습니다 (3개 질문)  
 지원자의 책임감과 완벽주의 성향을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
 - 업무 수행 중 예상치 못한 문제가 발생했을 때, 그 당시 상황과 해결 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
-3. 👥[협력]동료와 협업합니다 (3개 질문)  
+3. [협력]동료와 협업합니다 (3개 질문)  
 지원자의 팀워크와 협업 능력을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
 - 팀 프로젝트에서 의견 충돌이 있었던 상황에서, 그 당시 상황과 해결 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
-4. 🧠[전문성]능동적으로 일합니다 (3개 질문)  
+4. [전문성]능동적으로 일합니다 (3개 질문)  
 지원자의 전문성과 주도적인 업무 수행 능력을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
 - 업무 개선을 위해 스스로 주도적으로 문제를 발견하고 해결했던 경험이 있다면, 그 당시 상황과 개선 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
 [출력 형식 예시]  
-💡[도전]두려워 말고 시도합니다
+[도전]두려워 말고 시도합니다
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
-📝[책임감]대충은 없습니다 
+[책임감]대충은 없습니다 
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
-👥[협력]동료와 협업합니다  
+[협력]동료와 협업합니다  
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
-🧠[전문성]능동적으로 일합니다  
+[전문성]능동적으로 일합니다  
+                             
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
@@ -1205,3 +1459,146 @@ elif st.session_state['current_page'] == "interview2":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
+
+elif st.session_state['current_page'] == "evaluation":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            📝 면접평가표
+        </h5>
+    """, unsafe_allow_html=True)
+    
+    # 본부와 직무 데이터 가져오기
+    departments, jobs = get_google_sheet_data()
+    
+    # 직무별 평가 항목 템플릿(공통)
+    eval_template = [
+        {"구분": "업무 지식", "내용": "Web front Architecture, Data Structure, RESTful Design, ...", "만점": 30},
+        {"구분": "직무기술", "내용": "AWS Cloud, Typescript+ReactJS, Webpack, ...", "만점": 30},
+        {"구분": "직무 수행 태도 및 자세", "내용": "요구사항을 수용하려는 적극성, 명품을 만들기 위한 디테일, 도전정신", "만점": 30},
+        {"구분": "기본인성", "내용": "복장은 단정한가? 태도는 어떤가? 적극적으로 답변하는가? ...", "만점": 10}
+    ]
+
+    # 평가 템플릿 가져오기
+    eval_templates = get_evaluation_template()
+    
+    # 선택된 본부와 직무에 해당하는 템플릿 가져오기
+    selected_template_key = f"{selected_dept}-{selected_job}" if selected_dept and selected_job else None
+    eval_template = eval_templates.get(selected_template_key, default_template)
+    
+    # 본부와 직무 선택을 위한 두 개의 컬럼 생성
+    col1, col2 = st.columns(2)
+    
+    # 왼쪽 컬럼: 본부 선택
+    with col1:
+        selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
+        if selected_dept == "선택해주세요":
+            selected_dept = None
+    
+    # 오른쪽 컬럼: 직무 선택
+    with col2:
+        if selected_dept and jobs.get(selected_dept):
+            selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
+            if selected_job == "선택해주세요":
+                selected_job = None
+        else:
+            selected_job = None
+    st.markdown(f"**선택된 본부&직무:** {selected_dept} - {selected_job if selected_job else '직무를 선택해주세요'}")
+    # 본부/직무 선택에 따라 템플릿 자동 반영
+    if selected_dept and selected_job:
+        st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)
+    else:
+        st.session_state.eval_data = default_template
+    
+    # 후보자 정보 입력
+    st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
+    candidate_info_cols = st.columns(5)
+    with candidate_info_cols[0]: candidate_name = st.text_input("후보자명", key="candidate_name")
+    with candidate_info_cols[1]: interviewer_name = st.text_input("면접관성명", key="interviewer_name")
+    with candidate_info_cols[2]: interview_date = st.date_input("면접일자", key="interview_date")
+    with candidate_info_cols[3]: education = st.text_input("최종학교/전공", key="education")
+    with candidate_info_cols[4]: experience = st.text_input("경력년월", key="experience")
+
+    # 평가표 데이터 입력
+    st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
+    for i, row in enumerate(st.session_state.eval_data):
+        cols = st.columns([1, 3, 1, 2, 1])
+        cols[0].write(row["구분"])
+        cols[1].write(row["내용"])
+        st.session_state.eval_data[i]["점수"] = cols[2].number_input("점수", min_value=0, max_value=row["만점"], value=row["점수"], key=f"score_{i}")
+        st.session_state.eval_data[i]["의견"] = cols[3].text_input("의견", value=row["의견"], key=f"opinion_{i}")
+        cols[4].write(f"/ {row['만점']}")
+
+    # 종합의견, 전형결과, 입사가능시기
+    st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
+    summary = st.text_area("종합의견", key="summary")
+    result = st.selectbox("전형결과", ["합격", "불합격", "보류"])
+    join_date = st.text_input("입사가능시기", key="join_date")
+
+    # 총점 계산
+    total_score = sum([row["점수"] for row in st.session_state.eval_data])
+    st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
+
+    # 저장 버튼
+    save_btn = st.button("Google Sheet에 저장")
+    save_result = None
+    if save_btn:
+        try:
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            import json
+            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+            credentials_dict = {
+                "type": st.secrets["google_credentials"]["type"],
+                "project_id": st.secrets["google_credentials"]["project_id"],
+                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+                "private_key": st.secrets["google_credentials"]["private_key"],
+                "client_email": st.secrets["google_credentials"]["client_email"],
+                "client_id": st.secrets["google_credentials"]["client_id"],
+                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+                "token_uri": st.secrets["google_credentials"]["token_uri"],
+                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+            }
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+            gc = gspread.authorize(credentials)
+            sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
+            worksheet = gc.open_by_key(sheet_id).sheet1
+            # 데이터 저장
+            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
+            for row in st.session_state.eval_data:
+                row_data.extend([row["점수"], row["의견"]])
+            row_data.extend([summary, result, join_date, total_score])
+            worksheet.append_row(row_data)
+            save_result = True
+            st.success("Google Sheet에 저장되었습니다.")
+        except Exception as e:
+            save_result = False
+            st.error(f"Google Sheet 저장 중 오류: {str(e)}")
+
+    # PDF 저장 버튼 (html2pdf 임시)
+    import base64
+    from io import BytesIO
+    from xhtml2pdf import pisa
+    def create_pdf(html):
+        result = BytesIO()
+        pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
+        return result.getvalue()
+    pdf_btn = st.button("PDF로 저장")
+    if pdf_btn:
+        html = f"""
+        <h2>면접평가표</h2>
+        <b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}<br><br>
+        <table border='1' cellpadding='5' cellspacing='0'>
+        <tr><th>구분</th><th>내용</th><th>점수</th><th>의견</th><th>만점</th></tr>
+        {''.join([f"<tr><td>{row['구분']}</td><td>{row['내용']}</td><td>{row['점수']}</td><td>{row['의견']}</td><td>{row['만점']}</td></tr>" for row in st.session_state.eval_data])}
+        </table><br>
+        <b>종합의견:</b> {summary}<br>
+        <b>전형결과:</b> {result}<br>
+        <b>입사가능시기:</b> {join_date}<br>
+        <b>총점:</b> {total_score} / 100
+        """
+        pdf = create_pdf(html)
+        b64 = base64.b64encode(pdf).decode()
+        href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
