@@ -138,7 +138,6 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
         return default_template
         
     except Exception as e:
-        st.warning(f"평가 템플릿을 불러오는 중 오류가 발생했습니다. 기본 템플릿을 사용합니다.")
         return default_template
 
 # 구글 스프레드시트 인증 및 데이터 가져오기
@@ -2044,73 +2043,120 @@ elif st.session_state['current_page'] == "admin":
                         })
                     
                     # PDF 생성을 위한 HTML 템플릿
-                    html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
-    <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
-    <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
-    
-    <p><br><b>ㆍ후보자 정보 </b></p>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-        <tr>
-            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
-            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
-            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
-            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
-        </tr>
-        <tr>
-            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
-            <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
-            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
-            <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
-        </tr>
-    </table>
+                    html_content = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            @font-face {{
+                                font-family: 'NanumGothic';
+                                src: url('https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css');
+                            }}
+                            * {{
+                                font-family: 'NanumGothic', sans-serif;
+                            }}
+                            body {{
+                                font-family: 'NanumGothic', sans-serif;
+                                padding: 20px;
+                            }}
+                            table {{
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 15px;
+                            }}
+                            th, td {{
+                                border: 1px solid #000;
+                                padding: 5px;
+                                font-family: 'NanumGothic', sans-serif;
+                            }}
+                            th {{
+                                background-color: #f0f0f0;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div>
+                            <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+                            <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
+                            
+                            <p><br><b>ㆍ후보자 정보 </b></p>
+                            <table>
+                                <tr>
+                                    <th style="width: 20%;">후보자명</th>
+                                    <td style="width: 30%;">{selected_row['후보자명']}</td>
+                                    <th style="width: 20%;">면접관성명</th>
+                                    <td style="width: 30%;">{selected_row['면접관성명']}</td>
+                                </tr>
+                                <tr>
+                                    <th>면접일자</th>
+                                    <td>{selected_row['면접일자']}</td>
+                                    <th>최종학교/전공</th>
+                                    <td>{selected_row['최종학교/전공']}</td>
+                                </tr>
+                            </table>
 
-    <p><br><b>ㆍ평가내용</b></p>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-        <tr>
-            <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
-            <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
-            <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
-            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관 의견</th>
-        </tr>
-        {''.join([f"""
-        <tr>
-            <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
-            <td style="border: 1px solid #000; padding: 5px;">{row['내용']}</td>
-            <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
-            <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
-        </tr>
-        """ for row in eval_data])}
-        <tr>
-            <th colspan="2" style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
-            <td style="border: 1px solid #000; padding: 5px; text-align: center;">{selected_row['총점']} / 100</td>
-            <td style="border: 1px solid #000; padding: 5px;">-</td>
-        </tr>
-    </table>
+                            <p><br><b>ㆍ평가내용</b></p>
+                            <table>
+                                <tr>
+                                    <th style="width: 18%;">평가구분</th>
+                                    <th style="width: 39%;">내용</th>
+                                    <th style="width: 13%;">점수</th>
+                                    <th style="width: 30%;">면접관 의견</th>
+                                </tr>
+                                {''.join([f"""
+                                <tr>
+                                    <td>{row['구분']}</td>
+                                    <td>{row['내용']}</td>
+                                    <td style="text-align: center;">{row['점수']} / {row['만점']}</td>
+                                    <td>{row['의견']}</td>
+                                </tr>
+                                """ for row in eval_data])}
+                                <tr>
+                                    <th colspan="2">총점</th>
+                                    <td style="text-align: center;">{selected_row['총점']} / 100</td>
+                                    <td>-</td>
+                                </tr>
+                            </table>
 
-    <p><br><b>ㆍ종합의견 및 결과</b></p>
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
-            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
-        </tr>
-        <tr>
-            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접결과</th>
-            <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['면접결과']}</td>
-            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
-            <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['총점']}</td>
-        </tr>
-    </table>
-</div>"""
+                            <p><br><b>ㆍ종합의견 및 결과</b></p>
+                            <table>
+                                <tr>
+                                    <th style="width: 15%;">종합의견</th>
+                                    <td colspan="3">{selected_row['종합의견']}</td>
+                                </tr>
+                                <tr>
+                                    <th>면접결과</th>
+                                    <td style="width: 20%;">{selected_row['면접결과']}</td>
+                                    <th style="width: 15%;">총점</th>
+                                    <td style="width: 35%;">{selected_row['총점']}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </body>
+                    </html>
+                    """
 
-                    # PDF 다운로드 버튼
-                    if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                        pdf = create_pdf(html_content)
-                        st.download_button(
-                            label="PDF 다운로드",
-                            data=pdf,
-                            file_name=f"면접평가표_{selected_candidate}.pdf",
-                            mime="application/pdf"
+                    # PDF 생성
+                    try:
+                        pdf_buffer = BytesIO()
+                        pisa.showLogging()
+                        pdf = pisa.pisaDocument(
+                            BytesIO(html_content.encode('utf-8')),
+                            pdf_buffer,
+                            encoding='utf-8',
+                            path=os.path.dirname(os.path.abspath(__file__)),
+                            show_error_as_pdf=True
                         )
+                        
+                        if not pdf.err:
+                            return pdf_buffer.getvalue()
+                        else:
+                            st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
+                            return None
+                    except Exception as e:
+                        st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
+                        return None
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
