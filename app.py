@@ -1667,7 +1667,7 @@ elif st.session_state['current_page'] == "evaluation":
             st.session_state.eval_opinions[i] = opinion
             st.session_state.eval_data[i]["의견"] = opinion
             
-            cols[4].write(f"/ {row['만점']}")
+            cols[4].write(f"")
 
         # 종합의견, 전형결과, 입사가능시기
         st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
