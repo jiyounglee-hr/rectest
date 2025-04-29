@@ -1999,10 +1999,16 @@ elif st.session_state['current_page'] == "admin":
 
                 # 필터 적용
                 filtered_df = df.copy()
+                
+                # 본부 필터링
                 if dept_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
+                    filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
+                
+                # 직무 필터링
                 if job_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["직무"] == job_filter]
+                    filtered_df = filtered_df[filtered_df["직무"].str.strip() == job_filter.strip()]
+                
+                # 후보자명 필터링
                 if name_filter:
                     filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
 
