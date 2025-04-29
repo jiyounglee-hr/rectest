@@ -1957,117 +1957,136 @@ elif st.session_state['current_page'] == "evaluation":
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
 
 elif st.session_state['current_page'] == "admin":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            ⚙️ 채용 관리자
+        </h5>
+    """, unsafe_allow_html=True)
+
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
     
+    if 'last_data_fetch' not in st.session_state:
+        st.session_state.last_data_fetch = 0
+    
+    if 'cached_eval_data' not in st.session_state:
+        st.session_state.cached_eval_data = None
+
     if not st.session_state.admin_authenticated:
         password = st.text_input("비밀번호를 입력하세요", type="password")
-        if password == "0314":
-            st.session_state.admin_authenticated = True
-            st.rerun()
-    else:
-        st.markdown("""
-            <h5 style='color: #333333; margin-bottom: 20px;'>
-                ⚙️ 채용 관리자
-            </h5>
-        """, unsafe_allow_html=True)
-        
-        # 검색 필터
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            filter_dept = st.selectbox("본부", ["전체"] + departments)
-        with col2:
-            filter_job = st.selectbox("직무", ["전체"] + jobs)
-        with col3:
-            filter_date = st.date_input("면접일자")
-            
-        st.markdown("<hr>", unsafe_allow_html=True)
-        
-        # 평가 데이터 입력 폼
-        st.subheader("평가 데이터 입력")
-        with st.form("evaluation_input"):
-            col1, col2 = st.columns(2)
-            with col1:
-                input_dept = st.selectbox("본부 *", departments, key="input_dept")
-                input_name = st.text_input("지원자명 *", key="input_name")
-                input_date = st.date_input("면접일자 *", key="input_date")
-                input_total = st.number_input("총점 *", min_value=0, max_value=100, key="input_total")
-            with col2:
-                input_job = st.selectbox("직무 *", jobs, key="input_job")
-                input_interviewer = st.text_input("면접관 *", key="input_interviewer")
-                input_education = st.text_input("학력", key="input_education")
-                input_experience = st.text_input("경력", key="input_experience")
-            
-            input_result = st.selectbox("면접결과 *", ["합격", "불합격", "보류"], key="input_result")
-            input_opinion = st.text_area("종합의견", height=100, key="input_opinion")
-            
-            submitted = st.form_submit_button("저장")
-            if submitted:
-                if not (input_dept and input_name and input_date and input_total and input_job and input_interviewer and input_result):
-                    st.error("필수 항목(*)을 모두 입력해주세요.")
-                else:
-                    try:
-                        # Google Sheets에 데이터 저장
-                        worksheet = init_google_sheets()
-                        new_row = [
-                            input_dept,
-                            input_job,
-                            input_name,
-                            input_date.strftime("%Y-%m-%d"),
-                            input_interviewer,
-                            str(input_total),
-                            input_education or "",
-                            input_experience or "",
-                            input_result,
-                            input_opinion or ""
-                        ]
-                        worksheet.append_row(new_row)
-                        st.success("평가 데이터가 저장되었습니다.")
-                        
-                        # 입력 필드 초기화
-                        for key in st.session_state.keys():
-                            if key.startswith("input_"):
-                                del st.session_state[key]
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"저장 중 오류가 발생했습니다: {str(e)}")
-        
-        st.markdown("<hr>", unsafe_allow_html=True)
-        
-        # 기존 데이터 표시 로직
-        try:
-            worksheet = init_google_sheets()
-            data = worksheet.get_all_records()
-            
-            if data:
-                # 필터 적용
-                filtered_data = data
-                if filter_dept != "전체":
-                    filtered_data = [row for row in filtered_data if row["본부"] == filter_dept]
-                if filter_job != "전체":
-                    filtered_data = [row for row in filtered_data if row["직무"] == filter_job]
-                if filter_date:
-                    filter_date_str = filter_date.strftime("%Y-%m-%d")
-                    filtered_data = [row for row in filtered_data if row["면접일자"] == filter_date_str]
-                
-                if filtered_data:
-                    df = pd.DataFrame(filtered_data)
-                    st.dataframe(df, use_container_width=True)
-                    
-                    # CSV 다운로드 버튼
-                    csv = df.to_csv(index=False).encode('utf-8-sig')
-                    st.download_button(
-                        label="CSV 다운로드",
-                        data=csv,
-                        file_name="evaluation_data.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    st.info("검색 결과가 없습니다.")
+        if st.button("확인"):
+            if password == "0314!":
+                st.session_state.admin_authenticated = True
+                st.rerun()
             else:
-                st.info("저장된 평가 데이터가 없습니다.")
-        except Exception as e:
-            st.error(f"데이터 조회 중 오류가 발생했습니다: {str(e)}")
-            
+                st.error("비밀번호가 올바르지 않습니다.")
+    else:
+        try:
+            with st.spinner("데이터를 불러오는 중..."):
+                gc = init_google_sheets()
+                sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
+                time.sleep(1)  # API 호출 간격 조절
+                data = sheet.get_all_records()
+                df = pd.DataFrame(data)
 
+            if df is not None:
+                # 검색 필터
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
+                with col2:
+                    job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
+                with col3:
+                    name_filter = st.text_input("후보자명")
+
+                # 필터 적용
+                filtered_df = df.copy()
+                if dept_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
+                if job_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["직무"] == job_filter]
+                if name_filter:
+                    filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
+
+                # 인덱스 재설정 (내림차순)
+                filtered_df = filtered_df.sort_index(ascending=False)
+                filtered_df.index = range(1, len(filtered_df) + 1)
+
+                # 데이터 표시
+                st.markdown("---")     
+                st.markdown("###### 📋 면접평가 목록")                
+                
+                # 필요한 컬럼만 선택
+                display_columns = [
+                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
+                ]
+                filtered_df = filtered_df[display_columns]
+
+                # 데이터프레임 표시
+                st.dataframe(
+                    filtered_df,
+                    use_container_width=True,
+                    hide_index=False
+                )
+
+                # 선택 박스로 후보자 선택
+                selected_candidate = st.selectbox(
+                    "평가표를 다운로드할 후보자를 선택하세요",
+                    options=filtered_df['후보자명'].tolist(),
+                    index=None
+                )
+
+                if selected_candidate:
+                    selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
+                    
+                    # PDF 생성을 위한 HTML 템플릿
+                    html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
+    <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+    <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
+    
+    <p><br><b>ㆍ후보자 정보 </b></p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+        <tr>
+            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
+            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
+            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
+            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
+            <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
+            <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
+        </tr>
+    </table>
+
+    <p><br><b>ㆍ종합의견 및 결과</b></p>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
+            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접결과</th>
+            <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['면접결과']}</td>
+            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
+            <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['총점']}</td>
+        </tr>
+    </table>
+</div>"""
+
+                # PDF 다운로드 버튼
+                if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
+                            pdf = create_pdf(html_content)
+                            st.download_button(
+                                label="PDF 다운로드",
+                                data=pdf,
+                                file_name=f"면접평가표_{selected_candidate}.pdf",
+                                mime="application/pdf"
+                            )
+            else:
+                st.info("저장된 면접평가 데이터가 없습니다.")
+        except Exception as e:
+            st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
 
