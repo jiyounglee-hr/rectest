@@ -1533,7 +1533,7 @@ elif st.session_state['current_page'] == "evaluation":
     st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
     candidate_info_cols = st.columns(5)
     
-    # 세션 상태에 후보자 정보 초기화
+    # 세션 상태에 후보자 정보 초기화 (처음 한 번만)
     if 'candidate_info' not in st.session_state:
         st.session_state.candidate_info = {
             'candidate_name': '',
@@ -1543,35 +1543,54 @@ elif st.session_state['current_page'] == "evaluation":
             'experience': ''
         }
     
-    # JavaScript 코드 추가
-    st.markdown("""
-        <script>
-        // 입력값이 변경될 때마다 세션 상태를 업데이트하는 함수
-        function updateSessionState(key, value) {
-            window.parent.postMessage({
-                type: 'streamlit:setComponentValue',
-                key: key,
-                value: value
-            }, '*');
-        }
-        </script>
-    """, unsafe_allow_html=True)
+    def update_session_state(key, value):
+        st.session_state.candidate_info[key] = value
     
     with candidate_info_cols[0]: 
-        candidate_name = st.text_input("후보자명", value=st.session_state.candidate_info['candidate_name'], key="candidate_name", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.candidate_info['candidate_name'] = candidate_name
+        candidate_name = st.text_input(
+            "후보자명",
+            value=st.session_state.candidate_info['candidate_name'],
+            key="candidate_name",
+            on_change=update_session_state,
+            args=('candidate_name',),
+            label_visibility="visible"
+        )
     with candidate_info_cols[1]: 
-        interviewer_name = st.text_input("면접관성명", value=st.session_state.candidate_info['interviewer_name'], key="interviewer_name", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.candidate_info['interviewer_name'] = interviewer_name
+        interviewer_name = st.text_input(
+            "면접관성명",
+            value=st.session_state.candidate_info['interviewer_name'],
+            key="interviewer_name",
+            on_change=update_session_state,
+            args=('interviewer_name',),
+            label_visibility="visible"
+        )
     with candidate_info_cols[2]: 
-        interview_date = st.date_input("면접일자", value=st.session_state.candidate_info['interview_date'], key="interview_date", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.candidate_info['interview_date'] = interview_date
+        interview_date = st.date_input(
+            "면접일자",
+            value=st.session_state.candidate_info['interview_date'],
+            key="interview_date",
+            on_change=update_session_state,
+            args=('interview_date',),
+            label_visibility="visible"
+        )
     with candidate_info_cols[3]: 
-        education = st.text_input("최종학교/전공", value=st.session_state.candidate_info['education'], key="education", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.candidate_info['education'] = education
+        education = st.text_input(
+            "최종학교/전공",
+            value=st.session_state.candidate_info['education'],
+            key="education",
+            on_change=update_session_state,
+            args=('education',),
+            label_visibility="visible"
+        )
     with candidate_info_cols[4]: 
-        experience = st.text_input("경력년월", value=st.session_state.candidate_info['experience'], key="experience", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.candidate_info['experience'] = experience
+        experience = st.text_input(
+            "경력년월",
+            value=st.session_state.candidate_info['experience'],
+            key="experience",
+            on_change=update_session_state,
+            args=('experience',),
+            label_visibility="visible"
+        )
 
     # 평가표 데이터 입력
     st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
