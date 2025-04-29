@@ -1782,7 +1782,7 @@ elif st.session_state['current_page'] == "evaluation":
                         <tr>
                             <th colspan="2" style="border: 1px solid #000; padding: 5px;">총점</th>
                             <td style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
-                            <td style="border: 1px solid #000; padding: 5px;"></td>
+                            <td style="border: 1px solid #000; padding: 5px;">-</td>
                         </tr>
 
                     </table>
