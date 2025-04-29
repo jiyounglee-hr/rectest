@@ -1646,97 +1646,96 @@ elif st.session_state['current_page'] == "evaluation":
             label_visibility="visible"
         )
 
-    # 평가표 데이터 입력
-    st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
-    
-    # 평가 데이터 초기화
-    if 'eval_opinions' not in st.session_state:
-        st.session_state.eval_opinions = [''] * len(st.session_state.eval_data)
-    
-    for i, row in enumerate(st.session_state.eval_data):
-        cols = st.columns([1, 3, 1, 2, 1])
-        cols[0].write(row["구분"])
-        cols[1].write(row["내용"])
-        st.session_state.eval_data[i]["점수"] = cols[2].number_input("점수", min_value=0, max_value=row["만점"], value=row["점수"], key=f"score_{i}")
+    # 평가표 입력 폼 시작
+    with st.form("evaluation_form"):
+        st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
         
-        # 의견 입력을 새로고침 없이 처리
-        opinion = cols[3].text_input("의견", value=st.session_state.eval_opinions[i], key=f"opinion_{i}", on_change=lambda: None, label_visibility="visible", disabled=False)
-        st.session_state.eval_opinions[i] = opinion
-        st.session_state.eval_data[i]["의견"] = opinion
+        # 평가 데이터 초기화
+        if 'eval_opinions' not in st.session_state:
+            st.session_state.eval_opinions = [''] * len(st.session_state.eval_data)
         
-        cols[4].write(f"/ {row['만점']}")
+        for i, row in enumerate(st.session_state.eval_data):
+            cols = st.columns([1, 3, 1, 2, 1])
+            cols[0].write(row["구분"])
+            cols[1].write(row["내용"])
+            st.session_state.eval_data[i]["점수"] = cols[2].number_input("점수", min_value=0, max_value=row["만점"], value=row["점수"], key=f"score_{i}")
+            
+            # 의견 입력을 새로고침 없이 처리
+            opinion = cols[3].text_input("의견", value=st.session_state.eval_opinions[i], key=f"opinion_{i}", label_visibility="visible")
+            st.session_state.eval_opinions[i] = opinion
+            st.session_state.eval_data[i]["의견"] = opinion
+            
+            cols[4].write(f"/ {row['만점']}")
 
-    # 종합의견, 전형결과, 입사가능시기
-    st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
-    summary = st.text_area("종합의견", key="summary", on_change=lambda: None, label_visibility="visible", disabled=False)
-    result = st.selectbox("전형결과", ["합격", "불합격", "보류"], key="result", on_change=lambda: None, label_visibility="visible", disabled=False)
-    join_date = st.text_input("입사가능시기", key="join_date", on_change=lambda: None, label_visibility="visible", disabled=False)
+        # 종합의견, 전형결과, 입사가능시기
+        st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
+        summary = st.text_area("종합의견", key="summary", label_visibility="visible")
+        result = st.selectbox("전형결과", ["합격", "불합격", "보류"], key="result", label_visibility="visible")
+        join_date = st.text_input("입사가능시기", key="join_date", label_visibility="visible")
 
-    # 총점 계산
-    total_score = sum([row["점수"] for row in st.session_state.eval_data])
-    st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
+        # 총점 계산
+        total_score = sum([row["점수"] for row in st.session_state.eval_data])
+        st.markdown(f"<b>총점: {total_score} / 100</b>", unsafe_allow_html=True)
 
-    # 저장 버튼
-    save_btn = st.button("면접평가표 제출")
-    save_result = None
-    if save_btn:
-        try:
-            import gspread
-            from oauth2client.service_account import ServiceAccountCredentials
-            import json
-            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-            credentials_dict = {
-                "type": st.secrets["google_credentials"]["type"],
-                "project_id": st.secrets["google_credentials"]["project_id"],
-                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-                "private_key": st.secrets["google_credentials"]["private_key"],
-                "client_email": st.secrets["google_credentials"]["client_email"],
-                "client_id": st.secrets["google_credentials"]["client_id"],
-                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-                "token_uri": st.secrets["google_credentials"]["token_uri"],
-                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-            }
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-            gc = gspread.authorize(credentials)
-            sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
-            worksheet = gc.open_by_key(sheet_id).sheet1
-            # 데이터 저장
-            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
-            for row in st.session_state.eval_data:
-                row_data.extend([row["점수"], row["의견"]])
-            row_data.extend([summary, result, join_date, total_score])
-            worksheet.append_row(row_data)
-            save_result = True
-            st.success("제출이 완료 되었습니다.")
-        except Exception as e:
-            save_result = False
-            st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
-
-    # PDF 저장 버튼 (html2pdf 임시)
-    import base64
-    from io import BytesIO
-    from xhtml2pdf import pisa
-    def create_pdf(html):
-        result = BytesIO()
-        pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
-        return result.getvalue()
-    pdf_btn = st.button("PDF로 저장")
-    if pdf_btn:
-        html = f"""
-        <h2>면접평가표</h2>
-        <b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}<br><br>
-        <table border='1' cellpadding='5' cellspacing='0'>
-        <tr><th>구분</th><th>내용</th><th>점수</th><th>의견</th><th>만점</th></tr>
-        {''.join([f"<tr><td>{row['구분']}</td><td>{row['내용']}</td><td>{row['점수']}</td><td>{row['의견']}</td><td>{row['만점']}</td></tr>" for row in st.session_state.eval_data])}
-        </table><br>
-        <b>종합의견:</b> {summary}<br>
-        <b>전형결과:</b> {result}<br>
-        <b>입사가능시기:</b> {join_date}<br>
-        <b>총점:</b> {total_score} / 100
-        """
-        pdf = create_pdf(html)
-        b64 = base64.b64encode(pdf).decode()
-        href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
-        st.markdown(href, unsafe_allow_html=True)
+        # 제출 버튼
+        submitted = st.form_submit_button("면접평가표 제출")
+        
+        if submitted:
+            try:
+                import gspread
+                from oauth2client.service_account import ServiceAccountCredentials
+                import json
+                scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+                credentials_dict = {
+                    "type": st.secrets["google_credentials"]["type"],
+                    "project_id": st.secrets["google_credentials"]["project_id"],
+                    "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+                    "private_key": st.secrets["google_credentials"]["private_key"],
+                    "client_email": st.secrets["google_credentials"]["client_email"],
+                    "client_id": st.secrets["google_credentials"]["client_id"],
+                    "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+                    "token_uri": st.secrets["google_credentials"]["token_uri"],
+                    "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+                    "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+                }
+                credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+                gc = gspread.authorize(credentials)
+                sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
+                worksheet = gc.open_by_key(sheet_id).sheet1
+                # 데이터 저장
+                row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
+                for row in st.session_state.eval_data:
+                    row_data.extend([row["점수"], row["의견"]])
+                row_data.extend([summary, result, join_date, total_score])
+                worksheet.append_row(row_data)
+                st.success("제출이 완료 되었습니다.")
+                
+                # PDF 다운로드 버튼 표시
+                import base64
+                from io import BytesIO
+                from xhtml2pdf import pisa
+                def create_pdf(html):
+                    result = BytesIO()
+                    pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
+                    return result.getvalue()
+                
+                html = f"""
+                <h2>면접평가표</h2>
+                <b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}<br><br>
+                <table border='1' cellpadding='5' cellspacing='0'>
+                <tr><th>구분</th><th>내용</th><th>점수</th><th>의견</th><th>만점</th></tr>
+                {''.join([f"<tr><td>{row['구분']}</td><td>{row['내용']}</td><td>{row['점수']}</td><td>{row['의견']}</td><td>{row['만점']}</td></tr>" for row in st.session_state.eval_data])}
+                </table><br>
+                <b>종합의견:</b> {summary}<br>
+                <b>전형결과:</b> {result}<br>
+                <b>입사가능시기:</b> {join_date}<br>
+                <b>총점:</b> {total_score} / 100
+                """
+                pdf = create_pdf(html)
+                b64 = base64.b64encode(pdf).decode()
+                href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
+                st.markdown(href, unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
 
