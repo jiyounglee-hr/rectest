@@ -2139,7 +2139,19 @@ elif st.session_state['current_page'] == "admin":
                                     <td>{selected_row['최종학교/전공']}</td>
                                 </tr>
                             </table>
-
+                            <p><br><b>ㆍ종합의견 및 결과</b></p>
+                            <table>
+                                <tr>
+                                    <th style="width: 15%;">종합의견</th>
+                                    <td colspan="3">{selected_row['종합의견']}</td>
+                                </tr>
+                                <tr>
+                                    <th>면접결과</th>
+                                    <td style="width: 20%;">{selected_row['면접결과']}</td>
+                                    <th style="width: 15%;">총점</th>
+                                    <td style="width: 35%;">{selected_row['총점']}</td>
+                                </tr>
+                            </table>
                             <p><br><b>ㆍ평가내용</b></p>
                             <table>
                                 <tr>
@@ -2160,20 +2172,6 @@ elif st.session_state['current_page'] == "admin":
                                     <th colspan="2">총점</th>
                                     <td style="text-align: center;">{selected_row['총점']} / 100</td>
                                     <td>-</td>
-                                </tr>
-                            </table>
-
-                            <p><br><b>ㆍ종합의견 및 결과</b></p>
-                            <table>
-                                <tr>
-                                    <th style="width: 15%;">종합의견</th>
-                                    <td colspan="3">{selected_row['종합의견']}</td>
-                                </tr>
-                                <tr>
-                                    <th>면접결과</th>
-                                    <td style="width: 20%;">{selected_row['면접결과']}</td>
-                                    <th style="width: 15%;">총점</th>
-                                    <td style="width: 35%;">{selected_row['총점']}</td>
                                 </tr>
                             </table>
                         </div>
