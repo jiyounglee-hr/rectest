@@ -2098,9 +2098,10 @@ elif st.session_state['current_page'] == "admin":
                                 line-height: 1.5;
                             }}
                             table {{
-                                width: 70% !important;
+                                width: 100% 
                                 border-collapse: collapse;
                                 margin-bottom: 5px;
+                                margin-left: 20px !important;
                             }}
                             th, td {{
                                 border: 1px solid black;
