@@ -2097,11 +2097,11 @@ elif st.session_state['current_page'] == "admin":
                                 font-size: 11px;
                                 line-height: 1.5;
                             }}
-                            table {
+                            table {{
                                 width: 80% !important;
                                 border-collapse: collapse;
                                 margin-bottom: 5px;
-                            }
+                            }}
                             th, td {{
                                 border: 1px solid black;
                                 padding: 5px;
