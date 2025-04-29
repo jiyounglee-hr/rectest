@@ -1762,7 +1762,7 @@ elif st.session_state['current_page'] == "evaluation":
                         </tr>
                     </table>
                 </div>
-                <p><br><b>ㆍ평가내용</b></p>      
+                <p><br><br><b>ㆍ평가내용</b></p>      
                 <div style="margin-bottom: 15px;">
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                         <tr>
@@ -1774,19 +1774,20 @@ elif st.session_state['current_page'] == "evaluation":
                         {''.join([f"""
                         <tr>
                             <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
-                            <td style="border: 1px solid #000; padding: 5px; white-space: pre-line;">{'\\n'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{''.join([f"• {', '.join([line.strip() for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}" if row['내용'] else ''])}</td>
                             <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
                             <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
                         </tr>
                         """ for row in st.session_state.eval_data])}
                         <tr>
                             <th colspan="2" style="border: 1px solid #000; padding: 5px;">총점</th>
-                            <td colspan="2" style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
+                            <td style="border: 1px solid #000; padding: 5px;"></td>
                         </tr>
 
                     </table>
                 </div>
-                <p><br><b>ㆍ종합의견 및 결과</b></p>      
+                <p><br><br><b>ㆍ종합의견 및 결과</b></p>      
     
                 <div style="margin-bottom: 15px;">
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
