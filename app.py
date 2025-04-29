@@ -649,7 +649,7 @@ with st.sidebar:
 
     else:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
-        
+        st.markdown("---")  
     def switch_to_admin():
         st.query_params["page"] = "admin"
         st.session_state['current_page'] = 'admin'
