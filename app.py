@@ -2006,8 +2006,11 @@ elif st.session_state['current_page'] == "admin":
                 if name_filter:
                     filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
 
-                # 인덱스 재설정 (내림차순)
-                filtered_df = filtered_df.sort_index(ascending=False)
+                # 면접일자를 datetime 타입으로 변환
+                filtered_df['면접일자'] = pd.to_datetime(filtered_df['면접일자'])
+                
+                # 면접일자 기준으로 내림차순 정렬
+                filtered_df = filtered_df.sort_values(by=['면접일자', '본부', '직무', '후보자명'], ascending=[False, True, True, True])
                 filtered_df.index = range(1, len(filtered_df) + 1)
 
                 # 데이터 표시
