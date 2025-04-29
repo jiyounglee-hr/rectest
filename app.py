@@ -2184,13 +2184,10 @@ elif st.session_state['current_page'] == "admin":
                     """
 
                     # 버튼을 3개의 컬럼으로 나누어 배치
-                    col1, col2, col3 = st.columns([20, 20, 60])
+                    col1, col2 = st.columns([30, 70])
                     
                     with col1:
-                        st.write(f"📥 {selected_candidate}님의")
-                    
-                    with col2:
-                        if st.button("면접평가표 다운로드", use_container_width=True):
+                        if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
                             try:
                                 # PDF 옵션 설정
                                 pdf_options = {
@@ -2226,7 +2223,7 @@ elif st.session_state['current_page'] == "admin":
                             except Exception as e:
                                 st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
                     
-                    with col3:
+                    with col2:
                         st.write("")  # 여백용 빈 컬럼
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
