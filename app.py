@@ -1744,7 +1744,7 @@ elif st.session_state['current_page'] == "evaluation":
             <div style="font-family: Arial, 'Malgun Gothic', sans-serif; font-size: 12px; line-height: 1.5;">
                 <div style="margin-bottom: 20px;">
                     <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
-                    <p><b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}</p>
+                    <p><b>본부:</b> {selected_dept} / <b>직무:</b> {selected_job}</p>
                 </div>
                 <p><b>ㆍ후보자 정보 </b></p>
                 <div style="margin-bottom: 15px;">
@@ -1767,7 +1767,7 @@ elif st.session_state['current_page'] == "evaluation":
                 <div style="margin-bottom: 15px;">
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                         <tr>
-                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가표 입력</th>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
                             <th style="width: 45%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
                             <th style="width: 10%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
                             <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">의견</th>
@@ -1840,6 +1840,9 @@ elif st.session_state['current_page'] == "evaluation":
                             h1, h2, h3, h4, h5, h6, p, span, div {{
                                 font-family: 'Noto Sans KR', sans-serif !important;
                             }}
+                            .content-item {{
+                                margin-bottom: 8px;
+                            }}
                         </style>
                     </head>
                     <body>
@@ -1847,6 +1850,9 @@ elif st.session_state['current_page'] == "evaluation":
                     </body>
                     </html>
                     '''
+
+                    # 내용의 각 항목을 줄바꿈으로 분리
+                    html_with_font = html_with_font.replace('• ', '<div class="content-item">• ').replace('<br>', '</div>')
                     
                     # PDF 옵션 설정
                     pdf_options = {
