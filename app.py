@@ -697,30 +697,32 @@ with st.sidebar:
     st.markdown("""
         <style>
         .admin-button {
-            position: fixed;
-            left: 1rem;
-            bottom: 1rem;
+            display: block;
+            margin-top: 20px;
+            margin-left: 1rem;
             background: none;
             border: none;
             color: #888888;
-            font-size: 0.8em;
-            opacity: 0.5;
+            font-size: 0.7em;
+            opacity: 0.3;
             cursor: pointer;
             padding: 0;
-            margin: 0;
             text-decoration: none;
         }
         .admin-button:hover {
-            opacity: 1;
+            opacity: 0.8;
         }
         </style>
     """, unsafe_allow_html=True)
 
+    # 빈 공간 추가
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # 채용관리자 버튼
     st.markdown(f"""
-        <div onclick="window.location.href='?page=admin'" class="admin-button">
+        <a href="?page=admin" class="admin-button">
             채용관리자
-        </div>
+        </a>
     """, unsafe_allow_html=True)
 
     # 본부와 직무 데이터 가져오기
