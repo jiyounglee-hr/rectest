@@ -1927,6 +1927,8 @@ elif st.session_state['current_page'] == "admin":
     # 비밀번호 확인을 위한 세션 상태
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
+    if 'selected_evaluation' not in st.session_state:
+        st.session_state.selected_evaluation = None
 
     # 비밀번호가 확인되지 않은 경우
     if not st.session_state.admin_authenticated:
@@ -1964,17 +1966,95 @@ elif st.session_state['current_page'] == "admin":
             
             if eval_data:
                 df = pd.DataFrame(eval_data)
-                st.markdown("### 면접평가 데이터")
-                st.dataframe(df)
                 
-                # CSV 다운로드 버튼
-                csv = df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(
-                    label="CSV 다운로드",
-                    data=csv,
-                    file_name="면접평가_데이터.csv",
-                    mime="text/csv"
-                )
+                # 검색 필터
+                st.markdown("### 🔍 검색")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
+                with col2:
+                    job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
+                with col3:
+                    name_filter = st.text_input("후보자명")
+
+                # 필터 적용
+                filtered_df = df.copy()
+                if dept_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
+                if job_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["직무"] == job_filter]
+                if name_filter:
+                    filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
+
+                # 인덱스 재설정 (내림차순)
+                filtered_df = filtered_df.sort_index(ascending=False)
+                filtered_df.index = range(1, len(filtered_df) + 1)
+
+                # 데이터 표시
+                st.markdown("### 📋 면접평가 목록")
+                
+                # 클릭 가능한 데이터프레임 표시
+                def make_clickable(row):
+                    return f'<div style="cursor: pointer; text-decoration: underline; color: #1E88E5;">{row["후보자명"]}</div>'
+                
+                filtered_df['후보자명'] = filtered_df.apply(make_clickable, axis=1)
+                st.write(filtered_df.to_html(escape=False), unsafe_allow_html=True)
+
+                # 선택된 행 상세 정보 표시
+                if st.session_state.selected_evaluation is not None:
+                    st.markdown("### 📝 면접평가 상세정보")
+                    selected_row = filtered_df.loc[st.session_state.selected_evaluation]
+                    
+                    # HTML 템플릿으로 평가표 표시
+                    html = f"""
+                    <div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
+                        <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+                        <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
+                        
+                        <p><br><b>ㆍ후보자 정보 </b></p>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <tr>
+                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
+                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
+                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
+                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
+                            </tr>
+                            <tr>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
+                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
+                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
+                            </tr>
+                        </table>
+
+                        <p><br><b>ㆍ평가내용</b></p>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <tr>
+                                <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
+                                <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
+                                <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
+                                <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관 의견</th>
+                            </tr>
+                            <!-- 평가 항목들 -->
+                        </table>
+
+                        <p><br><b>ㆍ종합의견 및 결과</b></p>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
+                                <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
+                            </tr>
+                            <tr>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">전형결과</th>
+                                <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['전형결과']}</td>
+                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">입사가능시기</th>
+                                <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['입사가능시기']}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    """
+                    st.markdown(html, unsafe_allow_html=True)
+
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
                 
