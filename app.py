@@ -1766,15 +1766,15 @@ elif st.session_state['current_page'] == "evaluation":
                 <div style="margin-bottom: 15px;">
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                         <tr>
-                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
-                            <th style="width: 45%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
-                            <th style="width: 10%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
+                            <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
+                            <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
+                            <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
                             <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">의견</th>
                         </tr>
                         {''.join([f"""
                         <tr>
                             <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
-                            <td style="border: 1px solid #000; padding: 5px;">{''.join([f"• {', '.join([line.strip() for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}" if row['내용'] else ''])}</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{', '.join([line.strip() for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
                             <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
                             <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
                         </tr>
