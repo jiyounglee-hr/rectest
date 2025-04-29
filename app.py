@@ -2049,17 +2049,15 @@ elif st.session_state['current_page'] == "admin":
     </table>
 </div>"""
 
-                        # PDF 다운로드 버튼
-                        col1, col2, col3 = st.columns([1,2,1])
-                        with col2:
-                            if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                                pdf = create_pdf(html_content)
-                                st.download_button(
-                                    label="PDF 다운로드",
-                                    data=pdf,
-                                    file_name=f"면접평가표_{selected_candidate}.pdf",
-                                    mime="application/pdf"
-                                )
+                # PDF 다운로드 버튼
+                if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
+                            pdf = create_pdf(html_content)
+                            st.download_button(
+                                label="PDF 다운로드",
+                                data=pdf,
+                                file_name=f"면접평가표_{selected_candidate}.pdf",
+                                mime="application/pdf"
+                            )
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
