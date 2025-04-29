@@ -1957,30 +1957,21 @@ elif st.session_state['current_page'] == "evaluation":
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
 
 elif st.session_state['current_page'] == "admin":
-    st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
-            ⚙️ 채용 관리자
-        </h5>
-    """, unsafe_allow_html=True)
-
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
     
-    if 'last_data_fetch' not in st.session_state:
-        st.session_state.last_data_fetch = 0
-    
-    if 'cached_eval_data' not in st.session_state:
-        st.session_state.cached_eval_data = None
-
     if not st.session_state.admin_authenticated:
         password = st.text_input("비밀번호를 입력하세요", type="password")
-        if st.button("확인"):
-            if password == "0314!":
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("비밀번호가 올바르지 않습니다.")
+        if password == "0314":
+            st.session_state.admin_authenticated = True
+            st.rerun()
     else:
+        st.markdown("""
+            <h5 style='color: #333333; margin-bottom: 20px;'>
+                ⚙️ 채용 관리자
+            </h5>
+        """, unsafe_allow_html=True)
+        
         try:
             with st.spinner("데이터를 불러오는 중..."):
                 gc = init_google_sheets()
@@ -2076,15 +2067,15 @@ elif st.session_state['current_page'] == "admin":
     </table>
 </div>"""
 
-                # PDF 다운로드 버튼
-                if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                            pdf = create_pdf(html_content)
-                            st.download_button(
-                                label="PDF 다운로드",
-                                data=pdf,
-                                file_name=f"면접평가표_{selected_candidate}.pdf",
-                                mime="application/pdf"
-                            )
+                    # PDF 다운로드 버튼
+                    if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
+                        pdf = create_pdf(html_content)
+                        st.download_button(
+                            label="PDF 다운로드",
+                            data=pdf,
+                            file_name=f"면접평가표_{selected_candidate}.pdf",
+                            mime="application/pdf"
+                        )
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
