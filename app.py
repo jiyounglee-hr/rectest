@@ -1778,11 +1778,12 @@ elif st.session_state['current_page'] == "evaluation":
                             <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
                             <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
                         </tr>
+                        """ for row in st.session_state.eval_data])}
                         <tr>
                             <th colspan="2" style="border: 1px solid #000; padding: 5px;">총점</th>
                             <td colspan="2" style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
                         </tr>
-                        """ for row in st.session_state.eval_data])}
+
                     </table>
                 </div>
                 <p><br><b>ㆍ종합의견 및 결과</b></p>      
