@@ -1740,105 +1740,71 @@ elif st.session_state['current_page'] == "evaluation":
             
             html = f"""
             <meta charset="UTF-8">
-            <style type="text/css">
-                @page {{
-                    size: A4;
-                    margin: 1cm;
-                }}
-                @font-face {{
-                    font-family: 'Malgun Gothic';
-                    src: local('Malgun Gothic');
-                }}
-                body {{
-                    font-family: 'Malgun Gothic', sans-serif;
-                    font-size: 12px;
-                    line-height: 1.5;
-                }}
-                table {{
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin-bottom: 10px;
-                }}
-                th, td {{
-                    border: 1px solid #000;
-                    padding: 5px;
-                    text-align: left;
-                    font-size: 12px;
-                }}
-                th {{
-                    background-color: #f0f0f0;
-                }}
-                .header {{
-                    margin-bottom: 20px;
-                }}
-                .section {{
-                    margin-bottom: 15px;
-                }}
-                h2 {{
-                    font-size: 18px;
-                    margin-bottom: 10px;
-                }}
-            </style>
-            <div class="header">
-                <h2>면접평가표</h2>
-                <p><b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}</p>
-            </div>
-            <div class="section">
-                <table>
-                    <tr>
-                        <th style="width: 15%">후보자 정보</th>
-                        <th style="width: 20%">후보자명</th>
-                        <td style="width: 15%">{candidate_name}</td>
-                        <th style="width: 20%">면접관성명</th>
-                        <td style="width: 30%">{interviewer_name}</td>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th>면접일자</th>
-                        <td>{interview_date.strftime("%Y-%m-%d")}</td>
-                        <th>최종학교/전공</th>
-                        <td>{education}</td>
-                    </tr>
-                </table>
-            </div>
-            <div class="section">
-                <table>
-                    <tr>
-                        <th style="width: 15%">평가표 입력</th>
-                        <th style="width: 45%">내용</th>
-                        <th style="width: 10%">점수</th>
-                        <th style="width: 30%">의견</th>
-                    </tr>
-                    {''.join([f"""
-                    <tr>
-                        <td>{row['구분']}</td>
-                        <td>{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
-                        <td style="text-align: center">{row['점수']} / {row['만점']}</td>
-                        <td>{row['의견']}</td>
-                    </tr>
-                    """ for row in st.session_state.eval_data])}
-                </table>
-            </div>
-            <div class="section">
-                <table>
-                    <tr>
-                        <th style="width: 15%">종합의견 및 결과</th>
-                        <th style="width: 15%">종합의견</th>
-                        <td colspan="3">{summary}</td>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th>전형결과</th>
-                        <td style="width: 20%">{result}</td>
-                        <th style="width: 15%">입사가능시기</th>
-                        <td style="width: 35%">{join_date}</td>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th>총점</th>
-                        <td colspan="3">{total_score} / 100</td>
-                    </tr>
-                </table>
+            <div style="font-family: Arial, 'Malgun Gothic', sans-serif; font-size: 12px; line-height: 1.5;">
+                <div style="margin-bottom: 20px;">
+                    <h2 style="font-size: 18px; margin-bottom: 10px;">면접평가표</h2>
+                    <p><b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                        <tr>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자 정보</th>
+                            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
+                            <td style="width: 15%; border: 1px solid #000; padding: 5px;">{candidate_name}</td>
+                            <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
+                            <td style="width: 30%; border: 1px solid #000; padding: 5px;">{interviewer_name}</td>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;"></th>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
+                            <td style="border: 1px solid #000; padding: 5px;">{interview_date.strftime("%Y-%m-%d")}</td>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
+                            <td style="border: 1px solid #000; padding: 5px;">{education}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                        <tr>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가표 입력</th>
+                            <th style="width: 45%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
+                            <th style="width: 10%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
+                            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">의견</th>
+                        </tr>
+                        {''.join([f"""
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
+                            <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
+                            <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
+                        </tr>
+                        """ for row in st.session_state.eval_data])}
+                    </table>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                        <tr>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견 및 결과</th>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
+                            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{summary}</td>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;"></th>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">전형결과</th>
+                            <td style="width: 20%; border: 1px solid #000; padding: 5px;">{result}</td>
+                            <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">입사가능시기</th>
+                            <td style="width: 35%; border: 1px solid #000; padding: 5px;">{join_date}</td>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;"></th>
+                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
+                            <td colspan="3" style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             """
             
@@ -1847,12 +1813,9 @@ elif st.session_state['current_page'] == "evaluation":
                 pdf = pisa.pisaDocument(
                     BytesIO(html_content.encode('utf-8')),
                     result,
-                    encoding='utf-8',
-                    path=os.path.dirname(os.path.abspath(__file__))
+                    encoding='utf-8'
                 )
-                if pdf.err:
-                    return None
-                return result.getvalue()
+                return result.getvalue() if not pdf.err else None
             
             pdf = create_pdf(html)
             if pdf:
