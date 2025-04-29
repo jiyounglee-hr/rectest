@@ -23,6 +23,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import time
+from xhtml2pdf import pisa
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -1738,9 +1739,21 @@ elif st.session_state['current_page'] == "evaluation":
                 return result.getvalue()
             
             html = f"""
+            <meta charset="UTF-8">
             <style>
+                @font-face {{
+                    font-family: 'Malgun Gothic';
+                    src: local('Malgun Gothic');
+                }}
+                body {{
+                    font-family: 'Malgun Gothic', sans-serif;
+                }}
                 table {{ border-collapse: collapse; width: 100%; }}
-                th, td {{ border: 1px solid #ddd; padding: 8px; }}
+                th, td {{ 
+                    border: 1px solid #ddd; 
+                    padding: 8px; 
+                    font-family: 'Malgun Gothic', sans-serif;
+                }}
                 th {{ background-color: #f8f9fa; }}
                 .header {{ margin-bottom: 20px; }}
                 .section {{ margin-bottom: 15px; }}
@@ -1807,6 +1820,19 @@ elif st.session_state['current_page'] == "evaluation":
                 </table>
             </div>
             """
+            
+            def create_pdf(html):
+                result = BytesIO()
+                # 한글 폰트 설정
+                pdf = pisa.pisaDocument(
+                    BytesIO(html.encode('utf-8')),
+                    result,
+                    encoding='utf-8'
+                )
+                if not pdf.err:
+                    return result.getvalue()
+                return None
+            
             pdf = create_pdf(html)
             b64 = base64.b64encode(pdf).decode()
             href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
