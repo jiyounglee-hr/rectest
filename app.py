@@ -176,10 +176,10 @@ def get_evaluation_template():
 
 # 기본 평가 템플릿
 default_template = [
-    {"구분": "업무지식", "내용": ["Web front Architecture", "Data Structure", "RESTful Design"], "만점": 30, "점수": 0, "의견": ""},
-    {"구분": "직무기술", "내용": ["AWS Cloud", "Typescript + ReactJS", "Webpack"], "만점": 30, "점수": 0, "의견": ""},
-    {"구분": "직무수행 태도 및 자세", "내용": ["요구사항을 수행하려는 적극성", "명품을 만들기 위한 디테일", "도전정신"], "만점": 30, "점수": 0, "의견": ""},
-    {"구분": "기본인성", "내용": ["복장은 단정한가?", "태도는 어떤가?", "적극적으로 답변하는가?"], "만점": 10, "점수": 0, "의견": ""}
+    {"구분": "업무 지식", "내용": "", "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "직무기술", "내용": "", "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "직무 수행 태도 및 자세", "내용": "", "만점": 30, "점수": 0, "의견": ""},
+    {"구분": "기본인성", "내용": "", "만점": 10, "점수": 0, "의견": ""}
 ]
 
 # 본부와 직무 데이터 가져오기
@@ -1507,14 +1507,14 @@ elif st.session_state['current_page'] == "evaluation":
     with col1:
         selected_dept = st.selectbox("본부를 선택하세요", ["선택해주세요"] + departments, key="eval_dept")
         if selected_dept == "선택해주세요":
-            selected_dept = None
+            selected_dept = "본부 미선택"
     
     # 가운데 컬럼: 직무 선택
     with col2:
         if selected_dept and jobs.get(selected_dept):
             selected_job = st.selectbox("직무를 선택하세요", ["선택해주세요"] + jobs[selected_dept], key="eval_job")
             if selected_job == "선택해주세요":
-                selected_job = "본부 미선택"
+                selected_job = "직무무 미선택"
         else:
             selected_job = None
             
@@ -1558,19 +1558,19 @@ elif st.session_state['current_page'] == "evaluation":
     """, unsafe_allow_html=True)
     
     with candidate_info_cols[0]: 
-        candidate_name = st.text_input("후보자명", value=st.session_state.candidate_info['candidate_name'], key="candidate_name", on_change=lambda: None)
+        candidate_name = st.text_input("후보자명", value=st.session_state.candidate_info['candidate_name'], key="candidate_name", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.candidate_info['candidate_name'] = candidate_name
     with candidate_info_cols[1]: 
-        interviewer_name = st.text_input("면접관성명", value=st.session_state.candidate_info['interviewer_name'], key="interviewer_name", on_change=lambda: None)
+        interviewer_name = st.text_input("면접관성명", value=st.session_state.candidate_info['interviewer_name'], key="interviewer_name", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.candidate_info['interviewer_name'] = interviewer_name
     with candidate_info_cols[2]: 
-        interview_date = st.date_input("면접일자", value=st.session_state.candidate_info['interview_date'], key="interview_date", on_change=lambda: None)
+        interview_date = st.date_input("면접일자", value=st.session_state.candidate_info['interview_date'], key="interview_date", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.candidate_info['interview_date'] = interview_date
     with candidate_info_cols[3]: 
-        education = st.text_input("최종학교/전공", value=st.session_state.candidate_info['education'], key="education", on_change=lambda: None)
+        education = st.text_input("최종학교/전공", value=st.session_state.candidate_info['education'], key="education", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.candidate_info['education'] = education
     with candidate_info_cols[4]: 
-        experience = st.text_input("경력년월", value=st.session_state.candidate_info['experience'], key="experience", on_change=lambda: None)
+        experience = st.text_input("경력년월", value=st.session_state.candidate_info['experience'], key="experience", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.candidate_info['experience'] = experience
 
     # 평가표 데이터 입력
@@ -1587,7 +1587,7 @@ elif st.session_state['current_page'] == "evaluation":
         st.session_state.eval_data[i]["점수"] = cols[2].number_input("점수", min_value=0, max_value=row["만점"], value=row["점수"], key=f"score_{i}")
         
         # 의견 입력을 새로고침 없이 처리
-        opinion = cols[3].text_input("의견", value=st.session_state.eval_opinions[i], key=f"opinion_{i}", on_change=lambda: None)
+        opinion = cols[3].text_input("의견", value=st.session_state.eval_opinions[i], key=f"opinion_{i}", on_change=lambda: None, label_visibility="visible", disabled=False)
         st.session_state.eval_opinions[i] = opinion
         st.session_state.eval_data[i]["의견"] = opinion
         
@@ -1595,9 +1595,9 @@ elif st.session_state['current_page'] == "evaluation":
 
     # 종합의견, 전형결과, 입사가능시기
     st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
-    summary = st.text_area("종합의견", key="summary")
-    result = st.selectbox("전형결과", ["합격", "불합격", "보류"])
-    join_date = st.text_input("입사가능시기", key="join_date")
+    summary = st.text_area("종합의견", key="summary", on_change=lambda: None, label_visibility="visible", disabled=False)
+    result = st.selectbox("전형결과", ["합격", "불합격", "보류"], key="result", on_change=lambda: None, label_visibility="visible", disabled=False)
+    join_date = st.text_input("입사가능시기", key="join_date", on_change=lambda: None, label_visibility="visible", disabled=False)
 
     # 총점 계산
     total_score = sum([row["점수"] for row in st.session_state.eval_data])
