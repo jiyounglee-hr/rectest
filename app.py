@@ -673,11 +673,6 @@ with st.sidebar:
             key="btn_evaluation", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
-
-    st.button("⚙️ 채용 관리자", 
-            key="btn_admin", 
-            on_click=switch_to_admin,
-            type="primary" if st.session_state['current_page'] == "admin" else "secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -699,7 +694,6 @@ with st.sidebar:
         .admin-button {
             display: block;
             margin-top: 5px;
-            margin-left: 0.8rem;
             background: none;
             border: none;
             color: #888888;
