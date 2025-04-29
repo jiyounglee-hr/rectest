@@ -659,12 +659,12 @@ with st.sidebar:
             on_click=switch_to_resume,
             type="primary" if st.session_state['current_page'] == "resume" else "secondary")
 
-    st.button("☝️ 1차 면접 질문", 
+    st.button("☝️ 1차 면접 가이드", 
             key="btn_interview1", 
             on_click=switch_to_interview1,
             type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
 
-    st.button("✌️ 2차 면접 질문", 
+    st.button("✌️ 2차 면접 가이드", 
             key="btn_interview2", 
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
@@ -1119,7 +1119,7 @@ if st.session_state['current_page'] == "resume":
 elif st.session_state['current_page'] == "interview1":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            ☝️ 1차 면접 질문
+            ☝️ 1차 면접 가이드드
         </h5>
     """, unsafe_allow_html=True)
     
