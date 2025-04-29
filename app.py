@@ -691,7 +691,7 @@ with st.sidebar:
         📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
         """)
     st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗후보자 이력서 링크</a></div>', unsafe_allow_html=True)
-    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗뉴로핏 커리어</a></div>', ext-decoration = none, unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗뉴로핏 커리어</a></div>', unsafe_allow_html=True)
 
     # CSS 스타일 추가
     st.markdown("""
