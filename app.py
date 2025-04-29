@@ -1999,7 +1999,8 @@ elif st.session_state['current_page'] == "admin":
                 
                 with col3:
                     name_filter = st.text_input("후보자명")
-
+                st.markdown("---")
+                st.markdown("💾 후보자 리스트")
                 # 필터 적용
                 filtered_df = df.copy()
                                 
