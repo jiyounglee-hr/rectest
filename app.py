@@ -2018,10 +2018,11 @@ elif st.session_state['current_page'] == "admin":
                         th {
                             background-color: #f0f0f0;
                             font-weight: bold;
+                            text-align: center !important;
                         }
                         td, th {
                             padding: 8px;
-                            text-align: left;
+                            text-align: center !important;
                             border: 1px solid #ddd;
                         }
                         tr:nth-child(even) {
