@@ -1926,8 +1926,21 @@ elif st.session_state['current_page'] == "evaluation":
             gc = gspread.authorize(credentials)
             sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
             worksheet = gc.open_by_key(sheet_id).sheet1
+            
+            # 기존 데이터에서 동일한 이름 검색
+            all_data = worksheet.get_all_records()
+            existing_names = [row.get('후보자명', '') for row in all_data]
+            
+            # 동일한 이름이 있는 경우 알파벳 추가
+            modified_name = candidate_name
+            if candidate_name in existing_names:
+                suffix = 'A'
+                while f"{candidate_name}_{suffix}" in existing_names:
+                    suffix = chr(ord(suffix) + 1)
+                modified_name = f"{candidate_name}_{suffix}"
+            
             # 데이터 저장
-            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
+            row_data = [selected_dept, selected_job, modified_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
             for row in st.session_state.eval_data:
                 content = ', '.join([line.strip() for line in row['내용'].replace('•', '').split('\n') if line.strip()])
                 row_data.extend([content, row["점수"], row["의견"]])
