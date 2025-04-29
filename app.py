@@ -2049,16 +2049,6 @@ elif st.session_state['current_page'] == "admin":
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
-                    # 평가 데이터 생성
-                    eval_data = [
-                        {
-                            '구분': '업무 지식',
-                            '내용': '• 직무 관련 전문 지식 보유 수준\n• 업무 프로세스 이해도\n• 관련 법규 및 규정 이해도',
-                            '점수': selected_row.get('업무지식_점수', 0),
-                            '만점': 30,
-                            '의견': selected_row.get('업무지식_의견', '')
-                        },
-                        {
                     # 평가 데이터 가져오기
                     eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
                     eval_data = []
@@ -2066,9 +2056,9 @@ elif st.session_state['current_page'] == "admin":
                         eval_data.append({
                             '구분': item['구분'],
                             '내용': item['내용'],
-                            '점수': selected_row.get(f"점수_{item['구분']}", 0),
+                            '점수': selected_row.get(f"{item['구분']}_점수", 0),
                             '만점': item.get('만점', 30),
-                            '의견': selected_row.get(f"의견_{item['구분']}", '')
+                            '의견': selected_row.get(f"{item['구분']}_의견", '')
                         })
                     
                     # PDF 생성을 위한 HTML 템플릿
