@@ -1954,96 +1954,67 @@ elif st.session_state['current_page'] == "admin":
             else:
                 st.error("비밀번호가 올바르지 않습니다.")
     else:
-        with st.spinner("데이터를 불러오는 중..."):
-            try:
-                # 새로운 방식으로 Google Sheets 클라이언트 초기화
+        try:
+            with st.spinner("데이터를 불러오는 중..."):
                 gc = init_google_sheets()
                 sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
                 time.sleep(1)  # API 호출 간격 조절
                 data = sheet.get_all_records()
                 df = pd.DataFrame(data)
-            except Exception as e:
-                st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
-                df = None
 
-        if df is not None:
-            # 검색 필터
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
-            with col2:
-                job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
-            with col3:
-                name_filter = st.text_input("후보자명")
+            if df is not None:
+                # 검색 필터
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
+                with col2:
+                    job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
+                with col3:
+                    name_filter = st.text_input("후보자명")
 
-            # 필터 적용
-            filtered_df = df.copy()
-            if dept_filter != "전체":
-                filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
-            if job_filter != "전체":
-                filtered_df = filtered_df[filtered_df["직무"] == job_filter]
-            if name_filter:
-                filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
+                # 필터 적용
+                filtered_df = df.copy()
+                if dept_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
+                if job_filter != "전체":
+                    filtered_df = filtered_df[filtered_df["직무"] == job_filter]
+                if name_filter:
+                    filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
 
-            # 인덱스 재설정 (내림차순)
-            filtered_df = filtered_df.sort_index(ascending=False)
-            filtered_df.index = range(1, len(filtered_df) + 1)
+                # 인덱스 재설정 (내림차순)
+                filtered_df = filtered_df.sort_index(ascending=False)
+                filtered_df.index = range(1, len(filtered_df) + 1)
 
-            # 데이터 표시
-            st.markdown("---")     
-            st.markdown("###### 📋 면접평가 목록")                
-            # 필요한 컬럼만 선택
-            display_columns = [
-                "본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
-            ]
-            filtered_df = filtered_df[display_columns]
-
-            # 데이터프레임 스타일링을 위한 CSS 추가
-            st.markdown("""
-                <style>
-                    table {
-                        font-size: 14px;
-                        width: 100%;
-                    }
-                    th {
-                        background-color: #f0f0f0;
-                        font-weight: bold;
-                        text-align: center !important;
-                    }
-                    td, th {
-                        padding: 8px;
-                        text-align: center !important;
-                        border: 1px solid #ddd;
-                    }
-                    tr:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-                    tr:hover {
-                        background-color: #f5f5f5;
-                    }
-                </style>
-            """, unsafe_allow_html=True)
-
-            # 데이터프레임 표시
-            st.dataframe(
-                filtered_df,
-                use_container_width=True,
-                hide_index=False
-            )
-
-            # 선택 박스로 후보자 선택
-            selected_candidate = st.selectbox(
-                "평가표를 다운로드할 후보자를 선택하세요",
-                options=filtered_df['후보자명'].tolist(),
-                index=None
-            )
-
-            if selected_candidate:
-                selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
+                # 데이터 표시
+                st.markdown("---")     
+                st.markdown("###### 📋 면접평가 목록")                
                 
-                # PDF 생성을 위한 HTML 템플릿
-                html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
+                # 필요한 컬럼만 선택
+                display_columns = [
+                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
+                ]
+                filtered_df = filtered_df[display_columns]
+
+                # 데이터프레임 표시
+                st.dataframe(
+                    filtered_df,
+                    use_container_width=True,
+                    hide_index=False
+                )
+
+                # 선택 박스로 후보자 선택
+                selected_candidate = st.selectbox(
+                    "평가표를 다운로드할 후보자를 선택하세요",
+                    options=filtered_df['후보자명'].tolist(),
+                    index=None
+                )
+
+                if selected_candidate:
+                    selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
+                    
+                    # PDF 생성을 위한 HTML 템플릿
+                    html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
     <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
     <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
     
@@ -2078,22 +2049,19 @@ elif st.session_state['current_page'] == "admin":
     </table>
 </div>"""
 
-                    # PDF 다운로드 버튼
-                    col1, col2, col3 = st.columns([1,2,1])
-                    with col2:
-                        if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                            pdf = create_pdf(html_content)
-                            st.download_button(
-                                label="PDF 다운로드",
-                                data=pdf,
-                                file_name=f"면접평가표_{selected_candidate}.pdf",
-                                mime="application/pdf"
-                            )
-        else:
-            st.info("저장된 면접평가 데이터가 없습니다.")
-                
+                        # PDF 다운로드 버튼
+                        col1, col2, col3 = st.columns([1,2,1])
+                        with col2:
+                            if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
+                                pdf = create_pdf(html_content)
+                                st.download_button(
+                                    label="PDF 다운로드",
+                                    data=pdf,
+                                    file_name=f"면접평가표_{selected_candidate}.pdf",
+                                    mime="application/pdf"
+                                )
+            else:
+                st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
-
-       
 
