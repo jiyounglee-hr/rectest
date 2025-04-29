@@ -2052,6 +2052,29 @@ elif st.session_state['current_page'] == "admin":
         </tr>
     </table>
 
+    <p><br><b>ㆍ평가내용</b></p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+        <tr>
+            <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
+            <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
+            <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
+            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관 의견</th>
+        </tr>
+        {''.join([f"""
+        <tr>
+            <td style="border: 1px solid #000; padding: 5px;">{row['구분']}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{row['내용']}</td>
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">{row['점수']} / {row['만점']}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{row['의견']}</td>
+        </tr>
+        """ for row in eval_data])}
+        <tr>
+            <th colspan="2" style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">{selected_row['총점']} / 100</td>
+            <td style="border: 1px solid #000; padding: 5px;">-</td>
+        </tr>
+    </table>
+
     <p><br><b>ㆍ종합의견 및 결과</b></p>
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
