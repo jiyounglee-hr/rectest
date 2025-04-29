@@ -1726,8 +1726,12 @@ elif st.session_state['current_page'] == "evaluation":
                 row_data.extend([row["점수"], row["의견"]])
             row_data.extend([summary, result, join_date, total_score])
             worksheet.append_row(row_data)
+            st.success("제출이 완료 되었습니다.")
             
-            # PDF 생성
+            # PDF 다운로드 버튼 표시
+            import base64
+            from io import BytesIO
+            from xhtml2pdf import pisa
             def create_pdf(html):
                 result = BytesIO()
                 pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
@@ -1747,13 +1751,8 @@ elif st.session_state['current_page'] == "evaluation":
             """
             pdf = create_pdf(html)
             b64 = base64.b64encode(pdf).decode()
-            
-            # 제출 완료 메시지와 PDF 다운로드 버튼을 나란히 표시
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.success("제출이 완료 되었습니다.")
-            with col2:
-                st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf" style="text-decoration:none;"><div style="padding:0.5em 1em; background-color:#ffffff; color:#000000; border:1px solid #cccccc; border-radius:3px; text-align:center; cursor:pointer;">📥 PDF 다운로드</div></a>', unsafe_allow_html=True)
+            href = f'<a href="data:application/pdf;base64,{b64}" download="면접평가표.pdf">PDF 다운로드</a>'
+            st.markdown(href, unsafe_allow_html=True)
             
         except Exception as e:
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
