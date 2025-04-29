@@ -2006,12 +2006,10 @@ elif st.session_state['current_page'] == "admin":
                 # 본부 필터링
                 if dept_filter != "전체":
                     filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
-                    st.write(f"본부 필터링 후 데이터 수: {len(filtered_df)}")
                 
                 # 직무 필터링
                 if job_filter != "전체":
                     filtered_df = filtered_df[filtered_df["직무"].str.strip() == job_filter.strip()]
-                    st.write(f"직무 필터링 후 데이터 수: {len(filtered_df)}")
                 
                 # 후보자명 필터링
                 if name_filter:
