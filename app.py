@@ -2095,7 +2095,7 @@ elif st.session_state['current_page'] == "admin":
                             body {{
                                 font-family: 'Noto Sans KR', sans-serif !important;
                                 font-size: 11px;
-                                line-height: 1;
+                                line-height: 1.5;
                             }}
                             table {{
                                 width: 100%;
