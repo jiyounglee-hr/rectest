@@ -2001,12 +2001,19 @@ elif st.session_state['current_page'] == "admin":
 
                 # 클릭 가능한 데이터프레임 표시
                 def make_clickable(row):
-                    return f'<div style="cursor: pointer; text-decoration: underline; color: #1E88E5;">{row["후보자명"]}</div>'
+                    return f'<a href="#" onclick="handleRowClick({row.name}); return false;" style="text-decoration: underline; color: #1E88E5;">{row["후보자명"]}</a>'
                 
                 filtered_df['후보자명'] = filtered_df.apply(make_clickable, axis=1)
-
-                # 컬럼명 변경
                 filtered_df = filtered_df.rename(columns={"면접결과": "면접결과"})
+
+                # JavaScript 함수 추가
+                st.markdown("""
+                    <script>
+                    function handleRowClick(index) {
+                        window.parent.postMessage({type: 'streamlit:set_state', value: {selected_row_index: index}}, '*');
+                    }
+                    </script>
+                """, unsafe_allow_html=True)
 
                 # 데이터프레임 스타일링을 위한 CSS 추가
                 st.markdown("""
@@ -2037,14 +2044,65 @@ elif st.session_state['current_page'] == "admin":
                 # HTML 테이블로 표시
                 st.write(filtered_df.to_html(escape=False, index=True), unsafe_allow_html=True)
 
+                # 선택된 행 처리
+                if 'selected_row_index' in st.session_state:
+                    selected_row = filtered_df.loc[st.session_state.selected_row_index]
+                    
+                    # PDF 생성을 위한 HTML 템플릿
+                    html_content = f"""
+                    <div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
+                        <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
+                        <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
+                        
+                        <p><br><b>ㆍ후보자 정보 </b></p>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <tr>
+                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">후보자명</th>
+                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['후보자명']}</td>
+                                <th style="width: 20%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관성명</th>
+                                <td style="width: 30%; border: 1px solid #000; padding: 5px;">{selected_row['면접관성명']}</td>
+                            </tr>
+                            <tr>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접일자</th>
+                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['면접일자']}</td>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">최종학교/전공</th>
+                                <td style="border: 1px solid #000; padding: 5px;">{selected_row['최종학교/전공']}</td>
+                            </tr>
+                        </table>
+
+                        <p><br><b>ㆍ종합의견 및 결과</b></p>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">종합의견</th>
+                                <td colspan="3" style="border: 1px solid #000; padding: 5px;">{selected_row['종합의견']}</td>
+                            </tr>
+                            <tr>
+                                <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접결과</th>
+                                <td style="width: 20%; border: 1px solid #000; padding: 5px;">{selected_row['면접결과']}</td>
+                                <th style="width: 15%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
+                                <td style="width: 35%; border: 1px solid #000; padding: 5px;">{selected_row['총점']}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    """
+
+                    # PDF 다운로드 버튼
+                    st.markdown("---")
+                    col1, col2, col3 = st.columns([1,2,1])
+                    with col2:
+                        if st.button(f"📥 {selected_row['후보자명']}님의 면접평가표 다운로드", use_container_width=True):
+                            pdf = create_pdf(html_content)
+                            st.download_button(
+                                label="PDF 다운로드",
+                                data=pdf,
+                                file_name=f"면접평가표_{selected_row['후보자명']}.pdf",
+                                mime="application/pdf"
+                            )
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
                 
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
 
-        # 로그아웃 버튼
-        if st.button("로그아웃"):
-            st.session_state.admin_authenticated = False
-            st.rerun()
+       
 
