@@ -2098,7 +2098,7 @@ elif st.session_state['current_page'] == "admin":
                                 line-height: 1.5;
                             }}
                             table {{
-                                width: 100%;
+                                width: 80%;
                                 border-collapse: collapse;
                                 margin-bottom: 5px;
                             }}
@@ -2115,7 +2115,7 @@ elif st.session_state['current_page'] == "admin":
                                 font-family: 'Noto Sans KR', sans-serif !important;
                             }}
                             .content-item {{
-                                margin-bottom: 8px;
+                                margin-bottom: 5px;
                             }}
                             .section-title {{
                                 margin-left: 0px;
