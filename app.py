@@ -1738,16 +1738,74 @@ elif st.session_state['current_page'] == "evaluation":
                 return result.getvalue()
             
             html = f"""
-            <h2>면접평가표</h2>
-            <b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}<br><br>
-            <table border='1' cellpadding='5' cellspacing='0'>
-            <tr><th>구분</th><th>내용</th><th>점수</th><th>의견</th><th>만점</th></tr>
-            {''.join([f"<tr><td>{row['구분']}</td><td>{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td><td>{row['점수']}</td><td>{row['의견']}</td><td>{row['만점']}</td></tr>" for row in st.session_state.eval_data])}
-            </table><br>
-            <b>종합의견:</b> {summary}<br>
-            <b>전형결과:</b> {result}<br>
-            <b>입사가능시기:</b> {join_date}<br>
-            <b>총점:</b> {total_score} / 100
+            <style>
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; }}
+                th {{ background-color: #f8f9fa; }}
+                .header {{ margin-bottom: 20px; }}
+                .section {{ margin-bottom: 15px; }}
+            </style>
+            <div class="header">
+                <h2>면접평가표</h2>
+                <p><b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}</p>
+            </div>
+            <div class="section">
+                <table>
+                    <tr>
+                        <th width="15%">후보자 정보</th>
+                        <th width="20%">후보자명</th>
+                        <td width="15%">{candidate_name}</td>
+                        <th width="20%">면접관성명</th>
+                        <td width="30%">{interviewer_name}</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th>면접일자</th>
+                        <td>{interview_date.strftime("%Y-%m-%d")}</td>
+                        <th>최종학교/전공</th>
+                        <td>{education}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="section">
+                <table>
+                    <tr>
+                        <th width="15%">평가표 입력</th>
+                        <th width="45%">내용</th>
+                        <th width="10%">점수</th>
+                        <th width="30%">의견</th>
+                    </tr>
+                    {''.join([f"""
+                    <tr>
+                        <td>{row['구분']}</td>
+                        <td>{'<br>'.join([f'• {line.strip()}' for line in row['내용'].replace('•', '').split('\\n') if line.strip()])}</td>
+                        <td style="text-align: center;">{row['점수']} / {row['만점']}</td>
+                        <td>{row['의견']}</td>
+                    </tr>
+                    """ for row in st.session_state.eval_data])}
+                </table>
+            </div>
+            <div class="section">
+                <table>
+                    <tr>
+                        <th width="15%">종합의견 및 결과</th>
+                        <th width="15%">종합의견</th>
+                        <td colspan="3">{summary}</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th>전형결과</th>
+                        <td width="20%">{result}</td>
+                        <th width="15%">입사가능시기</th>
+                        <td width="35%">{join_date}</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th>총점</th>
+                        <td colspan="3">{total_score} / 100</td>
+                    </tr>
+                </table>
+            </div>
             """
             pdf = create_pdf(html)
             b64 = base64.b64encode(pdf).decode()
