@@ -1640,8 +1640,10 @@ elif st.session_state['current_page'] == "evaluation":
             cols[0].write(row["구분"])
             
             # 내용 컬럼에 스타일 적용
+            content_lines = row["내용"].replace('•', '').split('\n')
+            formatted_content = '<br>'.join([f"• {line.strip()}" for line in content_lines if line.strip()])
             cols[1].markdown(
-                f"""<div style='font-size: 0.9em; line-height: 1.3;'>{row["내용"]}</div>""",
+                f"""<div style='font-size: 0.9em; line-height: 1.5;'>{formatted_content}</div>""",
                 unsafe_allow_html=True
             )
             
@@ -1667,7 +1669,7 @@ elif st.session_state['current_page'] == "evaluation":
             st.session_state.eval_opinions[i] = opinion
             st.session_state.eval_data[i]["의견"] = opinion
             
-            cols[4].write(f"")
+            cols[4].write("")
 
         # 종합의견, 전형결과, 입사가능시기
         st.markdown("<br><b>종합의견 및 결과</b>", unsafe_allow_html=True)
