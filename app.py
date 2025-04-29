@@ -1510,9 +1510,16 @@ elif st.session_state['current_page'] == "evaluation":
             'selected_job': None
         }
 
-    def update_dept_job_state(key, value):
-        st.session_state.dept_job_info[key] = value
-        if key == 'selected_dept':  # 본부가 변경되면 직무 초기화
+    def update_selected_dept():
+        st.session_state.dept_job_info['selected_dept'] = st.session_state.eval_dept
+        if st.session_state.eval_dept == "선택해주세요":
+            st.session_state.dept_job_info['selected_dept'] = None
+        # 본부가 변경되면 직무 초기화
+        st.session_state.dept_job_info['selected_job'] = None
+    
+    def update_selected_job():
+        st.session_state.dept_job_info['selected_job'] = st.session_state.eval_job
+        if st.session_state.eval_job == "선택해주세요":
             st.session_state.dept_job_info['selected_job'] = None
     
     # 왼쪽 컬럼: 본부 선택
@@ -1521,15 +1528,13 @@ elif st.session_state['current_page'] == "evaluation":
             "본부를 선택하세요",
             ["선택해주세요"] + departments,
             key="eval_dept",
-            on_change=update_dept_job_state,
-            args=('selected_dept',),
+            on_change=update_selected_dept,
             index=0 if st.session_state.dept_job_info['selected_dept'] is None 
                   else departments.index(st.session_state.dept_job_info['selected_dept']) + 1 
                   if st.session_state.dept_job_info['selected_dept'] in departments else 0
         )
         if selected_dept == "선택해주세요":
             selected_dept = None
-        st.session_state.dept_job_info['selected_dept'] = selected_dept
     
     # 가운데 컬럼: 직무 선택
     with col2:
@@ -1539,15 +1544,13 @@ elif st.session_state['current_page'] == "evaluation":
                 "직무를 선택하세요",
                 job_list,
                 key="eval_job",
-                on_change=update_dept_job_state,
-                args=('selected_job',),
+                on_change=update_selected_job,
                 index=0 if st.session_state.dept_job_info['selected_job'] is None 
                       else jobs[selected_dept].index(st.session_state.dept_job_info['selected_job']) + 1 
                       if st.session_state.dept_job_info['selected_job'] in jobs[selected_dept] else 0
             )
             if selected_job == "선택해주세요":
                 selected_job = None
-            st.session_state.dept_job_info['selected_job'] = selected_job
         else:
             selected_job = None
             st.session_state.dept_job_info['selected_job'] = None
