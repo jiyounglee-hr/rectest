@@ -1,4 +1,15 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
+import json
+import time  # 추가
+from datetime import datetime
+import base64
+from io import BytesIO
+import PyPDF2
+from xhtml2pdf import pisa
 
 # 페이지 설정 (반드시 첫 번째 명령어여야 함)
 st.set_page_config(
@@ -1924,13 +1935,15 @@ elif st.session_state['current_page'] == "admin":
         </h5>
     """, unsafe_allow_html=True)
 
-    # 비밀번호 확인을 위한 세션 상태
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
-    if 'selected_evaluation' not in st.session_state:
-        st.session_state.selected_evaluation = None
+    
+    if 'last_data_fetch' not in st.session_state:
+        st.session_state.last_data_fetch = 0
+    
+    if 'cached_eval_data' not in st.session_state:
+        st.session_state.cached_eval_data = None
 
-    # 비밀번호가 확인되지 않은 경우
     if not st.session_state.admin_authenticated:
         password = st.text_input("비밀번호를 입력하세요", type="password")
         if st.button("확인"):
@@ -1939,106 +1952,98 @@ elif st.session_state['current_page'] == "admin":
                 st.rerun()
             else:
                 st.error("비밀번호가 올바르지 않습니다.")
-    
-    # 비밀번호가 확인된 경우
     else:
-        try:
-            # Google Sheets 데이터 가져오기
-            scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-            credentials_dict = {
-                "type": st.secrets["google_credentials"]["type"],
-                "project_id": st.secrets["google_credentials"]["project_id"],
-                "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-                "private_key": st.secrets["google_credentials"]["private_key"],
-                "client_email": st.secrets["google_credentials"]["client_email"],
-                "client_id": st.secrets["google_credentials"]["client_id"],
-                "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-                "token_uri": st.secrets["google_credentials"]["token_uri"],
-                "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-                "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-            }
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-            gc = gspread.authorize(credentials)
-            
-            # 면접평가 데이터 시트
-            eval_sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
-            eval_data = eval_sheet.get_all_records()
-            
-            if eval_data:
-                df = pd.DataFrame(eval_data)
+        with st.spinner("데이터를 불러오는 중..."):
+            try:
+                scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+                creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
+                gc = gspread.authorize(creds)
+                sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
+                time.sleep(1)  # API 호출 간격 조절
+                data = sheet.get_all_records()
+                df = pd.DataFrame(data)
+            except Exception as e:
+                st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
+                df = None
+
+        if df is not None:
+            # 검색 필터
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
+            with col2:
+                job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
+            with col3:
+                name_filter = st.text_input("후보자명")
+
+            # 필터 적용
+            filtered_df = df.copy()
+            if dept_filter != "전체":
+                filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
+            if job_filter != "전체":
+                filtered_df = filtered_df[filtered_df["직무"] == job_filter]
+            if name_filter:
+                filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
+
+            # 인덱스 재설정 (내림차순)
+            filtered_df = filtered_df.sort_index(ascending=False)
+            filtered_df.index = range(1, len(filtered_df) + 1)
+
+            # 데이터 표시
+            st.markdown("---")     
+            st.markdown("###### 📋 면접평가 목록")                
+            # 필요한 컬럼만 선택
+            display_columns = [
+                "본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
+            ]
+            filtered_df = filtered_df[display_columns]
+
+            # 데이터프레임 스타일링을 위한 CSS 추가
+            st.markdown("""
+                <style>
+                    table {
+                        font-size: 14px;
+                        width: 100%;
+                    }
+                    th {
+                        background-color: #f0f0f0;
+                        font-weight: bold;
+                        text-align: center !important;
+                    }
+                    td, th {
+                        padding: 8px;
+                        text-align: center !important;
+                        border: 1px solid #ddd;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    tr:hover {
+                        background-color: #f5f5f5;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # 데이터프레임 표시
+            st.dataframe(
+                filtered_df,
+                use_container_width=True,
+                hide_index=False
+            )
+
+            # 선택 박스로 후보자 선택
+            selected_candidate = st.selectbox(
+                "평가표를 다운로드할 후보자를 선택하세요",
+                options=filtered_df['후보자명'].tolist(),
+                index=None
+            )
+
+            if selected_candidate:
+                selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                 
-                # 검색 필터
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
-                with col2:
-                    job_filter = st.selectbox("직무", ["전체"] + sorted(df["직무"].unique().tolist()))
-                with col3:
-                    name_filter = st.text_input("후보자명")
-
-                # 필터 적용
-                filtered_df = df.copy()
-                if dept_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["본부"] == dept_filter]
-                if job_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["직무"] == job_filter]
-                if name_filter:
-                    filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
-
-                # 인덱스 재설정 (내림차순)
-                filtered_df = filtered_df.sort_index(ascending=False)
-                filtered_df.index = range(1, len(filtered_df) + 1)
-
-                # 데이터 표시
-                st.markdown("---")     
-                st.markdown("###### 📋 면접평가 목록")                
-                # 필요한 컬럼만 선택
-                display_columns = [
-                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
-                ]
-                filtered_df = filtered_df[display_columns]
-
-                # 데이터프레임 스타일링을 위한 CSS 추가
-                st.markdown("""
-                    <style>
-                        table {
-                            font-size: 14px;
-                            width: 100%;
-                        }
-                        th {
-                            background-color: #f0f0f0;
-                            font-weight: bold;
-                            text-align: center !important;
-                        }
-                        td, th {
-                            padding: 8px;
-                            text-align: center !important;
-                            border: 1px solid #ddd;
-                        }
-                        tr:nth-child(even) {
-                            background-color: #f9f9f9;
-                        }
-                        tr:hover {
-                            background-color: #f5f5f5;
-                        }
-                    </style>
-                """, unsafe_allow_html=True)
-
-                # 데이터프레임 표시
-                st.dataframe(
-                    filtered_df,
-                    use_container_width=True,
-                    hide_index=False
-                )
-
-                # 선택 박스로 후보자 선택
-                selected_candidate = st.selectbox(
-                    "평가표를 다운로드할 후보자를 선택하세요",
-                    options=filtered_df['후보자명'].tolist(),
-                    index=None
-                )
-
+                # PDF 생성을 위한 HTML 템플릿
+                html_content = f"""
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
@@ -2091,8 +2096,8 @@ elif st.session_state['current_page'] == "admin":
                                 file_name=f"면접평가표_{selected_candidate}.pdf",
                                 mime="application/pdf"
                             )
-            else:
-                st.info("저장된 면접평가 데이터가 없습니다.")
+        else:
+            st.info("저장된 면접평가 데이터가 없습니다.")
                 
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
