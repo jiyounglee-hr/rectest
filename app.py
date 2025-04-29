@@ -690,8 +690,38 @@ with st.sidebar:
         ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다\n
         📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
         """)
-    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗후보자 이력서 링크</a></div>', unsafe_allow_html=True)
     st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗뉴로핏 커리어</a></div>', unsafe_allow_html=True)
+
+    # CSS 스타일 추가
+    st.markdown("""
+        <style>
+        .admin-button {
+            position: fixed;
+            left: 1rem;
+            bottom: 1rem;
+            background: none;
+            border: none;
+            color: #888888;
+            font-size: 0.8em;
+            opacity: 0.5;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            text-decoration: none;
+        }
+        .admin-button:hover {
+            opacity: 1;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # 채용관리자 버튼
+    st.markdown(f"""
+        <div onclick="window.location.href='?page=admin'" class="admin-button">
+            채용관리자
+        </div>
+    """, unsafe_allow_html=True)
 
     # 본부와 직무 데이터 가져오기
     departments, jobs = get_google_sheet_data()
