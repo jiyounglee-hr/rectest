@@ -2183,43 +2183,51 @@ elif st.session_state['current_page'] == "admin":
                     </html>
                     """
 
-                    # PDF 생성 및 다운로드 버튼
-                    if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                        try:
-                            pdf_buffer = BytesIO()
-                            pisa.showLogging()
-                            
-                            # PDF 옵션 설정
-                            pdf_options = {
-                                'encoding': 'utf-8',
-                                'page-size': 'A4',
-                                'margin-top': '1.0cm',
-                                'margin-right': '1.0cm',
-                                'margin-bottom': '1.0cm',
-                                'margin-left': '1.0cm',
-                                'enable-local-file-access': True,
-                                'load-error-handling': 'ignore'
-                            }
-                            
-                            # PDF 생성
-                            pdf = pisa.pisaDocument(
-                                BytesIO(html_content.encode('utf-8')),
-                                pdf_buffer,
-                                encoding='utf-8',
-                                options=pdf_options
-                            )
-                            
-                            if not pdf.err:
-                                st.download_button(
-                                    label="PDF 다운로드",
-                                    data=pdf_buffer.getvalue(),
-                                    file_name=f"면접평가표_{selected_candidate}.pdf",
-                                    mime="application/pdf"
+                    # 버튼을 3개의 컬럼으로 나누어 배치
+                    col1, col2, col3 = st.columns([20, 20, 60])
+                    
+                    with col1:
+                        st.write(f"📥 {selected_candidate}님의")
+                    
+                    with col2:
+                        if st.button("면접평가표 다운로드", use_container_width=True):
+                            try:
+                                # PDF 옵션 설정
+                                pdf_options = {
+                                    'encoding': 'utf-8',
+                                    'page-size': 'A4',
+                                    'margin-top': '1.0cm',
+                                    'margin-right': '1.0cm',
+                                    'margin-bottom': '1.0cm',
+                                    'margin-left': '1.0cm',
+                                    'enable-local-file-access': True,
+                                    'load-error-handling': 'ignore'
+                                }
+                                
+                                # PDF 생성
+                                pdf_buffer = BytesIO()
+                                pisa.showLogging()
+                                pdf = pisa.pisaDocument(
+                                    BytesIO(html_content.encode('utf-8')),
+                                    pdf_buffer,
+                                    encoding='utf-8',
+                                    options=pdf_options
                                 )
-                            else:
-                                st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
-                        except Exception as e:
-                            st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
+                                
+                                if not pdf.err:
+                                    st.download_button(
+                                        label="PDF 다운로드",
+                                        data=pdf_buffer.getvalue(),
+                                        file_name=f"{selected_candidate}_면접평가표.pdf",
+                                        mime="application/pdf"
+                                    )
+                                else:
+                                    st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
+                            except Exception as e:
+                                st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
+                    
+                    with col3:
+                        st.write("")  # 여백용 빈 컬럼
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
         except Exception as e:
