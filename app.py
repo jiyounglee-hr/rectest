@@ -2031,6 +2031,18 @@ elif st.session_state['current_page'] == "admin":
                 if selected_candidate:
                     selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
                     
+                    # 평가 데이터 가져오기
+                    eval_template = get_eval_template_from_sheet(selected_row['본부'], selected_row['직무'])
+                    eval_data = []
+                    for item in eval_template:
+                        eval_data.append({
+                            '구분': item['구분'],
+                            '내용': item['내용'],
+                            '점수': item.get('점수', 0),
+                            '만점': item.get('만점', 30),
+                            '의견': item.get('의견', '')
+                        })
+                    
                     # PDF 생성을 위한 HTML 템플릿
                     html_content = f"""<div style="font-family: 'Noto Sans KR', sans-serif; padding: 20px;">
     <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
