@@ -1119,7 +1119,7 @@ if st.session_state['current_page'] == "resume":
 elif st.session_state['current_page'] == "interview1":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            ☝️ 1차 면접 가이드드
+            ☝️ 1차 면접 가이드
         </h5>
     """, unsafe_allow_html=True)
     
