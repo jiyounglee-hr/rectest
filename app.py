@@ -2324,7 +2324,7 @@ elif st.session_state['current_page'] == "admin":
                                     <th style="width: 18%;">평가구분</th>
                                     <th style="width: 39%;">내용</th>
                                     <th style="width: 13%;">점수</th>
-                                    <th style="width: 30%;">면접관 의견</th>
+                                    <th style="width: 30%;">의견</th>
                                 </tr>
                                 {''.join([f"""
                                 <tr>
