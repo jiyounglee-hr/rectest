@@ -1371,7 +1371,7 @@ elif st.session_state['current_page'] == "interview1":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("1차 면접 질문", st.session_state.interview_questions1, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
-
+    st.markdown("---")
     st.markdown("###### 🐯 면접 주의사항(준길님 당부)")
     
     st.markdown("""
