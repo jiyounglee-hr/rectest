@@ -1990,7 +1990,7 @@ elif st.session_state['current_page'] == "admin":
                 filtered_df.index = range(1, len(filtered_df) + 1)
 
                 # 데이터 표시
-                st.markdown("##### 📋 면접평가 목록")                
+                st.markdown("###### 📋 면접평가 목록")                
                 # 필요한 컬럼만 선택
                 display_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
