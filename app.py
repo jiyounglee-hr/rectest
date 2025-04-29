@@ -1635,23 +1635,34 @@ elif st.session_state['current_page'] == "evaluation":
         st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
         
         for i, row in enumerate(st.session_state.eval_data):
-            cols = st.columns([1, 3, 1, 2, 1])
+            # 컬럼 비율 조정 (1:2:1:3:0)으로 변경
+            cols = st.columns([1, 2, 1, 3, 0])
             cols[0].write(row["구분"])
-            cols[1].write(row["내용"])
-            st.session_state.eval_data[i]["점수"] = cols[2].number_input(
-                "점수", 
-                min_value=0, 
-                max_value=row["만점"], 
-                value=row["점수"], 
-                key=f"score_{i}"
+            
+            # 내용 컬럼에 스타일 적용
+            cols[1].markdown(
+                f"""<div style='font-size: 0.9em; line-height: 1.3;'>{row["내용"]}</div>""",
+                unsafe_allow_html=True
             )
             
-            # 의견 입력
-            opinion = cols[3].text_input(
-                "의견", 
-                value=st.session_state.eval_opinions[i], 
-                key=f"opinion_{i}", 
-                label_visibility="visible"
+            # 점수 입력 필드와 만점 표시를 하나의 컬럼에 배치
+            score = cols[2].number_input(
+                f"점수 ({row['만점']}점)",
+                min_value=0,
+                max_value=row["만점"],
+                value=row["점수"],
+                key=f"score_{i}",
+                help=f"0~{row['만점']}점"
+            )
+            st.session_state.eval_data[i]["점수"] = score
+            
+            # 의견 입력을 text_area로 변경
+            opinion = cols[3].text_area(
+                "의견",
+                value=st.session_state.eval_opinions[i],
+                key=f"opinion_{i}",
+                label_visibility="visible",
+                height=100
             )
             st.session_state.eval_opinions[i] = opinion
             st.session_state.eval_data[i]["의견"] = opinion
