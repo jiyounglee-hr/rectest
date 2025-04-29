@@ -2124,7 +2124,7 @@ elif st.session_state['current_page'] == "admin":
                         </style>
                     </head>
                     <body>
-                        <div style="padding: 10px;">
+                        <div style="padding: 5px;">
                             <h2 style="font-size: 18px; margin-bottom: 5px;"> 면접평가표</h2>
                             <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
                             <div class="section-title"><p><br><b>ㆍ후보자 정보</b></p></div>
