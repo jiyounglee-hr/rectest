@@ -1957,7 +1957,7 @@ elif st.session_state['current_page'] == "evaluation":
                             <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
                             <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
                             <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
-                            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관 의견</th>
+                            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">의견</th>
                         </tr>
                         {''.join([f"""
                         <tr>
