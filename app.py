@@ -2004,12 +2004,31 @@ elif st.session_state['current_page'] == "admin":
         """, unsafe_allow_html=True)
         
         try:
-            with st.spinner("데이터를 불러오는 중..."):
-                gc = init_google_sheets()
-                sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
-                time.sleep(1)  # API 호출 간격 조절
-                data = sheet.get_all_records()
-                df = pd.DataFrame(data)
+            # 세션 상태에 admin_data가 없거나 마지막 업데이트 시간이 5분 이상 지났을 때만 데이터를 새로 가져옴
+            current_time = time.time()
+            if ('admin_data' not in st.session_state or 
+                'last_update_time' not in st.session_state or 
+                current_time - st.session_state.last_update_time > 300):  # 5분 = 300초
+                
+                with st.spinner("데이터를 불러오는 중..."):
+                    gc = init_google_sheets()
+                    sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
+                    time.sleep(1)  # API 호출 간격 조절
+                    data = sheet.get_all_records()
+                    
+                    # 데이터와 마지막 업데이트 시간을 세션 상태에 저장
+                    st.session_state.admin_data = data
+                    st.session_state.last_update_time = current_time
+            
+            # 캐시된 데이터 사용
+            data = st.session_state.admin_data
+            df = pd.DataFrame(data)
+
+            # 데이터 새로고침 버튼
+            if st.button("🔄 데이터 새로고침", key="refresh_data"):
+                st.session_state.pop('admin_data', None)
+                st.session_state.pop('last_update_time', None)
+                st.rerun()
 
             if df is not None:
                 # 검색 필터
