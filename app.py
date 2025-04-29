@@ -2009,36 +2009,19 @@ elif st.session_state['current_page'] == "admin":
                 
                 # 본부 필터링
                 if dept_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["본부"].astype(str).str.strip() == dept_filter.strip()]
+                    filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
                     st.write(f"본부 필터링 후 데이터 수: {len(filtered_df)}")
-                    st.write("고유한 본부 값들:", filtered_df["본부"].unique())
                 
                 # 직무 필터링
                 if job_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["직무"].astype(str).str.strip() == job_filter.strip()]
+                    filtered_df = filtered_df[filtered_df["직무"].str.strip() == job_filter.strip()]
                     st.write(f"직무 필터링 후 데이터 수: {len(filtered_df)}")
-                    st.write("고유한 직무 값들:", filtered_df["직무"].unique())
                 
                 # 후보자명 필터링
                 if name_filter:
                     filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
                     st.write(f"후보자명 필터링 후 데이터 수: {len(filtered_df)}")
 
-                # 데이터 타입 확인을 위한 정보 출력
-                st.write("본부 컬럼 데이터 타입:", df["본부"].dtype)
-                st.write("직무 컬럼 데이터 타입:", df["직무"].dtype)
-
-                # 면접일자를 datetime 타입으로 변환
-                filtered_df['면접일자'] = pd.to_datetime(filtered_df['면접일자'])
-                
-                # 면접일자 기준으로 내림차순 정렬
-                filtered_df = filtered_df.sort_values(by=['면접일자', '본부', '직무', '후보자명'], ascending=[False, True, True, True])
-                filtered_df.index = range(1, len(filtered_df) + 1)
-
-                # 데이터 표시
-                st.markdown("---")     
-                st.markdown("###### 📋 면접평가 목록")                
-                
                 # 필요한 컬럼만 선택
                 display_columns = [
                     "본부", "직무", "후보자명", "면접관성명", "면접일자", 
@@ -2050,10 +2033,10 @@ elif st.session_state['current_page'] == "admin":
                 ]
                 
                 try:
-                    filtered_df = df[display_columns]
+                    display_df = filtered_df[display_columns]
                 except KeyError:
                     st.error("필요한 평가 데이터 컬럼이 없습니다. 데이터를 확인해주세요.")
-                    filtered_df = df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
+                    display_df = filtered_df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
                                     "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"]]
 
                 # 데이터프레임 표시용 컬럼 (기본 정보만 표시)
@@ -2064,7 +2047,7 @@ elif st.session_state['current_page'] == "admin":
                 
                 # 데이터프레임 표시
                 st.dataframe(
-                    filtered_df[display_view_columns],
+                    display_df[display_view_columns],
                     use_container_width=True,
                     hide_index=False
                 )
