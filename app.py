@@ -1569,7 +1569,7 @@ elif st.session_state['current_page'] == "evaluation":
     with col3:
         st.empty()
     
-    st.markdown(f"**선택된 본부&직무:** {selected_dept} / {selected_job if selected_job else '직무 미선택'}")
+    st.markdown(f"**선택된 본부&직무:** {selected_dept if selected_dept else '본부 미선택'} / {selected_job if selected_job else '직무 미선택'}")
     # 본부/직무 선택에 따라 템플릿 자동 반영
     if selected_dept and selected_job:
         st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)
