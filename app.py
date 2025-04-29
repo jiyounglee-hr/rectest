@@ -1576,78 +1576,49 @@ elif st.session_state['current_page'] == "evaluation":
     else:
         st.session_state.eval_data = default_template
     
-    # 후보자 정보 입력
-    st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
-    candidate_info_cols = st.columns(5)
-    
-    # 세션 상태에 후보자 정보 초기화 (처음 한 번만)
-    if 'candidate_info' not in st.session_state:
-        st.session_state.candidate_info = {
-            'candidate_name': '',
-            'interviewer_name': '',
-            'interview_date': datetime.now(),
-            'education': '',
-            'experience': ''
-        }
-    
-    def update_candidate_name():
-        st.session_state.candidate_info['candidate_name'] = st.session_state.candidate_name
-    
-    def update_interviewer_name():
-        st.session_state.candidate_info['interviewer_name'] = st.session_state.interviewer_name
-    
-    def update_interview_date():
-        st.session_state.candidate_info['interview_date'] = st.session_state.interview_date
-    
-    def update_education():
-        st.session_state.candidate_info['education'] = st.session_state.education
-    
-    def update_experience():
-        st.session_state.candidate_info['experience'] = st.session_state.experience
-    
-    with candidate_info_cols[0]: 
-        candidate_name = st.text_input(
-            "후보자명",
-            value=st.session_state.candidate_info['candidate_name'],
-            key="candidate_name",
-            on_change=update_candidate_name,
-            label_visibility="visible"
-        )
-    with candidate_info_cols[1]: 
-        interviewer_name = st.text_input(
-            "면접관성명",
-            value=st.session_state.candidate_info['interviewer_name'],
-            key="interviewer_name",
-            on_change=update_interviewer_name,
-            label_visibility="visible"
-        )
-    with candidate_info_cols[2]: 
-        interview_date = st.date_input(
-            "면접일자",
-            value=st.session_state.candidate_info['interview_date'],
-            key="interview_date",
-            on_change=update_interview_date,
-            label_visibility="visible"
-        )
-    with candidate_info_cols[3]: 
-        education = st.text_input(
-            "최종학교/전공",
-            value=st.session_state.candidate_info['education'],
-            key="education",
-            on_change=update_education,
-            label_visibility="visible"
-        )
-    with candidate_info_cols[4]: 
-        experience = st.text_input(
-            "경력년월",
-            value=st.session_state.candidate_info['experience'],
-            key="experience",
-            on_change=update_experience,
-            label_visibility="visible"
-        )
-
     # 평가표 입력 폼 시작
     with st.form("evaluation_form"):
+        # 후보자 정보 입력
+        st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
+        candidate_info_cols = st.columns(5)
+        
+        with candidate_info_cols[0]: 
+            candidate_name = st.text_input(
+                "후보자명",
+                value=st.session_state.candidate_info['candidate_name'],
+                key="candidate_name",
+                label_visibility="visible"
+            )
+        with candidate_info_cols[1]: 
+            interviewer_name = st.text_input(
+                "면접관성명",
+                value=st.session_state.candidate_info['interviewer_name'],
+                key="interviewer_name",
+                label_visibility="visible"
+            )
+        with candidate_info_cols[2]: 
+            interview_date = st.date_input(
+                "면접일자",
+                value=st.session_state.candidate_info['interview_date'],
+                key="interview_date",
+                label_visibility="visible"
+            )
+        with candidate_info_cols[3]: 
+            education = st.text_input(
+                "최종학교/전공",
+                value=st.session_state.candidate_info['education'],
+                key="education",
+                label_visibility="visible"
+            )
+        with candidate_info_cols[4]: 
+            experience = st.text_input(
+                "경력년월",
+                value=st.session_state.candidate_info['experience'],
+                key="experience",
+                label_visibility="visible"
+            )
+
+        # 평가표 데이터 입력
         st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
         
         # 평가 데이터 초기화
@@ -1682,6 +1653,15 @@ elif st.session_state['current_page'] == "evaluation":
         
         if submitted:
             try:
+                # 후보자 정보 세션 상태 업데이트
+                st.session_state.candidate_info.update({
+                    'candidate_name': candidate_name,
+                    'interviewer_name': interviewer_name,
+                    'interview_date': interview_date,
+                    'education': education,
+                    'experience': experience
+                })
+                
                 import gspread
                 from oauth2client.service_account import ServiceAccountCredentials
                 import json
