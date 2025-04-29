@@ -1539,11 +1539,11 @@ elif st.session_state['current_page'] == "evaluation":
     # 후보자 정보 입력
     st.markdown("<br><b>후보자 정보</b>", unsafe_allow_html=True)
     candidate_info_cols = st.columns(5)
-    with candidate_info_cols[0]: candidate_name = st.text_input("후보자명", key="candidate_name")
-    with candidate_info_cols[1]: interviewer_name = st.text_input("면접관성명", key="interviewer_name")
-    with candidate_info_cols[2]: interview_date = st.date_input("면접일자", key="interview_date")
-    with candidate_info_cols[3]: education = st.text_input("최종학교/전공", key="education")
-    with candidate_info_cols[4]: experience = st.text_input("경력년월", key="experience")
+    with candidate_info_cols[0]: candidate_name = st.text_input("후보자명")
+    with candidate_info_cols[1]: interviewer_name = st.text_input("면접관성명")
+    with candidate_info_cols[2]: interview_date = st.date_input("면접일자")
+    with candidate_info_cols[3]: education = st.text_input("최종학교/전공")
+    with candidate_info_cols[4]: experience = st.text_input("경력년월")
 
     # 평가표 데이터 입력
     st.markdown("<br><b>평가표 입력</b>", unsafe_allow_html=True)
