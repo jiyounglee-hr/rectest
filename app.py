@@ -24,6 +24,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 import time
 from xhtml2pdf import pisa
+from pathlib import Path
 
 # OpenAI API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -1727,17 +1728,17 @@ elif st.session_state['current_page'] == "evaluation":
                 row_data.extend([row["점수"], row["의견"]])
             row_data.extend([summary, result, join_date, total_score])
             worksheet.append_row(row_data)
-            st.success("제출이 완료 되었습니다.")
             
             # PDF 다운로드 버튼 표시
             import base64
             from io import BytesIO
             from xhtml2pdf import pisa
-            def create_pdf(html):
-                result = BytesIO()
-                pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
-                return result.getvalue()
+            import os
+
+            # 현재 스크립트의 디렉토리 경로
+            current_dir = os.path.dirname(os.path.abspath(__file__))
             
+            # PDF 생성을 위한 HTML 템플릿
             html = f"""
             <meta charset="UTF-8">
             <div style="font-family: Arial, 'Malgun Gothic', sans-serif; font-size: 12px; line-height: 1.5;">
@@ -1807,16 +1808,66 @@ elif st.session_state['current_page'] == "evaluation":
                 </div>
             </div>
             """
-            
+
             def create_pdf(html_content):
-                result = BytesIO()
-                pdf = pisa.pisaDocument(
-                    BytesIO(html_content.encode('utf-8')),
-                    result,
-                    encoding='utf-8'
-                )
-                return result.getvalue() if not pdf.err else None
-            
+                try:
+                    # HTML 템플릿에 Google Noto Sans KR 폰트 추가
+                    html_with_font = f'''
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+                        <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+                            body {{
+                                font-family: 'Noto Sans KR', sans-serif;
+                            }}
+                            table {{
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 10px;
+                            }}
+                            th, td {{
+                                border: 1px solid black;
+                                padding: 8px;
+                                text-align: left;
+                            }}
+                            th {{
+                                background-color: #f2f2f2;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        {html_content}
+                    </body>
+                    </html>
+                    '''
+                    
+                    # PDF 옵션 설정
+                    pdf_options = {
+                        'encoding': 'utf-8',
+                        'page-size': 'A4',
+                        'margin-top': '1.0cm',
+                        'margin-right': '1.0cm',
+                        'margin-bottom': '1.0cm',
+                        'margin-left': '1.0cm',
+                    }
+                    
+                    # PDF 생성
+                    result_file = BytesIO()
+                    pisa.pisaDocument(
+                        BytesIO(html_with_font.encode('utf-8')), 
+                        result_file,
+                        encoding='utf-8',
+                        options=pdf_options
+                    )
+                    
+                    return result_file.getvalue()
+                except Exception as e:
+                    st.error(f"PDF 생성 중 오류가 발생했습니다. 인사팀에 문의해주세요. 오류: {str(e)}")
+                    return None
+
+            # PDF 생성 및 다운로드 버튼 표시
             pdf = create_pdf(html)
             if pdf:
                 b64 = base64.b64encode(pdf).decode()
