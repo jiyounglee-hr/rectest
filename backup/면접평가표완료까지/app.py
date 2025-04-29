@@ -1724,8 +1724,7 @@ elif st.session_state['current_page'] == "evaluation":
             # 데이터 저장
             row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
             for row in st.session_state.eval_data:
-                content = ', '.join([line.strip() for line in row['내용'].replace('•', '').split('\n') if line.strip()])
-                row_data.extend([row["구분"], content, row["점수"], row["의견"]])
+                row_data.extend([row["점수"], row["의견"]])
             row_data.extend([summary, result, join_date, total_score])
             worksheet.append_row(row_data)
             
