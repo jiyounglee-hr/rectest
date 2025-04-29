@@ -2045,7 +2045,8 @@ elif st.session_state['current_page'] == "admin":
                     use_container_width=True,
                     hide_index=False
                 )
-
+                st.markdown("---")
+                st.markdown("📝 후보자 면접평가표 다운로드")
                 # 선택 박스로 후보자 선택
                 selected_candidate = st.selectbox(
                     "평가표를 다운로드할 후보자를 선택하세요",
