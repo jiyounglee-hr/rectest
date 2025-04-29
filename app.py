@@ -1574,33 +1574,11 @@ elif st.session_state['current_page'] == "evaluation":
             st.session_state.dept_job_info['selected_dept'] = None
         # 본부가 변경되면 직무 초기화
         st.session_state.dept_job_info['selected_job'] = None
-        # 데이터프레임 필터링 업데이트
-        update_filtered_dataframe()
     
     def update_selected_job():
         st.session_state.dept_job_info['selected_job'] = st.session_state.eval_job
         if st.session_state.eval_job == "선택해주세요":
             st.session_state.dept_job_info['selected_job'] = None
-        # 데이터프레임 필터링 업데이트
-        update_filtered_dataframe()
-
-    def update_filtered_dataframe():
-        # 원본 데이터프레임 가져오기
-        df = st.session_state.get('original_df', pd.DataFrame())
-        
-        # 필터링 조건 설정
-        dept_filter = st.session_state.dept_job_info['selected_dept']
-        job_filter = st.session_state.dept_job_info['selected_job']
-        
-        # 필터링 적용
-        filtered_df = df.copy()
-        if dept_filter:
-            filtered_df = filtered_df[filtered_df['본부'] == dept_filter]
-        if job_filter:
-            filtered_df = filtered_df[filtered_df['직무'] == job_filter]
-            
-        # 필터링된 데이터프레임 저장
-        st.session_state['filtered_df'] = filtered_df
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
