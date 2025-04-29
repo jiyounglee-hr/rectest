@@ -57,7 +57,16 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
             def split_items(val):
                 if not val:
                     return []
-                return [item.strip("• ").strip() for item in str(val).replace('\n', ',').split(',') if item.strip()]
+                return [item.strip() for item in str(val).split('\n') if item.strip()]
+            
+            st.markdown("""
+                <style>
+                    .small-text {
+                        font-size: 0.9em;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+            
             return [
                 {"구분": "업무 지식", "내용": split_items(row.get('업무지식', '')), "만점": 30, "점수": 0, "의견": ""},
                 {"구분": "직무기술", "내용": split_items(row.get('직무기술', '')), "만점": 30, "점수": 0, "의견": ""},
@@ -1486,7 +1495,7 @@ elif st.session_state['current_page'] == "evaluation":
     eval_template = eval_templates.get(selected_template_key, default_template)
     
     # 본부와 직무 선택을 위한 세 개의 컬럼 생성
-    col1, col2, col3 = st.columns([0.3, 0.3, 0.4])
+    col1, col2, col3 = st.columns([0.2, 0.2, 0.6])
     
     # 왼쪽 컬럼: 본부 선택
     with col1:
