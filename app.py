@@ -1141,7 +1141,7 @@ elif st.session_state['current_page'] == "interview1":
     st.markdown("""
     ① 1차 면접실    
     사전에 협의 된 일정에 맞추어 면접을 진행합니다.
-    질문 내용은 AI가 도와드려요.
+    면접 순서 및 잘문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.
     """)
 
     # 채용공고 링크 입력
