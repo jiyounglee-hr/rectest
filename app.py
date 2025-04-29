@@ -1811,16 +1811,21 @@ elif st.session_state['current_page'] == "evaluation":
 
             def create_pdf(html_content):
                 try:
-                    # HTML 템플릿에 Google Noto Sans KR 폰트 추가
+                    # HTML 템플릿에 한글 웹폰트 추가
                     html_with_font = f'''
                     <html>
                     <head>
                         <meta charset="utf-8">
-                        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+                        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
                         <style>
                             @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+                            * {{
+                                font-family: 'Noto Sans KR', sans-serif !important;
+                            }}
                             body {{
-                                font-family: 'Noto Sans KR', sans-serif;
+                                font-family: 'Noto Sans KR', sans-serif !important;
+                                font-size: 12px;
+                                line-height: 1.5;
                             }}
                             table {{
                                 width: 100%;
@@ -1831,9 +1836,13 @@ elif st.session_state['current_page'] == "evaluation":
                                 border: 1px solid black;
                                 padding: 8px;
                                 text-align: left;
+                                font-family: 'Noto Sans KR', sans-serif !important;
                             }}
                             th {{
                                 background-color: #f2f2f2;
+                            }}
+                            h1, h2, h3, h4, h5, h6, p, span, div {{
+                                font-family: 'Noto Sans KR', sans-serif !important;
                             }}
                         </style>
                     </head>
@@ -1851,20 +1860,26 @@ elif st.session_state['current_page'] == "evaluation":
                         'margin-right': '1.0cm',
                         'margin-bottom': '1.0cm',
                         'margin-left': '1.0cm',
+                        'enable-local-file-access': True,
+                        'load-error-handling': 'ignore'
                     }
                     
                     # PDF 생성
                     result_file = BytesIO()
-                    pisa.pisaDocument(
+                    pdf = pisa.pisaDocument(
                         BytesIO(html_with_font.encode('utf-8')), 
                         result_file,
                         encoding='utf-8',
                         options=pdf_options
                     )
                     
+                    if pdf.err:
+                        st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
+                        return None
+                        
                     return result_file.getvalue()
                 except Exception as e:
-                    st.error(f"PDF 생성 중 오류가 발생했습니다. 인사팀에 문의해주세요. 오류: {str(e)}")
+                    st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
                     return None
 
             # PDF 생성 및 다운로드 버튼 표시
