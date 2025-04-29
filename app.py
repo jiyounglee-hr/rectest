@@ -741,6 +741,8 @@ if st.session_state['current_page'] == "resume":
 
         ③ 면접일정 확인 : 합격자의 경우 인사팀에서 현업과 지원자의 일정을 확인해 1차 면접일정을 확인하고, 서류불합격자의 경우 인사팀에서 지원자에게 이메일로 통보합니다.
         """)
+
+    st.markdown("---")
     st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
     # 화면을 두 개의 컬럼으로 분할
     left_col, right_col = st.columns(2)
@@ -1096,7 +1098,7 @@ if st.session_state['current_page'] == "resume":
         st.text_area("분석 결과", st.session_state.analysis_result, height=400)
         st.markdown("</div>", unsafe_allow_html=True)
        # 서류전형 가이드라인 추가
-    st.markdown("###### ---")
+    st.markdown("---")
     st.markdown("###### 🎯 서류전형에서 무엇을 확인해야 할까요?")
         
     st.markdown("""
