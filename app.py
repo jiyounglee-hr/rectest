@@ -57,7 +57,12 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
             def format_items(val):
                 if not val:
                     return ""
-                items = [item.strip().replace('•', '').strip() for item in str(val).split('\n') if item.strip()]
+                # 먼저 모든 bullet point를 제거하고 쉼표나 줄바꿈으로 분리
+                items = []
+                text = str(val).replace('•', '').strip()
+                for item in text.replace('\n', ',').split(','):
+                    if item.strip():
+                        items.append(item.strip())
                 return "\n".join(f"• {item}" for item in items)
             
             st.markdown("""
@@ -67,7 +72,10 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
                         white-space: pre-wrap;
                         margin: 0;
                         padding: 0;
-                        line-height: 1.5;
+                        line-height: 1.8;
+                    }
+                    .stMarkdown div[data-testid="stMarkdownContainer"] p {
+                        white-space: pre-wrap;
                     }
                 </style>
             """, unsafe_allow_html=True)
