@@ -1309,6 +1309,8 @@ elif st.session_state['current_page'] == "interview1":
             인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
         </small>
     """, unsafe_allow_html=True)  
+    st.markdown("---")
+
     # 질문 생성 로직
     if question_button:
         if uploaded_file and job_description:
