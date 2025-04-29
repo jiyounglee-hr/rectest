@@ -1143,7 +1143,11 @@ elif st.session_state['current_page'] == "interview1":
 
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
-
+    st.markdown("""
+        <div style='font-size: 13px; color: #0066cc;'>
+        왼쪽에 이력서를 업데이트 하신 후, 채용공고 링크를 넣어주세요.
+        </div>
+        """, unsafe_allow_html=True)
     # 채용공고 링크 입력
     job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
     
