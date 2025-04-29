@@ -1743,7 +1743,7 @@ elif st.session_state['current_page'] == "evaluation":
             <meta charset="UTF-8">
             <div style="font-family: Arial, 'Malgun Gothic', sans-serif; font-size: 12px; line-height: 1.5;">
                 <div style="margin-bottom: 20px;">
-                    <h2 style="font-size: 18px; margin-bottom: 10px;">📝 면접평가표</h2>
+                    <h2 style="font-size: 18px; margin-bottom: 10px;"> 면접평가표</h2>
                     <p><b>본부:</b> {selected_dept} <b>직무:</b> {selected_job}</p>
                 </div>
                 <p><b>ㆍ후보자 정보 </b></p>
@@ -1797,7 +1797,6 @@ elif st.session_state['current_page'] == "evaluation":
                             <td style="width: 35%; border: 1px solid #000; padding: 5px;">{join_date}</td>
                         </tr>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;"></th>
                             <th style="border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">총점</th>
                             <td colspan="3" style="border: 1px solid #000; padding: 5px;">{total_score} / 100</td>
                         </tr>
