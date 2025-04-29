@@ -1987,6 +1987,8 @@ elif st.session_state['current_page'] == "admin":
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
+                    st.write(f"선택된 본부: {dept_filter}")  # 디버깅용
+                
                 with col2:
                     # 선택된 본부에 해당하는 직무만 표시
                     if dept_filter != "전체":
@@ -1994,23 +1996,37 @@ elif st.session_state['current_page'] == "admin":
                     else:
                         job_options = ["전체"] + sorted(df["직무"].unique().tolist())
                     job_filter = st.selectbox("직무", job_options)
+                    st.write(f"선택된 직무: {job_filter}")  # 디버깅용
+                
                 with col3:
                     name_filter = st.text_input("후보자명")
 
                 # 필터 적용
                 filtered_df = df.copy()
                 
+                # 디버깅을 위한 정보 출력
+                st.write("필터링 전 데이터 수:", len(filtered_df))
+                
                 # 본부 필터링
                 if dept_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
+                    filtered_df = filtered_df[filtered_df["본부"].astype(str).str.strip() == dept_filter.strip()]
+                    st.write(f"본부 필터링 후 데이터 수: {len(filtered_df)}")
+                    st.write("고유한 본부 값들:", filtered_df["본부"].unique())
                 
                 # 직무 필터링
                 if job_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["직무"].str.strip() == job_filter.strip()]
+                    filtered_df = filtered_df[filtered_df["직무"].astype(str).str.strip() == job_filter.strip()]
+                    st.write(f"직무 필터링 후 데이터 수: {len(filtered_df)}")
+                    st.write("고유한 직무 값들:", filtered_df["직무"].unique())
                 
                 # 후보자명 필터링
                 if name_filter:
                     filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
+                    st.write(f"후보자명 필터링 후 데이터 수: {len(filtered_df)}")
+
+                # 데이터 타입 확인을 위한 정보 출력
+                st.write("본부 컬럼 데이터 타입:", df["본부"].dtype)
+                st.write("직무 컬럼 데이터 타입:", df["직무"].dtype)
 
                 # 면접일자를 datetime 타입으로 변환
                 filtered_df['면접일자'] = pd.to_datetime(filtered_df['면접일자'])
