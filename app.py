@@ -1108,10 +1108,10 @@ if st.session_state['current_page'] == "resume":
     
     # 이미지 추가
     st.markdown("""
-    <div style="display: flex; justify-content: center; margin: 20px 0;">
+    <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
         <img src="https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F1e526dab-dca9-4781-9265-a9ee75b2f52c%2F%EC%A0%9C%EB%AA%A9%EC%9D%84_%EC%9E%85%EB%A0%A5%ED%95%98%EC%84%B8%EC%9A%94_(38).gif&blockId=44489939-4f3a-421e-85ba-f2fe368025bb" 
-             alt="서류전형 가이드" 
-             style="max-width: 100%; height: auto;">
+                 alt="서류전형 가이드" 
+                 style="max-width: 70%; height: auto; margin-left: 0;">
     </div>
     """, unsafe_allow_html=True)
     
@@ -1124,9 +1124,9 @@ if st.session_state['current_page'] == "resume":
     이미 경력이 있다면 그 경험 중에서 어느 부분이 새로운 직무에 적용 가능한 것인지, 어떤 가치 창출이 가능한지 가늠해 봅니다.
 
     ③ 회사와 개인의 문화 적합도 평가 : 조직의 문화와 개인의 특성 간 핏이 잘 맞아야 합니다. 조직의 문화적 특성이 맞는지 아닌지에 따라 같은 인재라도 성과가 달라질 수 있습니다. 
-    조직의 핵심 가치인 도전정신, 협력 그리고 전문성, 책임감, 자신감, 적극성을 갖추고 있는지를 판단합니다.
+    조직의 핵심 가치인 도전정신, 협력 그리고 전문성, 책임감을 갖추고 있는지를 판단합니다.
 
-    ④ 지원자에 관한 기초정보 자료 완성 : 위의 사항 외에 개인의 비전, 잠재능력, 특이능력(외국어) 등 향후 회사에 도움이 되는 부분이 어느 정도인지 파악해 기초 정보를 종합적으로 완성합니다. 
+    ④ 지원자에 관한 기초정보 자료 완성 : 위의 사항 외에 개인의 비전, 잠재능력, 특이능력(외국어 등) 향후 회사에 도움이 되는 부분이 어느 정도인지 파악해 기초 정보를 종합적으로 완성합니다. 
     어느 정도 회사에 부합되는 인재라고 판단하면 1차면접을 요청하시면 됩니다.
     """)
 elif st.session_state['current_page'] == "interview1":
