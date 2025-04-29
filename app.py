@@ -2024,11 +2024,6 @@ elif st.session_state['current_page'] == "admin":
             data = st.session_state.admin_data
             df = pd.DataFrame(data)
 
-            # 데이터 새로고침 버튼
-            if st.button("🔄 데이터 새로고침", key="refresh_data"):
-                st.session_state.pop('admin_data', None)
-                st.session_state.pop('last_update_time', None)
-                st.rerun()
 
             if df is not None:
                 # 검색 필터
