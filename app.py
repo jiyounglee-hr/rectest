@@ -289,16 +289,7 @@ def calculate_experience(experience_text):
     experience_periods = []
     
     # 각 줄을 분리하여 처리
-    # 줄바꿈이 없는 경우 공백을 기준으로 분리
-    if '\n' not in experience_text and len(experience_text.strip()) > 0:
-        periods = [p.strip() for p in experience_text.split(') ') if p.strip()]
-        # 마지막 항목에 ')' 추가
-        if periods and not periods[-1].endswith(')'):
-            periods[-1] = periods[-1] + ')'
-        lines = periods
-    else:
-        lines = experience_text.split('\n')
-    
+    lines = experience_text.split('\n')
     current_company = None
     
     for line in lines:
@@ -927,7 +918,7 @@ if st.session_state['current_page'] == "resume":
             else:
                 job_description = ""
         experience_text = st.text_area(
-            "- 경력기간 입력 (AI분석의 경력기간 산정 시 별도로 입력해 보세요. YYYY-MM-DD ~ YYYY-MM-DD 형식으로 입력)",  
+            "- 경력기간 입력 (AI분석의 경력기간 산정 시 별도로 입력해 보세요. YYYY-MM ~ YYYY-MM 형식으로 입력)",  
             height=120,
             help="분석결과 경력기간 산정이 잘못된 경우 활용해 보세요."
         )
