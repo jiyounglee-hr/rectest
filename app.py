@@ -1,43 +1,4 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-from oauth2client.service_account import ServiceAccountCredentials
-import gspread
-from gspread.client import Client
-import json
-import time
-from datetime import datetime
-import base64
-from io import BytesIO
-import PyPDF2
-from xhtml2pdf import pisa
-
-# Google Sheets 클라이언트 초기화 함수
-def init_google_sheets():
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
-    client = Client(auth=creds)
-    return client
-
-# PDF 생성 함수
-def create_pdf(html_content):
-    # PDF 생성을 위한 메모리 버퍼
-    result = BytesIO()
-    
-    # HTML을 PDF로 변환
-    pdf = pisa.pisaDocument(
-        BytesIO(html_content.encode("UTF-8")),
-        result,
-        encoding='UTF-8'
-    )
-    
-    # 변환 실패 시 에러 반환
-    if pdf.err:
-        st.error("PDF 생성 중 오류가 발생했습니다.")
-        return None
-    
-    # PDF 바이트 데이터 반환
-    return result.getvalue()
 
 # 페이지 설정 (반드시 첫 번째 명령어여야 함)
 st.set_page_config(
@@ -138,6 +99,7 @@ def get_eval_template_from_sheet(selected_dept, selected_job):
         return default_template
         
     except Exception as e:
+        st.warning(f"평가 템플릿을 불러오는 중 오류가 발생했습니다. 기본 템플릿을 사용합니다.")
         return default_template
 
 # 구글 스프레드시트 인증 및 데이터 가져오기
@@ -501,7 +463,7 @@ if 'interview_evaluation' not in st.session_state:
 
 # URL 파라미터 처리
 page_param = st.query_params.get("page", "resume")
-valid_pages = ['resume', 'interview1', 'interview2', 'evaluation', 'admin']
+valid_pages = ['resume', 'interview1', 'interview2', 'evaluation']
 
 # URL 파라미터가 유효한 경우에만 페이지 상태 업데이트
 if isinstance(page_param, str) and page_param in valid_pages:
@@ -609,7 +571,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
-        "이력서를 업로드해 주세요.",
+        "이력서를 선택해주세요.",
         type=['pdf'],
         help="200MB 이하의 PDF 파일만 가능합니다"
     )
@@ -649,85 +611,40 @@ with st.sidebar:
 
     else:
         st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
-        st.markdown("---")  
-    def switch_to_admin():
-        st.query_params["page"] = "admin"
-        st.session_state['current_page'] = 'admin'
+
     # 페이지 전환 버튼 추가
-    st.button("🤖 서류전형 가이드", 
+    st.button("🤖 이력서분석", 
             key="btn_resume", 
             on_click=switch_to_resume,
             type="primary" if st.session_state['current_page'] == "resume" else "secondary")
 
-    st.button("☝️ 1차 면접 가이드", 
+    st.button("☝️ 1차 면접 질문", 
             key="btn_interview1", 
             on_click=switch_to_interview1,
             type="primary" if st.session_state['current_page'] == "interview1" else "secondary")
 
-    st.button("✌️ 2차 면접 가이드", 
+    st.button("✌️ 2차 면접 질문", 
             key="btn_interview2", 
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
-    st.button("📝 면접 평가서 제출", 
+    st.button("📝 면접평가표", 
             key="btn_evaluation", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown("""
-        <style>
-        .web-link {
-            text-decoration: none !important;
-            color: inherit;
-        }
-        .web-link:hover {
-            text-decoration: none !important;
-            color: inherit;
-            opacity: 0.8;
-        }
-        .label-text {
-            margin-bottom: 5px;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗 채용공고(뉴로핏 커리어) </a></div>', unsafe_allow_html=True)
-    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗후보자 이력서 링크</a></div>', unsafe_allow_html=True)
 
-    # CSS 스타일 추가
-    st.markdown("""
-        <style>
-        .admin-button {
-            display: block;
-            margin-top: 5px;
-            background: none;
-            border: none;
-            color: #888888;
-            font-size: 0.8em;
-            opacity: 0.3;
-            cursor: pointer;
-            padding: 0;
-            text-decoration: none !important;
-        }
-        .admin-button:hover {
-            opacity: 0.8;
-            text-decoration: none !important;
-            color: #888888;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # 빈 공간 추가
+    # 맨 마지막에 도움말 추가
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # 채용관리자 버튼
-    st.markdown(f"""
-        <a href="?page=admin" class="admin-button">
-            ⚙️
-        </a>
-    """, unsafe_allow_html=True)
+    with st.expander("도움말"):
+        st.write("""
+        🤖 이력서분석 : PDF 형식의 이력서 파일을 업로드 > 채용요건 확인 > 경력기간 체크(필요 시) > '분석 시작하기' \n
+        ☝️ 1차 면접 질문 : 직무기반의 경험, 프로젝트, 문제해결, 자격요건 관련 사례 질문\n
+        ✌️ 2차 면접 질문 : 핵심가치 기반의 [도전]두려워 말고 시도합니다, [책임감]대충은 없습니다, [협력]동료와 협업합니다, [전문성]능동적으로 일합니다\n
+        📝 면접평가표 : 면접 평가를 위한 평가표 (개발예정)
+        """)
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗이력서 링크</a></div>', unsafe_allow_html=True)
 
     # 본부와 직무 데이터 가져오기
     departments, jobs = get_google_sheet_data()
@@ -745,28 +662,10 @@ job_descriptions = {}
 if st.session_state['current_page'] == "resume":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            🤖 서류전형 가이드
+            🤖 이력서분석
         </h5>
     """, unsafe_allow_html=True)
-
-
-    st.markdown("###### 🚩 서류전형 절차는 어떻게 되나요?")
-        
-    st.markdown("""
-        ① 서류접수 및 전달 : 인사팀에서 서류접수 확인과 기본사항 검토 후 현업 면접관님께 세부검토를 요청드립니다.
     
-        ② 서류검토 및 회신 : 서류검토 및 전형 진행 결과는 채용 채팅(팀즈)으로 회신을 부탁드립니다.
-
-        ③ 면접일정 확인 : 합격자의 경우 인사팀에서 현업과 지원자의 일정을 확인해 1차 면접일정을 확인하고, 서류불합격자의 경우 인사팀에서 지원자에게 이메일로 통보합니다.
-        """)
-
-    st.markdown("---")
-    st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
-    st.markdown("""
-        <div style='font-size: 13px; color: #0066cc;'>
-        왼쪽에 이력서를 업데이트 하신 후, 채용공고 링크를 넣어주세요.
-        </div>
-        """, unsafe_allow_html=True)
     # 화면을 두 개의 컬럼으로 분할
     left_col, right_col = st.columns(2)
 
@@ -782,7 +681,7 @@ if st.session_state['current_page'] == "resume":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
             # 채용공고 링크 입력
-            job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 넣어주세요. )", placeholder="https://career.neurophet.com/...")
+            job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
 
             if job_link:
                 try:
@@ -918,10 +817,10 @@ if st.session_state['current_page'] == "resume":
             else:
                 job_description = ""
         experience_text = st.text_area(
-            "- 경력기간 입력 (AI분석의 경력기간 산정 시 별도로 입력해 보세요. YYYY-MM ~ YYYY-MM 형식으로 입력)",  
-            height=120,
-            help="분석결과 경력기간 산정이 잘못된 경우 활용해 보세요."
+            "- 경력기간 입력",  
+            height=120
         )
+
         if experience_text:
             try:
                 result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
@@ -1120,62 +1019,16 @@ if st.session_state['current_page'] == "resume":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("분석 결과", st.session_state.analysis_result, height=400)
         st.markdown("</div>", unsafe_allow_html=True)
-       # 서류전형 가이드라인 추가
-    st.markdown("---")
-    st.markdown("###### 🎯 서류전형에서 무엇을 확인해야 할까요?")
-    
-    # 이미지 추가
-    st.markdown("""
-    <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
-        <img src="https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F1e526dab-dca9-4781-9265-a9ee75b2f52c%2F%EC%A0%9C%EB%AA%A9%EC%9D%84_%EC%9E%85%EB%A0%A5%ED%95%98%EC%84%B8%EC%9A%94_(38).gif&blockId=44489939-4f3a-421e-85ba-f2fe368025bb" 
-                 alt="서류전형 가이드" 
-                 style="max-width: 40%; height: auto; margin-left: 0;">
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    ① 입사지원 동기 평가 : '왜 수많은 직장 중에서 뉴로핏을 택했나'에 대한 분명한 이유를 가지고 있을수록 회사에 대한 애사심과 충성심이 높은 인재가 됩니다. 
-    이 부분은 다른 회사에 넣었던 이력서를 제출한 것인지, 우리 회사의 정보와 맞추어 이력서를 작성했는지, 자기소개서의 지원 동기, 
-    장래 희망 부분을 확인하여 동기가 확실한 인재인지 판단하시면 됩니다.
 
-    ② 직무 적합성 평가 : 이력서/자기소개서/포트폴리오를 통해 회사나 팀에서 요구하는 기술이나 기능에 대하여 지원자가 어느 정도 수준을 갖추고 있고, 
-    이미 경력이 있다면 그 경험 중에서 어느 부분이 새로운 직무에 적용 가능한 것인지, 어떤 가치 창출이 가능한지 가늠해 봅니다.
-
-    ③ 회사와 개인의 문화 적합도 평가 : 조직의 문화와 개인의 특성 간 핏이 잘 맞아야 합니다. 조직의 문화적 특성이 맞는지 아닌지에 따라 같은 인재라도 성과가 달라질 수 있습니다. 
-    조직의 핵심 가치인 도전정신, 협력 그리고 전문성, 책임감을 갖추고 있는지를 판단합니다.
-
-    ④ 지원자에 관한 기초정보 자료 완성 : 위의 사항 외에 개인의 비전, 잠재능력, 특이능력(외국어 등) 향후 회사에 도움이 되는 부분이 어느 정도인지 파악해 기초 정보를 종합적으로 완성합니다. 
-    어느 정도 회사에 부합되는 인재라고 판단하면 1차면접을 요청하시면 됩니다.
-    """)
 elif st.session_state['current_page'] == "interview1":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            ☝️ 1차 면접 가이드
+            ☝️ 1차 면접 질문
         </h5>
     """, unsafe_allow_html=True)
     
-    st.markdown("###### 🚩 1차 면접전형 절차는 어떻게 되나요?")
-    
-    st.markdown("""
-    ① 1차 면접실시 : 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.
-    """)
-    st.markdown(""" ② 1차 면접 평가제출 : 면접 결과를 작성하신 후 제출해 주세요.
-        <small style='color: #666666;'>
-            (아래 버튼을 누르시면 '📝 면접평가서 제출' 페이지로 이동합니다.)
-        </small>
-    """, unsafe_allow_html=True)  
-    left_space, button_col = st.columns([0.1, 0.9])
-    with button_col:
-        st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
-    st.markdown("---")
-    st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
-    st.markdown("""
-        <div style='font-size: 13px; color: #0066cc;'>
-        왼쪽에 이력서를 업데이트 하신 후, 채용공고 링크를 넣어주세요.
-        </div>
-        """, unsafe_allow_html=True)
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 복/붙)", placeholder="https://career.neurophet.com/...")
+    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
     
     if job_link:
         try:
@@ -1316,8 +1169,6 @@ elif st.session_state['current_page'] == "interview1":
             인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
         </small>
     """, unsafe_allow_html=True)  
-
-    
     # 질문 생성 로직
     if question_button:
         if uploaded_file and job_description:
@@ -1397,52 +1248,7 @@ elif st.session_state['current_page'] == "interview1":
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
         st.text_area("1차 면접 질문", st.session_state.interview_questions1, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    st.markdown("###### 🐯 면접 주의사항(준길님 당부)")
-    
-    st.markdown("""
-    1. 지원자에 대한 예의, 편안함, 친절함을 지켜주세요!
-    2. 테스트 하듯이 하지 말아주세요.
-       'OO님이 그렇게 생각한 게 옳은가요??' 혹은 '그게 진짜 좋은 방법이라고 생각하는 건가요?' 식의 확인 사살은 자제해주세요.
-    3. 압박 면접을 하지 말아주세요. 어렵고 난이도 높은 질문의 경우에는 생각할 시간을 줘도 됩니다.
-    """)
-    st.markdown("---")
-    st.markdown("###### 📒 면접 순서")
-    st.markdown("""
-    1. 면접관 사전 미팅 : 면접 시작 10분 전 면접 진행 방식에 대해 의견을 조율합니다.
 
-    2. 면접시작 : 입장하는 면접자들에게 가볍게 인사(바로 면접 본 질문으로 들어가지 않고 가벼운 환영 인사로 편안한 분위기를 유도)
-       EX) '식사는 하셨나요?', '오시는 데 불편하진 않으셨나요?', '많이 긴장 되시죠? 편안하게 생각하세요!'
-       면접관의 소속과 직책 등을 소개하고 채용 직무와 면접 진행 방식에 대해서도 간단히 설명해주는 것이 좋습니다.
-
-    3. 지원자 자기소개 : 지원자에게 경력 위주로 자기소개를 부탁하고 자기소개를 하는 동안 가급적 eye-contact를 해 주면서 부드러운 표정으로 경청합니다.
-
-    4. 자기소개 관련 질문 : 지원자의 자기소개 내용 중 궁금한 사항에 대해 질문합니다.
-
-    5. 직무역량/적성 관련질문 : 입사지원서를 참고하여 직무와 관련된 질문을 합니다. (하단에 "🤖 AI가 면접질문을 뽑아 드려요." 참고)
-
-    6. 입사관련사항 확인 : 입사 가능일을 확인합니다.
-
-    7. 면접 종료 : 지원자가 궁금한 사항이 있는지 확인하고, 다음 일정을 간단히 설명해 줍니다. (1차 면접 결정 및 2차 면접이 있음을 인지)
-       면접 종료 인사와 따뜻한 격려의 말을 건넵니다. (면접 보시느라 고생 많았습니다. 좋은 결과 있길 바라겠습니다. 수고하셨습니다. 등)
-
-    8. 면접평가 : 면접자별 면접 평가서 작성 및 피드백을 작성한 후 인사팀에 채팅(팀즈)로 전달합니다.
-    """)
-    st.markdown("###### 🚫  면접 시 절대 하지 말아야 하는 질문 ")
-    st.markdown("""
-    면접 시 직무와 무관한 질문은 자제해 주시기 바랍니다. 
-    1. 신체적 조건 : "생각보다 작아 보이는데 키가 얼마나 되시나요?" "체격이 좋네요. 어렸을 때 운동하셨나요?" 
-                
-    2. 출신지역ㆍ혼인여부ㆍ재산 관련 질문 : "사투리 쓰시네요? 어디 출신이에요?" "결혼하셨어요? 언제 하셨는데요?" "아이가 있으신가요? 혹시 낳으실 계획이라면 언제쯤으로 생각하세요?" "현재 만나는 사람이 없으신가요?"
-    
-    3. 가족의 학력ㆍ직업 : "부모님은 무슨 일을 하시죠?" "부모님은 무슨 일을 하시죠?"
-    
-    4. 그 외 인격모독적이거나 채용에 직접 관련된 질문 : "내가 뽑아주면 뭘 해 줄 수 있나요?" "그동안 뭐 했길래 경력이 이거 밖에 안 돼요?" "영~ 일 못할 것 같은데... 할 수 있겠어요?"
-    담배 피시나요? : "담배 피시나요?"
-    
-    ※ 2017년 1월 1일부터 「채용절차의 공정화에 관한 법률」(채용절차법)에 따라, 직무와 무관한 질문을 
-    법으로 금지 (1,500만원 이상 벌금부과) 하고 있습니다.   
-    """)
 elif st.session_state['current_page'] == "interview2":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
@@ -1450,17 +1256,8 @@ elif st.session_state['current_page'] == "interview2":
         </h5>
     """, unsafe_allow_html=True)
     
-    st.markdown("###### 🚩 2차 면접전형 절차는 어떻게 되나요?")    
-    st.markdown("""
-    2차 면접실시 및 평가: 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 핵심가치에 부합되는 평가를 부탁드려요! 질문 내용은 AI가 도와드려요.""")
-
-    # 채용공고 링크 입력   st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
-    st.markdown("""
-        <div style='font-size: 13px; color: #0066cc;'>
-        왼쪽에 이력서를 업데이트 하신 후, 채용공고 링크를 넣어주세요.
-        </div>
-        """, unsafe_allow_html=True)
-    job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 넣어주세요. )", placeholder="https://career.neurophet.com/...")
+    # 채용공고 링크 입력
+    job_link = st.text_input("채용공고 링크를 입력해주세요", placeholder="https://career.neurophet.com/...")
     
     if job_link:
         try:
@@ -1697,32 +1494,10 @@ elif st.session_state['current_page'] == "interview2":
         st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("###### 📒 면접 순서")
-    st.markdown("""
-    1. 면접관 사전 미팅 : 면접 시작 10분 전 면접 진행 방식에 대해 의견을 조율합니다.
-
-    2. 면접시작 : 입장하는 면접자들에게 가볍게 인사(바로 면접 본 질문으로 들어가지 않고 가벼운 환영 인사로 편안한 분위기를 유도)
-       EX) '식사는 하셨나요?', '오시는 데 불편하진 않으셨나요?', '많이 긴장 되시죠? 편안하게 생각하세요!'
-       면접관의 소속과 직책 등을 소개하고 채용 직무와 면접 진행 방식에 대해서도 간단히 설명해주는 것이 좋습니다.
-
-    3. 지원자 자기소개 : 지원자에게 경력 위주로 자기소개를 부탁하고 자기소개를 하는 동안 가급적 eye-contact를 해 주면서 부드러운 표정으로 경청합니다.
-
-    4. 자기소개 관련 질문 : 지원자의 자기소개 내용 중 궁금한 사항에 대해 질문합니다.
-
-    5. 핵심가치치 관련질문 : 입사지원서를 참고하여 핵심가치에 부합되는지 관련된 질문을 합니다. (하단에 "🤖 AI가 면접질문을 뽑아 드려요." 참고)
-
-    6. 최종연봉 및 희망연봉봉 확인 : 인사팀에 DM부탁드립니다. 
-
-    7. 면접 종료 : 지원자가 궁금한 사항이 있는지 확인하고, 다음 일정을 간단히 설명해 줍니다. (1차 면접 결정 및 2차 면접이 있음을 인지)
-       면접 종료 인사와 따뜻한 격려의 말을 건넵니다. (면접 보시느라 고생 많았습니다. 좋은 결과 있길 바라겠습니다. 수고하셨습니다. 등)
-
-    8. 면접평가 : 면접자별 면접 평가서 작성 및 피드백을 작성한 후 인사팀에 채팅(팀즈)로 전달합니다.
-    """)
-
 elif st.session_state['current_page'] == "evaluation":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            📝 면접 평가서 제출
+            📝 면접평가표
         </h5>
     """, unsafe_allow_html=True)
     
@@ -1946,21 +1721,8 @@ elif st.session_state['current_page'] == "evaluation":
             gc = gspread.authorize(credentials)
             sheet_id = st.secrets["google_sheets"]["interview_evaluation_sheet_id"]
             worksheet = gc.open_by_key(sheet_id).sheet1
-            
-            # 기존 데이터에서 동일한 이름 검색
-            all_data = worksheet.get_all_records()
-            existing_names = [row.get('후보자명', '') for row in all_data]
-            
-            # 동일한 이름이 있는 경우 알파벳 추가
-            modified_name = candidate_name
-            if candidate_name in existing_names:
-                suffix = 'A'
-                while f"{candidate_name}_{suffix}" in existing_names:
-                    suffix = chr(ord(suffix) + 1)
-                modified_name = f"{candidate_name}_{suffix}"
-            
             # 데이터 저장
-            row_data = [selected_dept, selected_job, modified_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
+            row_data = [selected_dept, selected_job, candidate_name, interviewer_name, interview_date.strftime("%Y-%m-%d"), education, experience]
             for row in st.session_state.eval_data:
                 content = ', '.join([line.strip() for line in row['내용'].replace('•', '').split('\n') if line.strip()])
                 row_data.extend([content, row["점수"], row["의견"]])
@@ -2008,7 +1770,7 @@ elif st.session_state['current_page'] == "evaluation":
                             <th style="width: 18%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">평가구분</th>
                             <th style="width: 39%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">내용</th>
                             <th style="width: 13%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">점수</th>
-                            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">의견</th>
+                            <th style="width: 30%; border: 1px solid #000; padding: 5px; background-color: #f0f0f0;">면접관 의견</th>
                         </tr>
                         {''.join([f"""
                         <tr>
@@ -2146,301 +1908,4 @@ elif st.session_state['current_page'] == "evaluation":
             
         except Exception as e:
             st.error(f"저장 중 오류: 인사팀에 문의해주세요! {str(e)}")
-
-elif st.session_state['current_page'] == "admin":
-    if 'admin_authenticated' not in st.session_state:
-        st.session_state.admin_authenticated = False
-    
-    if not st.session_state.admin_authenticated:
-        password = st.text_input("비밀번호를 입력하세요", type="password")
-        if st.button("확인"):
-            if password == "0314!":
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("비밀번호가 올바르지 않습니다.")
-    else:
-        st.markdown("""
-            <h5 style='color: #333333; margin-bottom: 20px;'>
-                ⚙️ 채용 관리자
-            </h5>
-        """, unsafe_allow_html=True)
-        
-        try:
-            # 세션 상태에 admin_data가 없거나 마지막 업데이트 시간이 5분 이상 지났을 때만 데이터를 새로 가져옴
-            current_time = time.time()
-            if ('admin_data' not in st.session_state or 
-                'last_update_time' not in st.session_state or 
-                current_time - st.session_state.last_update_time > 300):  # 5분 = 300초
-                
-                with st.spinner("데이터를 불러오는 중..."):
-                    gc = init_google_sheets()
-                    sheet = gc.open_by_key(st.secrets["google_sheets"]["interview_evaluation_sheet_id"]).sheet1
-                    time.sleep(1)  # API 호출 간격 조절
-                    data = sheet.get_all_records()
-                    
-                    # 데이터와 마지막 업데이트 시간을 세션 상태에 저장
-                    st.session_state.admin_data = data
-                    st.session_state.last_update_time = current_time
-            
-            # 캐시된 데이터 사용
-            data = st.session_state.admin_data
-            df = pd.DataFrame(data)
-
-
-            if df is not None:
-                # 검색 필터
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    dept_filter = st.selectbox("본부", ["전체"] + sorted(df["본부"].unique().tolist()))
-                
-                with col2:
-                    # 선택된 본부에 해당하는 직무만 표시
-                    if dept_filter != "전체":
-                        job_options = ["전체"] + sorted(df[df["본부"] == dept_filter]["직무"].unique().tolist())
-                    else:
-                        job_options = ["전체"] + sorted(df["직무"].unique().tolist())
-                    job_filter = st.selectbox("직무", job_options)
-                
-                with col3:
-                    name_filter = st.text_input("후보자명")
-                st.markdown("💾 후보자 리스트")
-                # 필터 적용
-                filtered_df = df.copy()
-                                
-                # 본부 필터링
-                if dept_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["본부"].str.strip() == dept_filter.strip()]
-                
-                # 직무 필터링
-                if job_filter != "전체":
-                    filtered_df = filtered_df[filtered_df["직무"].str.strip() == job_filter.strip()]
-                
-                # 후보자명 필터링
-                if name_filter:
-                    filtered_df = filtered_df[filtered_df["후보자명"].str.contains(name_filter, na=False)]
-                    st.write(f"후보자명 필터링 후 데이터 수: {len(filtered_df)}")
-
-                # 필요한 컬럼만 선택
-                display_columns = [
-                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견",
-                    "업무지식", "업무지식점수", "업무지식의견",
-                    "직무기술", "직무기술점수", "직무기술의견",
-                    "직무수행태도 및 자세", "직무수행태도 및 자세점수", "직무수행태도 및 자세의견",
-                    "기본인성", "기본인성점수", "기본인성의견"
-                ]
-                
-                try:
-                    display_df = filtered_df[display_columns]
-                except KeyError:
-                    st.error("필요한 평가 데이터 컬럼이 없습니다. 데이터를 확인해주세요.")
-                    display_df = filtered_df[["본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"]]
-
-                # 데이터프레임 표시용 컬럼 (기본 정보만 표시)
-                display_view_columns = [
-                    "본부", "직무", "후보자명", "면접관성명", "면접일자", 
-                    "최종학교/전공", "경력년월", "총점", "면접결과", "종합의견"
-                ]
-                
-                # 데이터프레임 표시
-                st.dataframe(
-                    display_df[display_view_columns],
-                    use_container_width=True,
-                    hide_index=False
-                )
-                st.markdown("---")
-                st.markdown("📝 후보자 면접평가표 다운로드")
-                # 선택 박스로 후보자 선택
-                selected_candidate = st.selectbox(
-                    "평가표를 다운로드할 후보자를 선택하세요",
-                    options=filtered_df['후보자명'].tolist(),
-                    index=None
-                )
-
-                if selected_candidate:
-                    selected_row = filtered_df[filtered_df['후보자명'] == selected_candidate].iloc[0]
-                    
-                    # 평가 데이터 가져오기
-                    eval_data = [
-                        {
-                            '구분': '업무 지식',
-                            '내용': selected_row.get('업무지식', ''),
-                            '점수': selected_row.get('업무지식점수', 0),
-                            '만점': 30,
-                            '의견': selected_row.get('업무지식의견', '')
-                        },
-                        {
-                            '구분': '직무기술',
-                            '내용': selected_row.get('직무기술', ''),
-                            '점수': selected_row.get('직무기술점수', 0),
-                            '만점': 30,
-                            '의견': selected_row.get('직무기술의견', '')
-                        },
-                        {
-                            '구분': '직무 수행 태도 및 자세',
-                            '내용': selected_row.get('직무수행태도 및 자세', ''),
-                            '점수': selected_row.get('직무수행태도 및 자세점수', 0),
-                            '만점': 30,
-                            '의견': selected_row.get('직무수행태도 및 자세의견', '')
-                        },
-                        {
-                            '구분': '기본인성',
-                            '내용': selected_row.get('기본인성', ''),
-                            '점수': selected_row.get('기본인성점수', 0),
-                            '만점': 10,
-                            '의견': selected_row.get('기본인성의견', '')
-                        }
-                    ]
-                    
-                    # PDF 생성을 위한 HTML 템플릿
-                    html_content = f"""
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
-                        <style>
-                            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-                            * {{
-                                font-family: 'Noto Sans KR', sans-serif !important;
-                            }}
-                            body {{
-                                font-family: 'Noto Sans KR', sans-serif !important;
-                                font-size: 11px;
-                                line-height: 1.5;
-                            }}
-                            table {{
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-bottom: 5px;
-                            }}
-                            th, td {{
-                                border: 1px solid black;
-                                padding: 5px;
-                                text-align: left;
-                                font-family: 'Noto Sans KR', sans-serif !important;
-                            }}
-                            th {{
-                                background-color: #f2f2f2;
-                            }}
-                            h1, h2, h3, h4, h5, h6, p, span, div {{
-                                font-family: 'Noto Sans KR', sans-serif !important;
-                            }}
-                            .content-item {{
-                                margin-bottom: 5px;
-                            }}
-                            .section-title {{
-                                margin-left: 0px;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div style="padding: 5px;">
-                            <h2 style="font-size: 18px; margin-bottom: 5px;"> 면접평가표</h2>
-                            <p><b>본부:</b> {selected_row['본부']} / <b>직무:</b> {selected_row['직무']}</p>
-                            <div class="section-title"><p><br><b>ㆍ후보자 정보</b></p></div>
-                            <table>
-                                <tr>
-                                    <th style="width: 20%;">후보자명</th>
-                                    <td style="width: 30%;">{selected_row['후보자명']}</td>
-                                    <th style="width: 20%;">면접관성명</th>
-                                    <td style="width: 30%;">{selected_row['면접관성명']}</td>
-                                </tr>
-                                <tr>
-                                    <th>면접일자</th>
-                                    <td>{selected_row['면접일자']}</td>
-                                    <th>최종학교/전공</th>
-                                    <td>{selected_row['최종학교/전공']}</td>
-                                </tr>
-                            </table>
-
-                            <div class="section-title"><p><br><b>ㆍ종합의견 및 결과</b></p></div>
-                            <table>
-                                <tr>
-                                    <th style="width: 15%;">종합의견</th>
-                                    <td colspan="3">{selected_row['종합의견']}</td>
-                                </tr>
-                                <tr>
-                                    <th>면접결과</th>
-                                    <td style="width: 20%;">{selected_row['면접결과']}</td>
-                                    <th style="width: 15%;">총점</th>
-                                    <td style="width: 35%;">{selected_row['총점']}</td>
-                                </tr>
-                            </table>
-
-                            <div class="section-title"><p><br><b>ㆍ평가내용</b></p></div>
-                            <table>
-                                <tr>
-                                    <th style="width: 18%;">평가구분</th>
-                                    <th style="width: 39%;">내용</th>
-                                    <th style="width: 13%;">점수</th>
-                                    <th style="width: 30%;">의견</th>
-                                </tr>
-                                {''.join([f"""
-                                <tr>
-                                    <td>{row['구분']}</td>
-                                    <td>{row['내용']}</td>
-                                    <td style="text-align: center;">{row['점수']} / {row['만점']}</td>
-                                    <td>{row['의견']}</td>
-                                </tr>
-                                """ for row in eval_data])}
-                                <tr>
-                                    <th colspan="2">총점</th>
-                                    <td style="text-align: center;">{selected_row['총점']} / 100</td>
-                                    <td>-</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </body>
-                    </html>
-                    """
-
-                    # 버튼을 3개의 컬럼으로 나누어 배치
-                    col1, col2 = st.columns([30, 70])
-                    
-                    with col1:
-                        if st.button(f"📥 {selected_candidate}님의 면접평가표 다운로드", use_container_width=True):
-                            try:
-                                # PDF 옵션 설정
-                                pdf_options = {
-                                    'encoding': 'utf-8',
-                                    'page-size': 'A4',
-                                    'margin-top': '1.0cm',
-                                    'margin-right': '1.0cm',
-                                    'margin-bottom': '1.0cm',
-                                    'margin-left': '1.0cm',
-                                    'enable-local-file-access': True,
-                                    'load-error-handling': 'ignore'
-                                }
-                                
-                                # PDF 생성
-                                pdf_buffer = BytesIO()
-                                pisa.showLogging()
-                                pdf = pisa.pisaDocument(
-                                    BytesIO(html_content.encode('utf-8')),
-                                    pdf_buffer,
-                                    encoding='utf-8',
-                                    options=pdf_options
-                                )
-                                
-                                if not pdf.err:
-                                    st.download_button(
-                                        label="PDF 다운로드",
-                                        data=pdf_buffer.getvalue(),
-                                        file_name=f"{selected_candidate}_면접평가표.pdf",
-                                        mime="application/pdf"
-                                    )
-                                else:
-                                    st.error(f"PDF 생성 중 오류가 발생했습니다: {pdf.err}")
-                            except Exception as e:
-                                st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
-                    
-                    with col2:
-                        st.write("")  # 여백용 빈 컬럼
-            else:
-                st.info("저장된 면접평가 데이터가 없습니다.")
-        except Exception as e:
-            st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
-
 
