@@ -738,38 +738,6 @@ with st.sidebar:
     else:
         st.session_state.eval_data = default_template
 
-# 채용공고 데이터
-job_descriptions = {}
-
-# 현재 페이지에 따른 내용 표시
-if st.session_state['current_page'] == "resume":
-    st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
-            🤖 서류전형 가이드
-        </h5>
-    """, unsafe_allow_html=True)
-
-
-    st.markdown("###### 🚩 서류전형 절차는 어떻게 되나요?")
-        
-    st.markdown("""
-        ① 서류접수 및 전달 : 접수된 지원서를 인사팀에서 채용 채팅(팀즈)를 통해 검토 요청을 드립니다. 
-    
-        ③ 서류검토 및 회신 : 면접관께서는 서류 검토 결과를 채용 채팅(팀즈)을 통해 회신해주세요. <small style='color: #666666;'>
-            (아래 '🤖 AI가 이력서 분석을 도와드려요!'를 활용해 보세요)
-        </small>
-
-        ④ 면접 일정 확인 및 통보: 합격자에 한해 인사팀이 면접관 및 지원자 일정 확인 후 1차 면접 일정을 조율하며, 불합격자는 인사팀에서 지원자에게 이메일로 개별 통보합니다.
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
-    st.markdown("""
-        <div style='font-size: 13px; color: #0066cc;'>
-        👈 왼쪽에 이력서를 업데이트(<a href="https://career.neurophet.com/recruit" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, <a href="https://career.neurophet.com/recruit" target="_blank">🔗뉴로핏 커리어 링크</a>를 클릭해 진행중인 공고 링크를 넣어주세요. 
-        </div>
-        """, unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
 def get_job_postings_from_sheet():
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -802,6 +770,39 @@ def get_job_postings_from_sheet():
     except Exception as e:
         st.error(f"채용공고 데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
         return {}
+# 채용공고 데이터
+job_descriptions = {}
+
+# 현재 페이지에 따른 내용 표시
+if st.session_state['current_page'] == "resume":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            🤖 서류전형 가이드
+        </h5>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("###### 🚩 서류전형 절차는 어떻게 되나요?")
+        
+    st.markdown("""
+        ① 서류접수 및 전달 : 접수된 지원서를 인사팀에서 채용 채팅(팀즈)를 통해 검토 요청을 드립니다. 
+    
+        ③ 서류검토 및 회신 : 면접관께서는 서류 검토 결과를 채용 채팅(팀즈)을 통해 회신해주세요. <small style='color: #666666;'>
+            (아래 '🤖 AI가 이력서 분석을 도와드려요!'를 활용해 보세요)
+        </small>
+
+        ④ 면접 일정 확인 및 통보: 합격자에 한해 인사팀이 면접관 및 지원자 일정 확인 후 1차 면접 일정을 조율하며, 불합격자는 인사팀에서 지원자에게 이메일로 개별 통보합니다.
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
+    st.markdown("""
+        <div style='font-size: 13px; color: #0066cc;'>
+        👈 왼쪽에 이력서를 업데이트(<a href="https://career.neurophet.com/recruit" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, <a href="https://career.neurophet.com/recruit" target="_blank">🔗뉴로핏 커리어 링크</a>를 클릭해 진행중인 공고 링크를 넣어주세요. 
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # 화면을 두 개의 컬럼으로 분할
     left_col, right_col = st.columns(2)
 
