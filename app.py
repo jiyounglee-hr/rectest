@@ -770,6 +770,38 @@ if st.session_state['current_page'] == "resume":
         </div>
         """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
+def get_job_postings_from_sheet():
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_dict = {
+            "type": st.secrets["google_credentials"]["type"],
+            "project_id": st.secrets["google_credentials"]["project_id"],
+            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
+            "private_key": st.secrets["google_credentials"]["private_key"],
+            "client_email": st.secrets["google_credentials"]["client_email"],
+            "client_id": st.secrets["google_credentials"]["client_id"],
+            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
+            "token_uri": st.secrets["google_credentials"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
+        }
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+        gc = gspread.authorize(credentials)
+        
+        # 채용공고 데이터가 있는 시트 ID (기존 시트 사용)
+        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+        worksheet = gc.open_by_key(sheet_id).worksheet("채용공고")  # 채용공고 시트 사용
+        
+        # 모든 데이터 가져오기
+        data = worksheet.get_all_records()
+        
+        # 채용공고 목록 생성 (직무 - 채용공고 제목 형식)
+        job_postings = {f"{row['직무']} - {row['제목']}": row for row in data if row['활성화'] == 'Y'}
+        
+        return job_postings
+    except Exception as e:
+        st.error(f"채용공고 데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
+        return {}
     # 화면을 두 개의 컬럼으로 분할
     left_col, right_col = st.columns(2)
 
@@ -2616,36 +2648,5 @@ elif st.session_state['current_page'] == "admin":
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
                     
-def get_job_postings_from_sheet():
-    try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials_dict = {
-            "type": st.secrets["google_credentials"]["type"],
-            "project_id": st.secrets["google_credentials"]["project_id"],
-            "private_key_id": st.secrets["google_credentials"]["private_key_id"],
-            "private_key": st.secrets["google_credentials"]["private_key"],
-            "client_email": st.secrets["google_credentials"]["client_email"],
-            "client_id": st.secrets["google_credentials"]["client_id"],
-            "auth_uri": st.secrets["google_credentials"]["auth_uri"],
-            "token_uri": st.secrets["google_credentials"]["token_uri"],
-            "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
-            "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
-        }
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-        gc = gspread.authorize(credentials)
-        
-        # 채용공고 데이터가 있는 시트 ID (기존 시트 사용)
-        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
-        worksheet = gc.open_by_key(sheet_id).worksheet("채용공고")  # 채용공고 시트 사용
-        
-        # 모든 데이터 가져오기
-        data = worksheet.get_all_records()
-        
-        # 채용공고 목록 생성 (직무 - 채용공고 제목 형식)
-        job_postings = {f"{row['직무']} - {row['제목']}": row for row in data if row['활성화'] == 'Y'}
-        
-        return job_postings
-    except Exception as e:
-        st.error(f"채용공고 데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
-        return {}
+
                     
