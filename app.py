@@ -1221,8 +1221,8 @@ elif st.session_state['current_page'] == "interview1":
                     response.raise_for_status()
                     break  # 성공하면 반복문 종료
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                                retry_count += 1
-                                if retry_count == max_retries:
+                    retry_count += 1
+                    if retry_count == max_retries:
                         raise  # 최대 재시도 횟수 초과시 예외 발생
                     st.warning(f"연결 시도 {retry_count}/{max_retries}...")
                     time.sleep(1)  # 1초 대기 후 재시도
@@ -1532,17 +1532,17 @@ elif st.session_state['current_page'] == "interview2":
                 try:
                     # 웹 페이지 가져오기 (타임아웃 30초)
                     response = requests.get(job_link, headers=headers, timeout=30)
-                            response.raise_for_status()
-                            break  # 성공하면 반복문 종료
-                        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                            retry_count += 1
-                            if retry_count == max_retries:
+                    response.raise_for_status()
+                    break  # 성공하면 반복문 종료
+                except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                      retry_count += 1
+                if retry_count == max_retries:
                         raise  # 최대 재시도 횟수 초과시 예외 발생
-                    st.warning(f"연결 시도 {retry_count}/{max_retries}...")
-                    time.sleep(1)  # 1초 대기 후 재시도
+                        st.warning(f"연결 시도 {retry_count}/{max_retries}...")
+                        time.sleep(1)  # 1초 대기 후 재시도
                     
                     # 인코딩 설정
-                    response.encoding = 'utf-8'
+                response.encoding = 'utf-8'
             
             # HTML 파싱
             soup = BeautifulSoup(response.text, 'lxml')
