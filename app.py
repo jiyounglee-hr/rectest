@@ -791,17 +791,27 @@ if st.session_state['current_page'] == "resume":
                 try:
                     # 웹 브라우저처럼 보이기 위한 헤더 설정
                     headers = {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                         'Accept-Encoding': 'gzip, deflate, br',
                         'Connection': 'keep-alive',
+                        'Cache-Control': 'max-age=0',
                         'Upgrade-Insecure-Requests': '1',
                         'Sec-Fetch-Dest': 'document',
                         'Sec-Fetch-Mode': 'navigate',
                         'Sec-Fetch-Site': 'none',
-                        'Sec-Fetch-User': '?1'
+                        'Sec-Fetch-User': '?1',
+                        'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+                        'Sec-Ch-Ua-Mobile': '?0',
+                        'Sec-Ch-Ua-Platform': '"Windows"',
+                        'DNT': '1',
+                        'Pragma': 'no-cache'
                     }
+                    
+                    # 세션 생성 및 쿠키 관리
+                    session = requests.Session()
+                    session.headers.update(headers)
                     
                     # 최대 3번까지 재시도
                     max_retries = 3
@@ -809,7 +819,7 @@ if st.session_state['current_page'] == "resume":
                     while retry_count < max_retries:
                         try:
                             # 웹 페이지 가져오기 (타임아웃 30초)
-                            response = requests.get(job_link, headers=headers, timeout=30)
+                            response = session.get(job_link, timeout=30)
                             response.raise_for_status()
                             break  # 성공하면 반복문 종료
                         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
@@ -1199,17 +1209,27 @@ elif st.session_state['current_page'] == "interview1":
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Connection': 'keep-alive',
+                'Cache-Control': 'max-age=0',
                 'Upgrade-Insecure-Requests': '1',
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1'
+                'Sec-Fetch-User': '?1',
+                'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'DNT': '1',
+                'Pragma': 'no-cache'
             }
+            
+            # 세션 생성 및 쿠키 관리
+            session = requests.Session()
+            session.headers.update(headers)
             
             # 최대 3번까지 재시도
             max_retries = 3
@@ -1217,7 +1237,7 @@ elif st.session_state['current_page'] == "interview1":
             while retry_count < max_retries:
                 try:
                     # 웹 페이지 가져오기 (타임아웃 30초)
-                    response = requests.get(job_link, headers=headers, timeout=30)
+                    response = session.get(job_link, timeout=30)
                     response.raise_for_status()
                     break  # 성공하면 반복문 종료
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
@@ -1513,17 +1533,27 @@ elif st.session_state['current_page'] == "interview2":
         try:
             # 웹 브라우저처럼 보이기 위한 헤더 설정
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Connection': 'keep-alive',
+                'Cache-Control': 'max-age=0',
                 'Upgrade-Insecure-Requests': '1',
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1'
+                'Sec-Fetch-User': '?1',
+                'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'DNT': '1',
+                'Pragma': 'no-cache'
             }
+            
+            # 세션 생성 및 쿠키 관리
+            session = requests.Session()
+            session.headers.update(headers)
             
             # 최대 3번까지 재시도
             max_retries = 3
@@ -1531,7 +1561,7 @@ elif st.session_state['current_page'] == "interview2":
             while retry_count < max_retries:
                 try:
                     # 웹 페이지 가져오기 (타임아웃 30초)
-                    response = requests.get(job_link, headers=headers, timeout=30)
+                    response = session.get(job_link, timeout=30)
                     response.raise_for_status()
                     break  # 성공하면 반복문 종료
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
