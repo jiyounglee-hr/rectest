@@ -669,7 +669,7 @@ with st.sidebar:
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
-    st.button("📝 면접평가표", 
+    st.button("📝 면접 평가서 제출", 
             key="btn_evaluation", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
@@ -1159,7 +1159,7 @@ elif st.session_state['current_page'] == "interview1":
     st.markdown("""
     ① 1차 면접실시 : 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서 및 질문을 숙지해 주세요! 질문 내용은 AI가 도와드려요.
 
-    ② 1차 면접 평가제출 : 면접 결과를 제출해 주세요.     
+    ② 1차 면접 평가제출 : 왼쪽 메뉴에 📝 면접 평가서 제출 메뉴에서 면접 결과를 작성하신 후 제출해 주세요. 
     """)
     st.link_button("면접 평가서 제출", "https://hr-rec.streamlit.app/?page=evaluation", type="primary")
     st.markdown("---")
@@ -1717,7 +1717,7 @@ elif st.session_state['current_page'] == "interview2":
 elif st.session_state['current_page'] == "evaluation":
     st.markdown("""
         <h5 style='color: #333333; margin-bottom: 20px;'>
-            📝 면접평가표
+            📝 면접 평가서 제출
         </h5>
     """, unsafe_allow_html=True)
     
