@@ -670,7 +670,7 @@ with st.sidebar:
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
     st.button("📝 면접 평가서 제출", 
-            key="btn_evaluation", 
+            key="question_button1", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
     
