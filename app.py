@@ -2004,7 +2004,7 @@ elif st.session_state['current_page'] == "evaluation":
                 st.markdown("<br>", unsafe_allow_html=True)
 
         # 총점 표시를 위한 컨테이너와 점수 계산 버튼을 위한 컬럼
-        score_cols = st.columns([6.5, 0.5])
+        score_cols = st.columns([6, 0.5])
         
         # 총점 표시를 위한 컨테이너
         total_container = score_cols[0].empty()
