@@ -289,7 +289,16 @@ def calculate_experience(experience_text):
     experience_periods = []
     
     # 각 줄을 분리하여 처리
-    lines = experience_text.split('\n')
+    # 줄바꿈이 없는 경우 공백을 기준으로 분리
+    if '\n' not in experience_text and len(experience_text.strip()) > 0:
+        periods = [p.strip() for p in experience_text.split(') ') if p.strip()]
+        # 마지막 항목에 ')' 추가
+        if periods and not periods[-1].endswith(')'):
+            periods[-1] = periods[-1] + ')'
+        lines = periods
+    else:
+        lines = experience_text.split('\n')
+    
     current_company = None
     
     for line in lines:
