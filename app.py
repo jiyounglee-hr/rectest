@@ -812,13 +812,14 @@ if st.session_state['current_page'] == "resume":
         job_postings = get_job_postings_from_sheet()
         
         if job_postings:
+            options = ["선택"] + list(job_postings.keys())
             selected_posting = st.selectbox(
                 "채용공고 선택",
-                options=list(job_postings.keys()),
+                options=options,
                 format_func=lambda x: x
             )
             
-            if selected_posting:
+            if selected_posting and selected_posting != "선택":
                 posting_data = job_postings[selected_posting]
                 job_description = st.text_area(
                     "채용공고 내용",
