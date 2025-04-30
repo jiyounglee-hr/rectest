@@ -808,28 +808,21 @@ if st.session_state['current_page'] == "resume":
 
     # 왼쪽 컬럼: 채용공고 선택 및 내용, 경력기간 산정
     with left_col:
-        job_option = st.selectbox(
-            "채용공고 타입 선택",
-            ["링크 입력", "직접 입력"]
-        )
-
-        job_description = ""  # 여기로 이동
-        if job_option == "직접 입력":
-            job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
-        else:
-            # 채용공고 선택
-            job_postings = get_job_postings_from_sheet()
+        # 채용공고 선택
+        job_postings = get_job_postings_from_sheet()
+        
+        if job_postings:
+            selected_posting = st.selectbox(
+                "채용공고 선택",
+                options=list(job_postings.keys()),
+                format_func=lambda x: x
+            )
             
-            if job_postings:
-                selected_posting = st.selectbox(
-                    "채용공고 선택",
-                    options=list(job_postings.keys()),
-                    format_func=lambda x: x
-                )
-                
-                if selected_posting:
-                    posting_data = job_postings[selected_posting]
-                    job_description = f"""[{posting_data['제목']}]
+            if selected_posting:
+                posting_data = job_postings[selected_posting]
+                job_description = st.text_area(
+                    "채용공고 내용",
+                    value=f"""[{posting_data['제목']}]
 
 담당업무
 {posting_data['담당업무']}
@@ -841,10 +834,12 @@ if st.session_state['current_page'] == "resume":
 {posting_data['우대사항']}
 
 기타 정보
-{posting_data['기타정보']}
-"""
-            else:
-                st.warning("활성화된 채용공고가 없습니다.")
+{posting_data['기타정보']}""",
+                    height=300
+                )
+        else:
+            st.warning("활성화된 채용공고가 없습니다.")
+            job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
 
     experience_text = st.text_area(
         "- 경력기간 입력 (AI분석의 경력기간 산정이 잘못된 경우 활용해 보세요.)",  
