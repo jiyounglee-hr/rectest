@@ -785,7 +785,7 @@ if st.session_state['current_page'] == "resume":
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
         else:
             # 채용공고 링크 입력
-            job_link = st.text_input("채용공고 링크를 입력해주세요. ", placeholder="https://career.neurophet.com/1d29976c-730b-80b6-92b2-d8cd39bfbfd9")
+            job_link = st.text_input("채용공고 링크를 입력해주세요. ", placeholder="https://career.neurophet.com/...")
 
             if job_link:
                 try:
