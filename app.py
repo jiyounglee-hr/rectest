@@ -840,25 +840,24 @@ if st.session_state['current_page'] == "resume":
         else:
             st.warning("활성화된 채용공고가 없습니다.")
             job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
-
+with left_col:
     experience_text = st.text_area(
         "- 경력기간 입력 (AI분석의 경력기간 산정이 잘못된 경우 활용해 보세요.)",  
         height=120,
         placeholder="ℹ️ YYYY-MM ~ YYYY-MM 형식으로 입력하시고 한 줄씩 입력하면 총 경력과 함께 자동으로 정리됩니다."
     )
-    
-    with left_col:
-        if experience_text:
-            try:
-                result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
-                st.markdown(f'<div class="resume-text">{result}</div>', unsafe_allow_html=True)
-                
-                # 경력기간 정보를 세션 상태에 저장
-                st.session_state.experience_years = total_years
-                st.session_state.experience_months = total_remaining_months
-                st.session_state.experience_decimal_years = total_decimal_years
-            except Exception as e:
-                st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
+
+    if experience_text:
+        try:
+            result, total_years, total_remaining_months, total_decimal_years = calculate_experience(experience_text)
+            st.markdown(f'<div class="resume-text">{result}</div>', unsafe_allow_html=True)
+            
+            # 경력기간 정보를 세션 상태에 저장
+            st.session_state.experience_years = total_years
+            st.session_state.experience_months = total_remaining_months
+            st.session_state.experience_decimal_years = total_decimal_years
+        except Exception as e:
+            st.error(f"경력기간 계산 중 오류가 발생했습니다: {str(e)}")
 
     # 오른쪽 컬럼: 이력서 내용
     with right_col:
