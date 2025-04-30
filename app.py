@@ -669,10 +669,10 @@ with st.sidebar:
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
-    left_space, button_col = st.columns([0.05, 0.95])
-    with button_col:
-        st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
-    st.markdown("---")
+    st.button("📝 면접 평가서 제출", 
+            key="btn_evaluation", 
+            on_click=switch_to_evaluation,
+            type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown("""
