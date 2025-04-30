@@ -1175,7 +1175,7 @@ elif st.session_state['current_page'] == "interview1":
         </div>
         """, unsafe_allow_html=True)
     # 채용공고 링크 입력
-    job_link = st.text_input("채용공고 링크를 입력해주세요. (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 넣어주세요. )", placeholder="https://career.neurophet.com/...")
+    job_link = st.text_input("채용공고 링크를 입력해주세요. <small style='color: #666666;'> (왼쪽에 뉴로핏 커리어 링크를 클릭해 진행중인 공고 링크를 복/붙)</small>", placeholder="https://career.neurophet.com/...")
     
     if job_link:
         try:
