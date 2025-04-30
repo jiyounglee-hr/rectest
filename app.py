@@ -670,7 +670,7 @@ with st.sidebar:
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
     st.button("📝 면접 평가서 제출", 
-            key="question_button1", 
+            key="btn_evaluation", 
             on_click=switch_to_evaluation,
             type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
     
@@ -1094,7 +1094,7 @@ elif st.session_state['current_page'] == "interview1":
     """, unsafe_allow_html=True)  
     left_space, button_col = st.columns([0.1, 0.9])
     with button_col:
-        st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
+        st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation)
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
