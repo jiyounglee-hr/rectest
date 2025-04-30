@@ -669,9 +669,97 @@ with st.sidebar:
             on_click=switch_to_interview2,
             type="primary" if st.session_state['current_page'] == "interview2" else "secondary")
 
-    st.markdown('<div style="margin-left: 20px;">', unsafe_allow_html=True)
-    st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
+    st.button("📝 면접 평가서 제출", 
+            key="btn_evaluation", 
+            on_click=switch_to_evaluation,
+            type="primary" if st.session_state['current_page'] == "evaluation" else "secondary")
+    
     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+        .web-link {
+            text-decoration: none !important;
+            color: inherit;
+        }
+        .web-link:hover {
+            text-decoration: none !important;
+            color: inherit;
+            opacity: 0.8;
+        }
+        .label-text {
+            margin-bottom: 5px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗 채용공고(뉴로핏 커리어) </a></div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗후보자 이력서 링크</a></div>', unsafe_allow_html=True)
+
+    # CSS 스타일 추가
+    st.markdown("""
+        <style>
+        .admin-button {
+            display: block;
+            margin-top: 5px;
+            background: none;
+            border: none;
+            color: #888888;
+            font-size: 0.8em;
+            opacity: 0.3;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: none !important;
+        }
+        .admin-button:hover {
+            opacity: 0.8;
+            text-decoration: none !important;
+            color: #888888;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # 빈 공간 추가
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # 채용관리자 버튼
+    st.markdown(f"""
+        <a href="?page=admin" class="admin-button">
+            ⚙️
+        </a>
+    """, unsafe_allow_html=True)
+
+    # 본부와 직무 데이터 가져오기
+    departments, jobs = get_google_sheet_data()
+    
+    # 본부와 직무 선택에 따라 템플릿 자동 반영
+    if selected_dept and selected_job:
+        st.session_state.eval_data = get_eval_template_from_sheet(selected_dept, selected_job)
+    else:
+        st.session_state.eval_data = default_template
+
+# 채용공고 데이터
+job_descriptions = {}
+
+# 현재 페이지에 따른 내용 표시
+if st.session_state['current_page'] == "resume":
+    st.markdown("""
+        <h5 style='color: #333333; margin-bottom: 20px;'>
+            🤖 서류전형 가이드
+        </h5>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("###### 🚩 서류전형 절차는 어떻게 되나요?")
+        
+    st.markdown("""
+        ① 서류접수 및 전달 : 인사팀에서 서류접수 확인과 기본사항 검토 후 현업 면접관님께 세부검토를 요청드립니다.
+    
+        ② 서류검토 및 회신 : 서류검토 및 전형 진행 결과는 채용 채팅(팀즈)으로 회신을 부탁드립니다.
+
+        ③ 면접일정 확인 : 합격자의 경우 인사팀에서 현업과 지원자의 일정을 확인해 1차 면접일정을 확인하고, 서류불합격자의 경우 인사팀에서 지원자에게 이메일로 통보합니다.
+        """)
+
     st.markdown("---")
     st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
     st.markdown("""
