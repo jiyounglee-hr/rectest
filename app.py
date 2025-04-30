@@ -1161,7 +1161,7 @@ elif st.session_state['current_page'] == "interview1":
 
     ② 1차 면접 평가제출 : 면접 결과를 작성하신 후 제출해 주세요. 면접평가서 제출 버튼을 누르면 작성성 페이지로 이동합니다.    
     """)
-    st.button("       📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
+    st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation, type="primary")
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
