@@ -1161,7 +1161,7 @@ elif st.session_state['current_page'] == "interview1":
 
     ② 1차 면접 평가제출 : 면접 결과를 제출해 주세요.     
     """)
-    st.link_button("면접 평가서 제출", "https://rectest-evuoqvdnth3gpmddaxoen7.streamlit.app/~/+/?page=evaluation", type="primary")
+    st.link_button("면접 평가서 제출", "https://hr-rec.streamlit.app/?page=evaluation", type="primary")
     st.markdown("---")
     st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
