@@ -510,10 +510,54 @@ if isinstance(page_param, str) and page_param in valid_pages:
 # 사이드바 스타일 수정
 st.markdown("""
     <style>
+        /* 기본 사이드바 스타일 */
         [data-testid="stSidebar"] {
-            min-width: 400px !important;
-            max-width: 400px !important;
+            min-width: 300px !important;
+            max-width: 100% !important;
             background-color: #f8f9fa;
+        }
+        
+        /* 모바일 화면에서의 사이드바 스타일 */
+        @media (max-width: 768px) {
+            [data-testid="stSidebar"] {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                visibility: visible !important;
+            }
+            
+            [data-testid="stSidebar"].e1fqkh3o4 {
+                visibility: hidden !important;
+                width: 0 !important;
+            }
+
+            section[data-testid="stSidebarContent"] {
+                width: 100% !important;
+                padding: 1rem !important;
+            }
+
+            div[data-testid="collapsedControl"] {
+                display: block !important;
+                position: fixed !important;
+                top: 0.5rem !important;
+                left: 0.5rem !important;
+                z-index: 999999 !important;
+            }
+        }
+
+        /* 메인 콘텐츠 영역 스타일 */
+        .main .block-container {
+            padding-top: 2rem !important;
+        }
+
+        @media (max-width: 768px) {
+            .main .block-container {
+                padding: 1rem !important;
+            }
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 2rem;
@@ -836,7 +880,7 @@ if st.session_state['current_page'] == "resume":
 
 기타 정보
 {posting_data['기타정보']}""",
-                    height=300
+                    height=250
                 )
         else:
             st.warning("활성화된 채용공고가 없습니다.")
@@ -2423,11 +2467,12 @@ elif st.session_state['current_page'] == "admin":
                         st.write("")  # 여백용 빈 컬럼
             else:
                 st.info("저장된 면접평가 데이터가 없습니다.")
+                
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
                     
-st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1zwYJ2hwneCeSgd6p4s9ngll8PDmhLhq9qOTRo5SLCz8/edit?gid=0#gid=0" target="_blank" class="web-link">🔗 면접평가서 DB </a></div>', unsafe_allow_html=True)
-st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=2080076349#gid=2080076349" target="_blank" class="web-link">🔗채용공고 DB</a></div>', unsafe_allow_html=True)
-st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=0#gid=0" target="_blank" class="web-link">🔗직무기술서 DB</a></div>', unsafe_allow_html=True)
+        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1zwYJ2hwneCeSgd6p4s9ngll8PDmhLhq9qOTRo5SLCz8/edit?gid=0#gid=0" target="_blank" class="web-link">🔗 면접평가서 DB </a></div>', unsafe_allow_html=True)
+        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=2080076349#gid=2080076349" target="_blank" class="web-link">🔗채용공고 DB</a></div>', unsafe_allow_html=True)
+        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=0#gid=0" target="_blank" class="web-link">🔗직무기술서 DB</a></div>', unsafe_allow_html=True)
 
                     
