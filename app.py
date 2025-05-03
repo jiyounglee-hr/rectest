@@ -572,9 +572,9 @@ st.markdown("""
         }
         /* 사이드바 버튼 스타일 */
         [data-testid="stSidebar"] .stButton button {
-            width: 200px !important;
+            width: 180px !important;
             padding: 5px 6px !important;
-            margin: 2px 2px !important;
+            margin: 1px 1px !important;
             border: 1px solid #ddd;
             border-radius: 5px;
             background-color: white;
@@ -606,7 +606,7 @@ with st.sidebar:
     st.image("https://neurophethr.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fe3948c44-a232-43dd-9c54-c4142a1b670b%2Fneruophet_logo.png?table=block&id=893029a6-2091-4dd3-872b-4b7cd8f94384&spaceId=9453ab34-9a3e-45a8-a6b2-ec7f1cefbd7f&width=410&userId=&cache=v2", 
              width=120)
     
-    st.markdown("<div class='sidebar-title'>HR-채용</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-title'>채용 전형 시스템</div>", unsafe_allow_html=True)
 
     # 버튼 컨테이너 추가
     st.markdown('<div class="button-container">', unsafe_allow_html=True)
@@ -692,7 +692,7 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
     else:
-        st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 기초 데이터 입니다. </div>", unsafe_allow_html=True)
+        st.markdown("<div class='upload-text'> 이력서 분석 및 면접 질문생성 시 필요합니다. </div>", unsafe_allow_html=True)
         st.markdown("---")  
     def switch_to_admin():
         st.query_params["page"] = "admin"
@@ -731,40 +731,36 @@ with st.sidebar:
             opacity: 0.8;
         }
         .label-text {
-            margin-bottom: 5px;
+            margin-bottom: 1px;
         }
         </style>
     """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link">🔗 채용공고(뉴로핏 커리어) </a></div>', unsafe_allow_html=True)
-    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/Shared%20Documents/Forms/AllItems.aspx?as=json&id=%2Fsites%2FHR2%2FShared%20Documents%2F%EC%B1%84%EC%9A%A9&viewid=f1a0986e%2Dd990%2D4f37%2Db273%2Dd8a6df2f4c40" target="_blank" class="web-link">🔗후보자 이력서 링크</a></div>', unsafe_allow_html=True)
-
+    st.markdown('<div class="label-text"><a href="https://neurophet.sharepoint.com/sites/HR2/SitePages/%EC%B1%84%EC%9A%A9-%EC%A0%84%ED%98%95%EA%B4%80%EB%A6%AC.aspx" target="_blank" class="web-link"> 👤 지원자 이력서(SharePoint) </a></div>', unsafe_allow_html=True)
+    st.markdown('<div class="label-text"><a href="https://career.neurophet.com/recruit" target="_blank" class="web-link"> 🚀 뉴로핏 커리어 </a></div>', unsafe_allow_html=True)
     # CSS 스타일 추가
     st.markdown("""
         <style>
         .admin-button {
             display: block;
-            margin-top: 5px;
+            margin-top: 1px;
             background: none;
             border: none;
             color: #888888;
-            font-size: 0.8em;
-            opacity: 0.3;
+            font-size: 0.5em;
+            opacity: 0;
             cursor: pointer;
             padding: 0;
             text-decoration: none !important;
         }
         .admin-button:hover {
-            opacity: 0.8;
+            opacity: 0;
             text-decoration: none !important;
             color: #888888;
         }
         </style>
     """, unsafe_allow_html=True)
-
-    # 빈 공간 추가
-    st.markdown("<br>", unsafe_allow_html=True)
     
     # 채용관리자 버튼
     st.markdown(f"""
@@ -784,6 +780,13 @@ with st.sidebar:
 
 def get_job_postings_from_sheet():
     try:
+        # 세션 상태에 job_postings가 있고, 마지막 업데이트 시간이 5분 이내라면 캐시된 데이터 반환
+        current_time = time.time()
+        if ('job_postings' in st.session_state and 
+            'job_postings_last_update' in st.session_state and 
+            current_time - st.session_state.job_postings_last_update < 300):  # 5분 = 300초
+            return st.session_state.job_postings
+
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         credentials_dict = {
             "type": st.secrets["google_credentials"]["type"],
@@ -797,52 +800,86 @@ def get_job_postings_from_sheet():
             "auth_provider_x509_cert_url": st.secrets["google_credentials"]["auth_provider_x509_cert_url"],
             "client_x509_cert_url": st.secrets["google_credentials"]["client_x509_cert_url"]
         }
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-        gc = gspread.authorize(credentials)
-        
-        # 채용공고 데이터가 있는 시트 ID (기존 시트 사용)
-        sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
-        worksheet = gc.open_by_key(sheet_id).worksheet("채용공고")  # 채용공고 시트 사용
-        
-        # 모든 데이터 가져오기
-        data = worksheet.get_all_records()
-        
-        # 채용공고 목록 생성 (직무 - 채용공고 제목 형식)
-        job_postings = {f"{row['직무']} - {row['제목']}": row for row in data if row['활성화'] == 'Y'}
-        
-        return job_postings
+
+        max_retries = 3
+        retry_count = 0
+        retry_delay = 2  # 초기 대기 시간 (초)
+
+        while retry_count < max_retries:
+            try:
+                credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+                gc = gspread.authorize(credentials)
+                sheet_id = st.secrets["google_sheets"]["department_job_sheet_id"]
+                worksheet = gc.open_by_key(sheet_id).worksheet("채용공고")
+                
+                # API 호출 간격 조절
+                time.sleep(1)
+                
+                data = worksheet.get_all_records()
+                job_postings = {f"{row['직무']} - {row['제목']}": row for row in data if row['활성화'] == 'Y'}
+                
+                # 데이터를 세션 상태에 저장
+                st.session_state.job_postings = job_postings
+                st.session_state.job_postings_last_update = current_time
+                
+                return job_postings
+
+            except gspread.exceptions.APIError as e:
+                error_message = str(e)
+                retry_count += 1
+                
+                if retry_count < max_retries:
+                    if "429" in error_message or "RESOURCE_EXHAUSTED" in error_message:
+                        wait_time = retry_delay * (2 ** (retry_count - 1))  # 지수 백오프
+                        st.warning(f"데이터를 가져오는 중입니다. {wait_time}초 후 재시도합니다... ({retry_count}/{max_retries})")
+                        time.sleep(wait_time)
+                        continue
+                else:
+                    if "429" in error_message or "RESOURCE_EXHAUSTED" in error_message:
+                        st.error("일시적으로 데이터를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.")
+                    else:
+                        st.error(f"채용공고 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+                    return {}
+
+            except Exception as e:
+                st.error(f"채용공고 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+                return {}
+
+        return {}  # 모든 재시도 실패 시 빈 딕셔너리 반환
+
     except Exception as e:
-        st.error(f"채용공고 데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
+        st.error(f"채용공고 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
         return {}
+
 # 채용공고 데이터
 job_descriptions = {}
 
 # 현재 페이지에 따른 내용 표시
 if st.session_state['current_page'] == "resume":
     st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
+        <h4 style='color: #333333; margin-bottom: 20px;'>
             🤖 서류전형 가이드
-        </h5>
+        </h4>
     """, unsafe_allow_html=True)
 
 
-    st.markdown("###### 🚩 서류전형 절차는 어떻게 되나요?")
+    st.markdown("##### 🚩 서류전형 절차는 어떻게 되나요?")
         
     st.markdown("""
-        ① 서류접수 및 전달 : 접수된 지원서를 인사팀에서 채용 채팅(팀즈)를 통해 검토 요청을 드립니다. 
+        1. 서류접수 및 전달 : 지원서가 접수되면, 인사팀에서 팀즈(Teams)를 통해 검토를 요청드립니다.  
     
-        ③ 서류검토 및 회신 : 면접관께서는 서류 검토 결과를 채용 채팅(팀즈)을 통해 회신해주세요. <small style='color: #666666;'>
+        2. 서류검토 및 회신 : 면접관께서는 서류 검토 결과를 팀즈(Teams)를 통해 회신해주세요. <small style='color: #666666;'>
             (아래 '🤖 AI가 이력서 분석을 도와드려요!'를 활용해 보세요)
         </small>
 
-        ④ 면접 일정 확인 및 통보: 합격자에 한해 인사팀이 면접관 및 지원자 일정 확인 후 1차 면접 일정을 조율하며, 불합격자는 인사팀에서 지원자에게 이메일로 개별 통보합니다.
+        3. 면접 일정 확인 및 통보: 합격자에 한해 인사팀이 면접관 및 지원자 일정 확인 후 1차 면접 일정을 조율하며, 불합격자는 인사팀에서 지원자에게 이메일로 개별 통보합니다.
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("###### 🤖 AI가 이력서 분석을 도와드려요!")
+    st.markdown("##### 🤖 AI가 이력서 분석을 도와드려요!")
     st.markdown("""
         <div style='font-size: 13px; color: #0066cc;'>
-        👈 왼쪽에 이력서를 업데이트(<a href="https://career.neurophet.com/recruit" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
+        👈 왼쪽에 이력서를 업데이트(<a href="https://neurophet.sharepoint.com/sites/HR2/SitePages/%EC%B1%84%EC%9A%A9-%EC%A0%84%ED%98%95%EA%B4%80%EB%A6%AC.aspx" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
         </div>
         """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -880,15 +917,15 @@ if st.session_state['current_page'] == "resume":
 
 기타 정보
 {posting_data['기타정보']}""",
-                    height=250
+                    height=340
                 )
         else:
             st.warning("활성화된 채용공고가 없습니다.")
-            job_description = st.text_area("채용공고 내용을 입력해주세요", height=300)
-    with left_col:
+            job_description = st.text_area("채용공고 내용을 입력해주세요", height=340)
+    with right_col:
         experience_text = st.text_area(
             "- 경력기간 입력 (AI분석의 경력기간 산정이 잘못된 경우 활용해 보세요.)",  
-            height=120,
+            height=100,
             placeholder="ℹ️ YYYY-MM ~ YYYY-MM 형식으로 입력하시고 한 줄씩 입력하면 총 경력과 함께 자동으로 정리됩니다."
         )
 
@@ -914,7 +951,7 @@ if st.session_state['current_page'] == "resume":
                         padding: 20px;
                         border-radius: 5px;
                         border: 1px solid #ddd;
-                        max-height: 500px;
+                        max-height: 250px;
                         overflow-y: auto;
                         font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
                         font-size: 0.9em;
@@ -1088,11 +1125,11 @@ if st.session_state['current_page'] == "resume":
     # 분석 결과를 구분선으로 분리하여 표시
     if st.session_state.analysis_result:
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
-        st.text_area("분석 결과", st.session_state.analysis_result, height=400)
+        st.text_area("분석 결과", st.session_state.analysis_result, height=500)
         st.markdown("</div>", unsafe_allow_html=True)
        # 서류전형 가이드라인 추가
     st.markdown("---")
-    st.markdown("###### 🎯 서류전형에서 무엇을 확인해야 할까요?")
+    st.markdown("##### 🎯 서류전형에서 무엇을 확인해야 할까요?")
     
     # 이미지 추가
     st.markdown("""
@@ -1119,19 +1156,19 @@ if st.session_state['current_page'] == "resume":
     """)
 elif st.session_state['current_page'] == "interview1":
     st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
+        <h4 style='color: #333333; margin-bottom: 20px;'>
             ☝️ 1차 면접 가이드
-        </h5>
+        </h4>
     """, unsafe_allow_html=True)
     
-    st.markdown("###### 🚩 1차 면접전형 절차는 어떻게 되나요?")
+    st.markdown("##### 🚩 1차 면접전형 절차는 어떻게 되나요?")
     
     st.markdown("""
-     1. <b>1차 면접실시</b> : 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서를 숙지해주시고 면접질문도 준비해 주세요! <small style='color: #666666;'>
+     1. <b>면접실시</b> : 사전에 협의 된 일정에 맞추어 면접을 진행합니다. 면접 순서를 숙지해주시고 면접질문도 준비해 주세요! <small style='color: #666666;'>
             (아래 '🤖 AI가 면접질문을 뽑아드려요.'를 활용해 보세요)
         </small>
     """, unsafe_allow_html=True)
-    st.markdown(""" 2. <b>1차 면접 평가제출</b> : 면접 결과를 작성하신 후 제출해 주세요.
+    st.markdown(""" 2. <b>면접 평가서 제출</b> : 면접 결과를 작성하신 후 제출해 주세요.
         <small style='color: #666666;'>
             ('📝 면접평가서 제출'버튼을 누르면 해당 페이지로 이동합니다.)
         </small>
@@ -1140,10 +1177,10 @@ elif st.session_state['current_page'] == "interview1":
     with button_col:
         st.button("📝 면접 평가서 제출", key="btn_eval_submit", on_click=switch_to_evaluation)
     st.markdown("---")
-    st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
+    st.markdown("##### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
         <div style='font-size: 13px; color: #0066cc;'>
-        👈 왼쪽에 이력서를 업데이트(<a href="https://career.neurophet.com/recruit" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
+        👈 왼쪽에 이력서를 업데이트(<a href="https://neurophet.sharepoint.com/sites/HR2/SitePages/%EC%B1%84%EC%9A%A9-%EC%A0%84%ED%98%95%EA%B4%80%EB%A6%AC.aspx" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
         </div>
         """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1201,17 +1238,18 @@ elif st.session_state['current_page'] == "interview1":
     
     # 질문 생성 로직
     if question_button:
-        if uploaded_file and job_description:
-            with st.spinner("면접 질문을 생성중입니다..."):
-                try:
-                    # 이력서 내용 가져오기
-                    text = st.session_state.resume_text
-                    
-                    # 1차 면접 질문 생성
-                    response1 = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": """[당신의 역할]  
+        if uploaded_file:
+            if selected_posting and selected_posting != "선택":
+                with st.spinner("면접 질문을 생성중입니다..."):
+                    try:
+                        # 이력서 내용 가져오기
+                        text = st.session_state.resume_text
+                        
+                        # 1차 면접 질문 생성
+                        response1 = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[
+                                {"role": "system", "content": """[당신의 역할]  
 당신은 지원자의 이력서와 채용공고 내용을 바탕으로 면접 질문을 준비하는 면접관입니다.  
 지원자의 과거 경험을 구체적으로 확인하고, 실제 업무 수행 역량을 검증하기 위해 STAR 기법에 기반한 질문을 작성해야 합니다.
 
@@ -1264,14 +1302,16 @@ elif st.session_state['current_page'] == "interview1":
 - 모든 질문은 STAR 구조를 따릅니다.  
 - 질문은 단순 사실 확인이 아닌, 지원자의 행동과 결과를 이끌어낼 수 있도록 구성하세요.  
 - 이력서와 채용공고의 연결고리를 고려해 질문을 구성하세요."""},
-                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
-                        ]
-                    )
-                    st.session_state.interview_questions1 = response1.choices[0].message.content
-                except Exception as e:
-                    st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
+                                {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
+                            ]
+                        )
+                        st.session_state.interview_questions1 = response1.choices[0].message.content
+                    except Exception as e:
+                        st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
+            else:
+                st.warning("채용공고를 선택해주세요.")
         else:
-            st.warning("이력서와 채용공고를 모두 입력해주세요.")
+            st.warning("이력서를 업로드해주세요.")
 
     # 면접 질문 결과 표시
     if st.session_state.interview_questions1:
@@ -1279,7 +1319,7 @@ elif st.session_state['current_page'] == "interview1":
         st.text_area("1차 면접 질문", st.session_state.interview_questions1, height=450)
         st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("###### 🐯 준길님께서 당부하신 주의사항")
+    st.markdown("##### 🐯 준길님께서 당부하신 주의사항")
     
     st.markdown("""
     1. 지원자에 대한 <b>예의, 편안함, 친절함</b>을 지켜주세요!</b>
@@ -1288,7 +1328,7 @@ elif st.session_state['current_page'] == "interview1":
     3. <b>압박 면접을 하지 말아주세요.</b> 어렵고 난이도 높은 질문의 경우에는 생각할 시간을 줘도 됩니다.
     """, unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("###### 📒 1차 면접 순서")
+    st.markdown("##### 📒 1차 면접 진행 순서")
     st.markdown("""
     1. <b>면접관 사전 미팅</b><br> 면접 시작 10분 전, 면접관 간 진행 방식 및 역할 분담 등을 간단히 조율합니다.
 
@@ -1313,36 +1353,35 @@ elif st.session_state['current_page'] == "interview1":
 
     """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("###### 🚫  면접 시 절대 하지 말아야 하는 질문 ")
+    st.markdown("##### 🚫  면접 시 절대 하지 말아야 하는 질문 ")
     st.markdown("""
      면접 시 직무와 무관한 질문은 자제해 주시기 바랍니다. 
     1. <b>신체적 조건</b> : "생각보다 작아 보이는데 키가 얼마나 되시나요?" "체격이 좋네요. 어렸을 때 운동하셨나요?" 
                 
     2. <b>출신지역ㆍ혼인여부ㆍ재산 관련 질문</b> : "사투리 쓰시네요? 어디 출신이에요?" "결혼하셨어요? 언제 하셨는데요?" "아이가 있으신가요?" "현재 만나는 사람이 없으신가요?"
     
-    3. <b>가족의 학력ㆍ직업</b> : "부모님은 무슨 일을 하시죠?" "부모님은 무슨 일을 하시죠?"
+    3. <b>가족의 학력ㆍ직업</b> : "부모님은 무슨 일을 하시죠?"
     
-    4. <b>그 외 인격모독적이거나 채용에 직접 관련된 질문</b> : "내가 뽑아주면 뭘 해 줄 수 있나요?" "그동안 뭐 했길래 경력이 이거 밖에 안 돼요?" "영~ 일 못할 것 같은데... 할 수 있겠어요?"
-    담배 피시나요? : "담배 피시나요?"
+    4. <b>그 외 인격모독적이거나 채용에 직접 관련된 질문</b> : "내가 뽑아주면 뭘 해 줄 수 있나요?" "그동안 뭐 했길래 경력이 이거 밖에 안 돼요?" "영~ 일 못할 것 같은데... 할 수 있겠어요?" "담배 피시나요?"
     
     ※ 2017년 1월 1일부터 「채용절차의 공정화에 관한 법률」(채용절차법)에 따라, 직무와 무관한 질문을 
     법으로 금지 (1,500만원 이상 벌금부과) 하고 있습니다.   
     """, unsafe_allow_html=True)
 elif st.session_state['current_page'] == "interview2":
     st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
+        <h4 style='color: #333333; margin-bottom: 20px;'>
             ✌️ 2차 면접 질문
-        </h5>
+        </h4>
     """, unsafe_allow_html=True)
     
-    st.markdown("###### 🚩 2차 면접전형 절차는 어떻게 되나요?")    
+    st.markdown("##### 🚩 2차 면접전형 절차는 어떻게 되나요?")    
     st.markdown("""
 
-    1. <b>2차 면접 진행</b> : 사전에 협의된 일정에 맞춰 면접을 진행합니다. <small style='color: #666666;'>
+    1. <b>면접 진행</b> : 사전에 협의된 일정에 맞춰 면접을 진행합니다. <small style='color: #666666;'>
             (아래 '🤖 AI가 면접질문을 뽑아 드려요!'를 통해 추출한 핵심가치 검토를 위한 면접 질문지를 인사팀에서 전달드립니다.)
         </small>
 
-    2. <b>면접 결과 입력 및 전달</b> : 면접 종료 후, 채용 채팅(팀즈)를 통해 결과를 인사팀에 회신해 주세요.
+    2. <b>면접 결과 입력 및 전달</b> : 면접 종료 후, 팀즈(Teams)를 통해 결과를 인사팀에 회신해 주세요.
 
     3. <b>연봉 협상 및 입사 확정</b> (인사팀 진행)<br>
         - 합격자: 인사팀이 연봉협상 및 입사 일정을 안내합니다.<br>
@@ -1351,10 +1390,10 @@ elif st.session_state['current_page'] == "interview2":
 
     st.markdown("---")
     # 채용공고 링크 입력   
-    st.markdown("###### 🤖 AI가 면접질문을 뽑아 드려요.")
+    st.markdown("##### 🤖 AI가 면접질문을 뽑아 드려요.")
     st.markdown("""
         <div style='font-size: 13px; color: #0066cc;'>
-        👈 왼쪽에 이력서를 업데이트(<a href="https://career.neurophet.com/recruit" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
+        👈 왼쪽에 이력서를 업데이트(<a href="https://neurophet.sharepoint.com/sites/HR2/SitePages/%EC%B1%84%EC%9A%A9-%EC%A0%84%ED%98%95%EA%B4%80%EB%A6%AC.aspx" target="_blank">🔗이력서 링크</a>에서 다운로드) 하신 후, 채용공고를 선택해주세요. 
         </div>
         """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1404,25 +1443,25 @@ elif st.session_state['current_page'] == "interview2":
         )
     st.markdown("""
         <small style='color: #666666;'>
-            AI를 통해 업무 지식 및 직무기술 직무 수행 태도 및 자세 관련 질문을 추출합니다. <br>
-            인상, 태도, 복장 등 전반적인 기본자세는 잘 관찰해주시고, 경력자의 경우 이직사유에 대해서도 체크부탁드립니다. 
+            AI를 통해 핵심가치(도전, 책임감, 협력, 전문성) 관련 질문을 추출합니다.<br>
         </small>
     """, unsafe_allow_html=True)  
 
     
     # 질문 생성 로직
     if question_button:
-        if uploaded_file and job_description:
-            with st.spinner("면접 질문을 생성중입니다..."):
-                try:
-                    # 이력서 내용 가져오기
-                    text = st.session_state.resume_text
-                    
-                    # 2차 면접 질문 생성
-                    response2 = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": """[당신의 역할]  
+        if uploaded_file:
+            if selected_posting and selected_posting != "선택":
+                with st.spinner("면접 질문을 생성중입니다..."):
+                    try:
+                        # 이력서 내용 가져오기
+                        text = st.session_state.resume_text
+                        
+                        # 2차 면접 질문 생성
+                        response2 = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[
+                                {"role": "system", "content": """[당신의 역할]  
 당신은 지원자의 이력서와 채용공고 내용을 바탕으로 면접 질문을 준비하는 본부장입니다.  
 지원자의 핵심가치 부합도를 확인하기 위해 STAR 기법에 기반한 질문을 작성해야 합니다.
 
@@ -1456,7 +1495,7 @@ elif st.session_state['current_page'] == "interview2":
 예시:  
 - 업무 수행 중 예상치 못한 문제가 발생했을 때, 그 당시 상황과 해결 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
 
-3. [협력]동료와 협업합니다 (3개 질문)  
+3. [협력]동료와 협력합니다 (3개 질문)  
 지원자의 팀워크와 협업 능력을 확인할 수 있는 질문을 STAR 형식으로 구성하세요.  
 예시:  
 - 팀 프로젝트에서 의견 충돌이 있었던 상황에서, 그 당시 상황과 해결 과제, 본인의 대응 방식과 결과를 구체적으로 말씀해 주세요.
@@ -1479,7 +1518,7 @@ elif st.session_state['current_page'] == "interview2":
 2. 질문 2 (STAR 구조)  
 3. 질문 3 (STAR 구조)
 
-[협력]동료와 협업합니다  
+[협력]동료와 협력합니다  
                              
 1. 질문 1 (STAR 구조)  
 2. 질문 2 (STAR 구조)  
@@ -1496,19 +1535,21 @@ elif st.session_state['current_page'] == "interview2":
 - 모든 질문은 STAR 구조를 따릅니다.  
 - 질문은 단순 사실 확인이 아닌, 지원자의 행동과 결과를 이끌어낼 수 있도록 구성하세요.  
 - 이력서와 채용공고의 연결고리를 고려해 질문을 구성하세요."""},
-                            {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
-                        ]
-                    )
-                    st.session_state.interview_questions2 = response2.choices[0].message.content
-                except Exception as e:
-                    st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
+                                {"role": "user", "content": f"이력서 내용:\n{text}\n\n채용공고:\n{job_description}\n\n위 내용을 바탕으로 STAR 기법에 기반한 면접 질문을 생성해주세요. 각 카테고리별로 최소 요구사항 이상의 질문을 생성해주세요."}
+                            ]
+                        )
+                        st.session_state.interview_questions2 = response2.choices[0].message.content
+                    except Exception as e:
+                        st.error(f"질문 생성 중 오류가 발생했습니다: {str(e)}")
+            else:
+                st.warning("채용공고를 선택해주세요.")
         else:
-            st.warning("이력서와 채용공고를 모두 입력해주세요.")
+            st.warning("이력서를 업로드해주세요.")
 
     # 면접 질문 결과 표시
     if st.session_state.interview_questions2:
         st.markdown("<div style='margin-top: 10px;'>", unsafe_allow_html=True)
-        st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=450)
+        st.text_area("2차 면접 질문", st.session_state.interview_questions2, height=720)
         st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("""
         <small style='color: #666666;'>
@@ -1517,7 +1558,7 @@ elif st.session_state['current_page'] == "interview2":
         </small>
     """, unsafe_allow_html=True)  
     st.markdown("---")
-    st.markdown("###### 📒 2차 면접 순서")
+    st.markdown("##### 📒 2차 면접 순서")
     st.markdown("""
     1. <b>면접관 사전 미팅</b><br> 면접 시작 10분 전, 면접관 간 진행 방식 및 역할 분담 등을 간단히 조율합니다.
 
@@ -1531,14 +1572,14 @@ elif st.session_state['current_page'] == "interview2":
 
     5. <b>핵심가치 관련 질문</b><br> 지원서를 참고하여 핵심가치에 부합되는지 관련된 질문을 합니다. (✅ 위에 '🤖AI가 면접질문을 뽑아 드려요.' 기능 참고)
 
-    6. <b>희망연봉 확인</b><br> 원자의 최종 연봉과 희망 연봉을 확인하고, 면접 종료 후 인사팀에 채팅(DM)으로 전달해주세요. 
+    6. <b>희망연봉 확인</b><br> 지원자의 최종 연봉과 희망 연봉을 확인하고, 면접 종료 후 인사팀에 팀즈(Teams)로 전달해주세요. 
 
     7. <b>면접 종료 및 안내</b><br>
         ① 지원자에게 궁금한 점이 있는지 확인하고, 다음 전형 일정을 간단히 안내합니다. (예시: "2차 결과는 인사팀에서 개별 안내 드릴 예정입니다.")<br>
         ② 마지막에는 따뜻한 격려의 인사를 전해 주세요. (예시: "면접 보시느라 고생 많으셨습니다. 좋은 결과 있길 바랍니다. 수고하셨습니다.")
 
     8. <b>면접 평가 및 결과 전달</b><br>
-        면접 종료 후, 간단한 피드백을 포함하여 채용 채팅(팀즈)로 인사팀에 전달해 주세요. 연봉관련 정보나 특이사항도 확인 된 부분은 함께 전달 부탁드립니다. 
+        면접 종료 후, 간단한 피드백을 포함하여 팀즈(Teams)로 인사팀에 전달해 주세요. 연봉관련 정보나 특이사항도 확인 된 부분은 함께 전달 부탁드립니다. 
     """, unsafe_allow_html=True)
 
 elif st.session_state['current_page'] == "evaluation":
@@ -1561,9 +1602,9 @@ elif st.session_state['current_page'] == "evaluation":
         st.session_state.reset_evaluation = False
     
     st.markdown("""
-        <h5 style='color: #333333; margin-bottom: 20px;'>
+        <h4 style='color: #333333; margin-bottom: 20px;'>
             📝 면접 평가서 제출
-        </h5>
+        </h4>
     """, unsafe_allow_html=True)
     st.markdown("""
         <small style='color: #666666;'>
@@ -1648,7 +1689,7 @@ elif st.session_state['current_page'] == "evaluation":
             st.session_state.reset_evaluation = True
         
         # 초기화 버튼 (작은 크기로)
-        st.markdown("<div style='padding-top: 25px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='padding-top: 25px; border: 0px;'></div>", unsafe_allow_html=True)
         st.button("🔄", on_click=reset_session, help="본부 및 직무 선택을 초기화하고 페이지를 새로고침합니다.")
     
     st.markdown(f"**선택된 본부&직무 :** {selected_dept if selected_dept else '본부 미선택'} / {selected_job if selected_job else '직무 미선택'}")
@@ -2471,8 +2512,5 @@ elif st.session_state['current_page'] == "admin":
         except Exception as e:
             st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {str(e)}")
                     
-        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1zwYJ2hwneCeSgd6p4s9ngll8PDmhLhq9qOTRo5SLCz8/edit?gid=0#gid=0" target="_blank" class="web-link">🔗 면접평가서 DB </a></div>', unsafe_allow_html=True)
-        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=2080076349#gid=2080076349" target="_blank" class="web-link">🔗채용공고 DB</a></div>', unsafe_allow_html=True)
-        st.markdown('<div class="label-text"><a href="https://docs.google.com/spreadsheets/d/1SfVtvaHgXesDFtdFozt9CJD8aQpPBrK76AxNj-OOfFE/edit?gid=0#gid=0" target="_blank" class="web-link">🔗직무기술서 DB</a></div>', unsafe_allow_html=True)
 
                     
